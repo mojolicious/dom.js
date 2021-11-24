@@ -8,15 +8,15 @@ import {TextNode} from './nodes/text.js';
 import parse5 from 'parse5';
 
 export class HTMLParser {
-  adapter = new TreeAdapter();
+  _adapter = new TreeAdapter();
 
   parse(html: string): DocumentNode {
-    const document: DocumentNode = parse5.parse(html, {treeAdapter: this.adapter}) as any;
+    const document: DocumentNode = parse5.parse(html, {treeAdapter: this._adapter}) as any;
     return document;
   }
 
   parseFragment(html: string): FragmentNode {
-    const document: FragmentNode = parse5.parseFragment(html, {treeAdapter: this.adapter}) as any;
+    const document: FragmentNode = parse5.parseFragment(html, {treeAdapter: this._adapter}) as any;
     return document;
   }
 }

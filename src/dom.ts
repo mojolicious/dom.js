@@ -1,6 +1,7 @@
 import type {Parent} from './types.js';
 import {Selector} from './css.js';
 import {HTMLParser} from './html.js';
+import {XMLParser} from './xml.js';
 export * from './util.js';
 
 /**
@@ -12,10 +13,12 @@ export default class DOM {
    */
   tree: Parent;
 
-  constructor(input: string | Parent, options: {fragment?: boolean} = {}) {
+  constructor(input: string | Parent, options: {fragment?: boolean; xml?: boolean} = {}) {
     // Parse
     if (typeof input === 'string') {
-      if (options.fragment === true) {
+      if (options.xml === true) {
+        this.tree = new XMLParser().parse(input);
+      } else if (options.fragment === true) {
         this.tree = new HTMLParser().parseFragment(input);
       } else {
         this.tree = new HTMLParser().parse(input);
