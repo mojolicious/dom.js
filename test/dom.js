@@ -62,6 +62,8 @@ t.test('DOM', t => {
     const dom = new DOM('<p class="foo">Foo</p><div>Bar</div>', {fragment: true});
     t.same(dom.tag, null);
     t.equal(dom.at('p').tag, 'p');
+    t.equal(dom.at('p').attr.class, 'foo');
+    t.equal(dom.at('p').attr['class'], 'foo');
     t.equal(dom.at('div').tag, 'div');
     t.equal(dom.at('.foo').tag, 'p');
     t.end();

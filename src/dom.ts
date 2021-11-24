@@ -4,6 +4,8 @@ import {HTMLParser} from './html.js';
 import {XMLParser} from './xml.js';
 export * from './util.js';
 
+type AttributeProxy = Record<string, string | null>;
+
 /**
  * DOM class.
  */
@@ -12,6 +14,7 @@ export default class DOM {
    * DOM tree.
    */
   tree: Parent;
+  _attr: AttributeProxy | undefined;
 
   constructor(input: string | Parent, options: {fragment?: boolean; xml?: boolean} = {}) {
     // Parse
@@ -37,6 +40,23 @@ export default class DOM {
   at(selector: string): DOM | null {
     const first = new Selector(selector).first(this.tree);
     return first === null ? null : new DOM(first);
+  }
+
+  /**
+   * This element's attributes.
+   */
+  get attr(): AttributeProxy {
+    if (this._attr === undefined) {
+      this._attr = new Proxy(this, {
+        get: function (target: DOM, name: string): string | null {
+          const tree = target.tree;
+          if (tree.nodeType !== '#element') return null;
+          return tree.getAttributeValue(name);
+        }
+      }) as any as AttributeProxy;
+    }
+
+    return this._attr;
   }
 
   /**

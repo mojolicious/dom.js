@@ -55,6 +55,16 @@ export class ElementNode extends ParentNode {
   }
 
   /**
+   * Get attribute value from this node.
+   */
+  getAttributeValue(name: string): string | null {
+    for (const attr of this.attrs) {
+      if (attr.name === name) return attr.value;
+    }
+    return null;
+  }
+
+  /**
    * Render node to string.
    */
   toString(): string {
