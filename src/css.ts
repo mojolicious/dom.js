@@ -190,7 +190,7 @@ function matchAttribute(selector: Attribute, current: ElementNode): boolean {
 
   for (const attr of current.attrs) {
     if (name.test(attr.name) === false) continue;
-    if (value?.test(attr.value) === true) return true;
+    if (value === null || value.test(attr.value) === true) return true;
   }
 
   return false;
