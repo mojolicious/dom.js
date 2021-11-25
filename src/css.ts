@@ -1,5 +1,6 @@
 import type {ElementNode} from './nodes/element.js';
 import type {Parent} from './types.js';
+import {inspect} from 'util';
 import {escapeRegExp, stickyMatch} from './util.js';
 
 interface Attribute {
@@ -32,7 +33,7 @@ const ESCAPE_RE = '\\\\[^0-9a-fA-F]|\\\\[0-9a-fA-F]{1,6}';
 const SEPARATOR_RE = new RegExp(`\\s*,\\s*`, 'y');
 const COMBINATOR_RE = new RegExp(`\\s*([ >+~])\\s*`, 'y');
 const TAG_RE = new RegExp(`((?:${ESCAPE_RE}\\s|\\\\.|[^,.#:[ >~+])+)`, 'y');
-const CLASS_ID_RE = new RegExp(`([.#])((?:${ESCAPE_RE}\\s|\\.|[^,.#:[ >~+])+)`, 'y');
+const CLASS_ID_RE = new RegExp(`([.#])((?:${ESCAPE_RE}\\s|\\\\.|[^,.#:[ >~+])+)`, 'y');
 const ATTR_RE = new RegExp(
   `\\[` +
     `((?:${ESCAPE_RE}|[\\w-])+)` +
@@ -147,6 +148,7 @@ function compileSelector(selector: string): SelectorList {
     throw new Error(`Unknown CSS selector: ${selector}`);
   }
 
+  if (process.env.MOJO_DOM_CSS_DEBUG === '1') console.log(inspect(group, {depth: 10}));
   return group;
 }
 

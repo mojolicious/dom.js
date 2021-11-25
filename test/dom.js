@@ -147,5 +147,27 @@ t.test('DOM', t => {
     t.end();
   });
 
+  t.test('Select based on parent', t => {
+    const dom = new DOM(
+      `
+  <body>
+    <div>test1</div>
+    <div><div>test2</div></div>
+  </body>`
+    );
+    t.equal(dom.find('body > div')[0].text(), 'test1');
+    t.equal(dom.find('body > div')[1].text(), '');
+    t.equal(dom.find('body > div')[2], undefined);
+    t.equal(dom.find('body > div > div')[0].text(), 'test2');
+    t.equal(dom.find('body > div > div')[1], undefined);
+    t.end();
+  });
+
+  t.test('Class and ID', t => {
+    const dom = new DOM('<div id="id" class="class">a</div>');
+    t.equal(dom.at('div#id.class').text(), 'a');
+    t.end();
+  });
+
   t.end();
 });

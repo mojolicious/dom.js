@@ -7,7 +7,7 @@ export * from './util.js';
 type AttributeProxy = Record<string, string | null>;
 
 /**
- * DOM class.
+ * HTML/XML DOM API class.
  */
 export default class DOM {
   /**
