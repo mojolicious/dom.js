@@ -70,11 +70,14 @@ t.test('DOM', t => {
   t.test('Attribute', t => {
     const dom = new DOM('<p class="foo">Foo</p><div id="bar">Bar</div>', {fragment: true});
     t.same(dom.attr.class, null);
+    t.same(Object.keys(dom.attr), []);
     t.equal(dom.at('p').attr.class, 'foo');
     t.equal(dom.at('p').attr['class'], 'foo');
     t.same(dom.at('p').attr.id, null);
+    t.same(Object.keys(dom.at('p').attr), ['class']);
     t.equal(dom.at('[id]').attr.id, 'bar');
     t.same(dom.at('[id]').attr.class, null);
+    t.same(Object.keys(dom.at('[id]').attr), ['id']);
     t.end();
   });
 

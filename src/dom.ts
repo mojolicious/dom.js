@@ -47,11 +47,17 @@ export default class DOM {
    */
   get attr(): AttributeProxy {
     if (this._attr === undefined) {
-      this._attr = new Proxy(this, {
-        get: function (target: DOM, name: string): string | null {
-          const tree = target.tree;
-          if (tree.nodeType !== '#element') return null;
-          return tree.getAttributeValue(name);
+      this._attr = new Proxy(this.tree, {
+        get: function (target: Parent, name: string): string | null {
+          if (target.nodeType !== '#element') return null;
+          return target.getAttributeValue(name);
+        },
+        ownKeys: function (target: Parent): string[] {
+          if (target.nodeType !== '#element') return [];
+          return target.attrs.map(attr => attr.name);
+        },
+        getOwnPropertyDescriptor: function (): Record<string, boolean> {
+          return {enumerable: true, configurable: true};
         }
       }) as any as AttributeProxy;
     }
