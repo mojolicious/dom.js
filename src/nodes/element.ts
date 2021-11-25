@@ -55,6 +55,13 @@ export class ElementNode extends ParentNode {
   }
 
   /**
+   * Get attribute names from this node.
+   */
+  getAttributeNames(): string[] {
+    return this.attrs.map(attr => attr.name);
+  }
+
+  /**
    * Get attribute value from this node.
    */
   getAttributeValue(name: string): string | null {

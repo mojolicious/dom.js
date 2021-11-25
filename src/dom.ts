@@ -49,15 +49,13 @@ export default class DOM {
     if (this._attr === undefined) {
       this._attr = new Proxy(this.tree, {
         get: function (target: Parent, name: string): string | null {
-          if (target.nodeType !== '#element') return null;
-          return target.getAttributeValue(name);
-        },
-        ownKeys: function (target: Parent): string[] {
-          if (target.nodeType !== '#element') return [];
-          return target.attrs.map(attr => attr.name);
+          return target.nodeType === '#element' ? target.getAttributeValue(name) : null;
         },
         getOwnPropertyDescriptor: function (): Record<string, boolean> {
           return {enumerable: true, configurable: true};
+        },
+        ownKeys: function (target: Parent): string[] {
+          return target.nodeType === '#element' ? target.getAttributeNames() : [];
         }
       }) as any as AttributeProxy;
     }
