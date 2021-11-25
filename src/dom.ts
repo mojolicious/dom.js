@@ -109,9 +109,9 @@ export default class DOM {
   }
 
   /**
-   * Render DOM to HTML.
+   * Render DOM to HTML or XML.
    */
-  toString(): string {
-    return this.tree.toString();
+  toString(options = {xml: false}): string {
+    return this.tree.toString(options);
   }
 }

@@ -139,5 +139,13 @@ t.test('DOM', t => {
     t.end();
   });
 
+  t.test('HTML to XML', t => {
+    const dom = new DOM('<p>Hello<br>Mojo!</p>', {fragment: true});
+    t.equal(dom.at('p').text(), 'HelloMojo!');
+    t.equal(dom.toString({xml: true}), '<p>Hello<br></br>Mojo!</p>');
+    t.equal(dom.toString(), '<p>Hello<br>Mojo!</p>');
+    t.end();
+  });
+
   t.end();
 });

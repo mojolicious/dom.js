@@ -97,7 +97,8 @@ export class ElementNode extends ParentNode {
   /**
    * Render node to string.
    */
-  toString(): string {
+  toString(options = {xml: false}): string {
+    const xml = options.xml;
     const result: string[] = [];
 
     const name = this.tagName;
@@ -107,8 +108,8 @@ export class ElementNode extends ParentNode {
     }
     result.push('>');
 
-    if (EMPTY_HTML_TAGS[name] !== true) {
-      result.push(this.childNodes.map(node => node.toString()).join(''), '</', name, '>');
+    if (xml === true || EMPTY_HTML_TAGS[name] !== true) {
+      result.push(this.childNodes.map(node => node.toString(options)).join(''), '</', name, '>');
     }
 
     return result.join('');

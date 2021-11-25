@@ -60,7 +60,7 @@ export class ParentNode extends ChildNode {
   /**
    * Render node to string.
    */
-  toString(): string {
-    return this.childNodes.map(node => node.toString()).join('');
+  toString(options = {xml: false}): string {
+    return this.childNodes.map(node => node.toString(options)).join('');
   }
 }
