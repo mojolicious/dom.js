@@ -60,10 +60,13 @@ t.test('DOM', t => {
 
   t.test('Tag', t => {
     const dom = new DOM('<p class="foo">Foo</p><div>Bar</div>', {fragment: true});
-    t.same(dom.tag, null);
+    t.equal(dom.tag, '');
     t.equal(dom.at('p').tag, 'p');
     t.equal(dom.at('div').tag, 'div');
     t.equal(dom.at('.foo').tag, 'p');
+    dom.at('.foo').tag = 'div';
+    t.equal(dom.at('.foo').tag, 'div');
+    t.equal(dom.toString(), '<div class="foo">Foo</div><div>Bar</div>');
     t.end();
   });
 
@@ -78,6 +81,13 @@ t.test('DOM', t => {
     t.equal(dom.at('[id]').attr.id, 'bar');
     t.same(dom.at('[id]').attr.class, null);
     t.same(Object.keys(dom.at('[id]').attr), ['id']);
+
+    const dom2 = new DOM('<p class="foo">Foo</p>', {fragment: true});
+    dom2.at('p').attr.class += 'bar';
+    dom2.at('p').attr.id = 'baz';
+    t.equal(dom2.toString(), '<p class="foobar" id="baz">Foo</p>');
+    delete dom2.at('p').attr.class;
+    t.equal(dom2.toString(), '<p id="baz">Foo</p>');
     t.end();
   });
 

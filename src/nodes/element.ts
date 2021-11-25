@@ -55,6 +55,14 @@ export class ElementNode extends ParentNode {
   }
 
   /**
+   * Remove attribute from this node.
+   */
+  deleteAttribute(name: string): boolean {
+    this.attrs = this.attrs.filter(attr => attr.name !== name);
+    return true;
+  }
+
+  /**
    * Get attribute names from this node.
    */
   getAttributeNames(): string[] {
@@ -69,6 +77,21 @@ export class ElementNode extends ParentNode {
       if (attr.name === name) return attr.value;
     }
     return null;
+  }
+
+  /**
+   * Set attribute value for this node.
+   */
+  setAttributeValue(name: string, value: string): boolean {
+    for (const attr of this.attrs) {
+      if (attr.name !== name) continue;
+      attr.value = value;
+      return true;
+    }
+
+    this.attrs.push({name, value});
+
+    return true;
   }
 
   /**

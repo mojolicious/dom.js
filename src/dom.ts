@@ -48,6 +48,9 @@ export default class DOM {
   get attr(): AttributeProxy {
     if (this._attr === undefined) {
       this._attr = new Proxy(this.tree, {
+        deleteProperty: function (target: Parent, name: string): boolean {
+          return target.nodeType === '#element' ? target.deleteAttribute(name) : false;
+        },
         get: function (target: Parent, name: string): string | null {
           return target.nodeType === '#element' ? target.getAttributeValue(name) : null;
         },
@@ -56,6 +59,9 @@ export default class DOM {
         },
         ownKeys: function (target: Parent): string[] {
           return target.nodeType === '#element' ? target.getAttributeNames() : [];
+        },
+        set: function (target: Parent, name: string, value: string): boolean {
+          return target.nodeType === '#element' ? target.setAttributeValue(name, value) : false;
         }
       }) as any as AttributeProxy;
     }
@@ -73,10 +79,16 @@ export default class DOM {
   /**
    * This element's tag name.
    */
-  get tag(): string | null {
+  get tag(): string {
     const tree = this.tree;
-    if (tree.nodeType !== '#element') return null;
+    if (tree.nodeType !== '#element') return '';
     return tree.tagName;
+  }
+
+  set tag(name: string) {
+    const tree = this.tree;
+    if (tree.nodeType !== '#element') return;
+    tree.tagName = name;
   }
 
   /**

@@ -1,9 +1,22 @@
-import {SafeString, escapeRegExp, xmlEscape} from '../lib/dom.js';
+import {SafeString, escapeRegExp, stickyMatch, xmlEscape} from '../lib/dom.js';
 import t from 'tap';
 
 t.test('escapeRegExp', t => {
   t.equal(escapeRegExp('te*s?t'), 'te\\*s\\?t', 'escaped');
   t.equal(escapeRegExp('\\^$.*+?()[]{}|'), '\\\\\\^\\$\\.\\*\\+\\?\\(\\)\\[\\]\\{\\}\\|', 'escaped');
+  t.end();
+});
+
+t.test('stickyMatch', t => {
+  const regex = /\s*(test\d)/y;
+  const results = [];
+  const sticky = {offset: 0, value: 'test1 test2 test3 test4'};
+  while (sticky.value.length > sticky.offset) {
+    const match = stickyMatch(sticky, regex);
+    if (match === null) break;
+    results.push(match[1]);
+  }
+  t.same(results, ['test1', 'test2', 'test3', 'test4']);
   t.end();
 });
 

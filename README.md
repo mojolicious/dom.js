@@ -11,6 +11,22 @@ A convenient DOM API. Written in TypeScript. **IN DEVELOPMENT!**
 
 ```js
 import DOM from '@mojojs/dom';
+
+// Parse
+const dom = new DOM('<div><p id="a">Test</p><p id="b">123</p></div>');
+
+// Find
+console.log(dom.at('#b').text());
+console.log(dom.find('p').map(e => e.text()).join('\n'));
+console.log(dom.find('[id]').map(e => e.attr.id).join('\n'));
+
+// Loop
+for (const e of dom.find('p[id]')) {
+  console.log(e.attr.id + ':' + e.text());
+}
+
+// Render
+console.log(dom.toString());
 ```
 
 ## Installation

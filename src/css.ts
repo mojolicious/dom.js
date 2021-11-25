@@ -1,6 +1,6 @@
 import type {ElementNode} from './nodes/element.js';
 import type {Parent} from './types.js';
-import {escapeRegExp} from './util.js';
+import {escapeRegExp, stickyMatch} from './util.js';
 
 interface Attribute {
   name: RegExp;
@@ -92,8 +92,8 @@ function compileAttrValue(op: string, value: string | undefined, insensitive: bo
 function compileSelector(selector: string): SelectorList {
   const group: SelectorList = [[]];
 
-  const sticky = {pos: 0, value: selector};
-  while (selector.length > sticky.pos) {
+  const sticky = {offset: 0, value: selector};
+  while (selector.length > sticky.offset) {
     const complex = group[group.length - 1];
     if (complex.length === 0 || complex[complex.length - 1].type !== 'compound') {
       complex.push({type: 'compound', value: []});
@@ -302,11 +302,4 @@ function selectElements(one: boolean, scope: Parent, group: SelectorList): Eleme
   }
 
   return results;
-}
-
-function stickyMatch(sticky: {pos: number; value: string}, regex: RegExp): RegExpMatchArray | null {
-  regex.lastIndex = sticky.pos;
-  const match = regex.exec(sticky.value);
-  if (match !== null) sticky.pos = regex.lastIndex;
-  return match;
 }
