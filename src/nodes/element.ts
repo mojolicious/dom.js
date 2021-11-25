@@ -104,7 +104,14 @@ export class ElementNode extends ParentNode {
     const name = this.tagName;
     result.push('<', name);
     for (const attr of this.attrs) {
-      result.push(' ', attr.name, '="', xmlEscape(attr.value), '"');
+      const name = attr.name;
+      const value = attr.value;
+
+      if (value === '') {
+        result.push(' ', xml === true ? `${name}="${name}"` : name);
+      } else {
+        result.push(' ', name, '="', xmlEscape(value), '"');
+      }
     }
     result.push('>');
 

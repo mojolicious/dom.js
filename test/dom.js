@@ -140,10 +140,10 @@ t.test('DOM', t => {
   });
 
   t.test('HTML to XML', t => {
-    const dom = new DOM('<p>Hello<br>Mojo!</p>', {fragment: true});
+    const dom = new DOM('<p data-test data-two="data-two">Hello<br>Mojo!</p>', {fragment: true});
     t.equal(dom.at('p').text(), 'HelloMojo!');
-    t.equal(dom.toString({xml: true}), '<p>Hello<br></br>Mojo!</p>');
-    t.equal(dom.toString(), '<p>Hello<br>Mojo!</p>');
+    t.equal(dom.toString({xml: true}), '<p data-test="data-test" data-two="data-two">Hello<br></br>Mojo!</p>');
+    t.equal(dom.toString(), '<p data-test data-two="data-two">Hello<br>Mojo!</p>');
     t.end();
   });
 
