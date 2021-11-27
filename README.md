@@ -7,7 +7,7 @@
 [![](https://github.com/mojolicious/dom.js/workflows/test/badge.svg)](https://github.com/mojolicious/dom.js/actions)
 [![npm](https://img.shields.io/npm/v/@mojojs/dom.svg)](https://www.npmjs.com/package/@mojojs/dom)
 
-A convenient HTML/XML DOM API class. Written in TypeScript. **IN DEVELOPMENT!**
+A convenient HTML/XML DOM API class. Written in TypeScript. **IN DEVELOPMENT AND UNSTABLE!**
 
 ```js
 import DOM from '@mojojs/dom';
