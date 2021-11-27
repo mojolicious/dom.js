@@ -15,11 +15,14 @@ export default class DOM {
    */
   tree: Parent;
   _attr: AttributeProxy | undefined;
+  _xml: boolean;
 
   constructor(input: string | Parent, options: {fragment?: boolean; xml?: boolean} = {}) {
+    const xml = (this._xml = options.xml ?? false);
+
     // Parse
     if (typeof input === 'string') {
-      if (options.xml === true) {
+      if (xml === true) {
         this.tree = new XMLParser().parse(input);
       } else if (options.fragment === true) {
         this.tree = new HTMLParser().parseFragment(input);
@@ -39,7 +42,7 @@ export default class DOM {
    */
   at(selector: string): DOM | null {
     const first = new Selector(selector).first(this.tree);
-    return first === null ? null : new DOM(first);
+    return first === null ? null : new DOM(first, {xml: this._xml});
   }
 
   /**
@@ -73,7 +76,7 @@ export default class DOM {
    * Find all descendant elements of this element matching the CSS selector.
    */
   find(selector: string): DOM[] {
-    return new Selector(selector).all(this.tree).map(node => new DOM(node));
+    return new Selector(selector).all(this.tree).map(node => new DOM(node, {xml: this._xml}));
   }
 
   /**
@@ -111,7 +114,7 @@ export default class DOM {
   /**
    * Render DOM to HTML or XML.
    */
-  toString(options = {xml: false}): string {
+  toString(options = {xml: this._xml}): string {
     return this.tree.toString(options);
   }
 }

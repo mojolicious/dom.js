@@ -50,11 +50,30 @@ t.test('DOM', t => {
     t.end();
   });
 
+  t.test('XML document', t => {
+    const dom = new DOM('<link>http://mojolicious.org</link>', {xml: true});
+    t.ok(dom.tree instanceof FragmentNode);
+    t.ok(dom.tree.childNodes[0] instanceof ElementNode);
+    t.equal(dom.tree.childNodes[0].tagName, 'link');
+    t.ok(dom.tree.childNodes[0].childNodes[0] instanceof TextNode);
+    t.equal(dom.tree.childNodes[0].childNodes[0].value, 'http://mojolicious.org');
+    t.same(dom.tree.childNodes[0].childNodes[1], undefined);
+    t.same(dom.tree.childNodes[1], undefined);
+    t.equal(dom.toString(), '<link>http://mojolicious.org</link>');
+    t.equal(dom.toString({xml: false}), '<link>');
+    t.end();
+  });
+
   t.test('Entities', t => {
     const dom = new DOM('<p class="&lt;foo&gt;">&lt;Mojo&gt;</p>', {fragment: true});
     t.equal(dom.tree.childNodes[0].attrs[0].value, '<foo>');
     t.equal(dom.tree.childNodes[0].childNodes[0].value, '<Mojo>');
     t.equal(dom.toString(), '<p class="&lt;foo&gt;">&lt;Mojo&gt;</p>');
+
+    const dom2 = new DOM('<link class="&lt;foo&gt;">&lt;Mojo&gt;</link>', {xml: true});
+    t.equal(dom2.tree.childNodes[0].attrs[0].value, '<foo>');
+    t.equal(dom2.tree.childNodes[0].childNodes[0].value, '<Mojo>');
+    t.equal(dom2.toString(), '<link class="&lt;foo&gt;">&lt;Mojo&gt;</link>');
     t.end();
   });
 
@@ -64,6 +83,10 @@ t.test('DOM', t => {
     t.equal(dom.at('p').tag, 'p');
     t.equal(dom.at('div').tag, 'div');
     t.equal(dom.at('.foo').tag, 'p');
+    t.same(
+      dom.find('*').map(e => e.tag),
+      ['p', 'div']
+    );
     dom.at('.foo').tag = 'div';
     t.equal(dom.at('.foo').tag, 'div');
     t.equal(dom.toString(), '<div class="foo">Foo</div><div>Bar</div>');
@@ -166,6 +189,36 @@ t.test('DOM', t => {
   t.test('Class and ID', t => {
     const dom = new DOM('<div id="id" class="class">a</div>');
     t.equal(dom.at('div#id.class').text(), 'a');
+    t.end();
+  });
+
+  t.test('RSS', t => {
+    const rss = `
+<?xml version="1.0" encoding="UTF-8"?>
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+  <channel>
+    <title>Test Blog</title>
+    <link>http://blog.example.com</link>
+    <description>lalala</description>
+    <generator>Mojolicious</generator>
+    <item>
+      <pubDate>Mon, 12 Jul 2010 20:42:00</pubDate>
+      <title>Works!</title>
+      <link>http://blog.example.com/test</link>
+      <guid>http://blog.example.com/test</guid>
+      <description>
+        <![CDATA[<p>trololololo>]]>
+      </description>
+      <my:extension foo:id="works" bar:id="too">
+        <![CDATA[
+          [awesome]]
+        ]]>
+      </my:extension>
+    </item>
+  </channel>
+</rss>`;
+    const dom = new DOM(rss, {xml: true});
+    t.equal(dom.toString(), rss);
     t.end();
   });
 

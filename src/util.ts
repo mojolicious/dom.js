@@ -6,6 +6,15 @@ const XML_ESCAPE: Record<string, string> = {
   "'": '&#39;'
 };
 
+const XML_UNESCAPE: Record<string, string> = {
+  amp: '&',
+  lt: '<',
+  gt: '>',
+  quot: '"',
+  apos: "'",
+  '#39': "'"
+};
+
 export class SafeString {
   _safe: string;
 
@@ -34,9 +43,17 @@ export function stickyMatch(
 
 export function xmlEscape(value: string | SafeString): string {
   if (value instanceof SafeString) return value.toString();
-  return value.replace(/[&<>'"]/g, xmlReplace);
+  return value.replace(/[&<>'"]/g, xmlEscapeReplace);
 }
 
-function xmlReplace(char: string): string {
-  return XML_ESCAPE[char] ?? char;
+function xmlEscapeReplace(char: string): string {
+  return XML_ESCAPE[char];
+}
+
+export function xmlUnescape(value: string): string {
+  return value.replace(/&(amp|lt|gt|quot|apos|#39);/g, xmlUnescapeReplace);
+}
+
+function xmlUnescapeReplace(value: string, entity: string): string {
+  return XML_UNESCAPE[entity];
 }

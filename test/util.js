@@ -1,4 +1,4 @@
-import {SafeString, escapeRegExp, stickyMatch, xmlEscape} from '../lib/dom.js';
+import {SafeString, escapeRegExp, stickyMatch, xmlEscape, xmlUnescape} from '../lib/dom.js';
 import t from 'tap';
 
 t.test('escapeRegExp', t => {
@@ -26,5 +26,13 @@ t.test('xmlEscape', t => {
   t.same(xmlEscape('la<f>\nbar"baz"\'yada\n\'&lt;la'), 'la&lt;f&gt;\nbar&quot;baz&quot;&#39;yada\n&#39;&amp;lt;la');
   t.same(xmlEscape('<p>'), '&lt;p&gt;');
   t.same(xmlEscape(new SafeString('<p>')), '<p>');
+  t.end();
+});
+
+t.test('xmlUnescape', t => {
+  t.same(xmlUnescape('Hello World!'), 'Hello World!');
+  t.same(xmlUnescape('привет&lt;foo&gt;'), 'привет<foo>');
+  t.same(xmlUnescape('la&lt;f&gt;\nbar&quot;baz&quot;&#39;yada\n&#39;&amp;lt;la'), 'la<f>\nbar"baz"\'yada\n\'&lt;la');
+  t.same(xmlUnescape('&lt;p&gt;&apos;'), "<p>'");
   t.end();
 });

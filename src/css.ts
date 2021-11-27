@@ -10,7 +10,7 @@ interface Attribute {
 }
 
 interface Tag {
-  name: string;
+  name: string | null;
   type: 'tag';
 }
 
@@ -141,7 +141,8 @@ function compileSelector(selector: string): SelectorList {
     // Tag
     const tagMatch = stickyMatch(sticky, TAG_RE);
     if (tagMatch !== null) {
-      last.push({type: 'tag', name: tagMatch[0]});
+      const tag = tagMatch[0];
+      last.push({type: 'tag', name: tag === '*' ? null : tag});
       continue;
     }
 
@@ -242,7 +243,8 @@ function matchSelector(compound: CompoundSelector, current: ElementNode, tree: P
 
     // Tag
     if (type === 'tag') {
-      if (selector.name !== current.tagName) return false;
+      const name = selector.name;
+      if (name !== null && name !== current.tagName) return false;
     }
 
     // Attribute
