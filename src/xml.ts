@@ -10,11 +10,11 @@ import {stickyMatch, xmlUnescape} from './util.js';
 const ATTR_RE = new RegExp(`([^<>=\\s/]+|/)(?:\\s*=\\s*(?:(?<quote>["'])(.*?)\\k<quote>|([^>\\s]*)))?\\s*`, 'ys');
 const TEXT_RE = new RegExp(`([^<]+)`, 'ys');
 const DOCTYPE_RE = new RegExp(
-  `<!DOCTYPE(\\s+\\w+(?:(?:\\s+\\w+)?(?:\\s+(?:"[^"]*"|'[^']*'))+)?(?:\\s+\\[.+?\\])?\\s*)>`,
-  'ys'
+  `<!DOCTYPE\\s*(\\w+(?:(?:\\s+\\w+)?(?:\\s+(?:"[^"]*"|'[^']*'))+)?(?:\\s+\\[.+?\\])?\\s*)>`,
+  'ysi'
 );
 const COMMENT_RE = new RegExp(`<!--(.*?)--\\s*>`, 'ys');
-const CDATA_RE = new RegExp(`<!\\[CDATA\\[(.*?)\\]\\]>`, 'ys');
+const CDATA_RE = new RegExp(`<!\\[CDATA\\[(.*?)\\]\\]>`, 'ysi');
 const PI_RE = new RegExp(`<\\?(.*?)\\?>`, 'ys');
 const TAG_RE = new RegExp(`<\\s*(\\/)?\\s*([^<>\\s]+)\\s*((?:${ATTR_RE.source})*)>`, 'ys');
 const RUNAWAY_RE = new RegExp(`<`, 'y');
@@ -70,32 +70,31 @@ export class XMLParser {
         if (tagMatch[1] === undefined) {
           const attrs = [];
           const unparsed = tagMatch[3];
+          let close = false;
           if (unparsed !== undefined) {
+            // Attributes
             const stickyAttr = {offset: 0, value: unparsed};
             while (unparsed.length > stickyAttr.offset) {
               const attrMatch = stickyMatch(stickyAttr, ATTR_RE);
               if (attrMatch === null) break;
-              attrs.push({name: attrMatch[1], value: xmlUnescape(attrMatch[3] ?? attrMatch[4])});
+              const name = attrMatch[1];
+              if (name === '/') {
+                close = true;
+              } else {
+                attrs.push({name: name, value: xmlUnescape(attrMatch[3] ?? attrMatch[4] ?? '')});
+              }
             }
           }
 
           current.appendChild((current = new ElementNode(tag, '', attrs)));
+
+          // Element without end tag (self-closing)
+          if (close === true) current = this._end(current, tag);
         }
 
         // End
         else {
-          let node: Parent | null = current;
-          while (node !== null) {
-            const parent: Parent | null = node.parentNode;
-            if (parent === null) break;
-
-            if (node.nodeType === '#element' && node.tagName === tag) {
-              current = parent;
-              break;
-            }
-
-            node = parent;
-          }
+          current = this._end(current, tag);
         }
         continue;
       }
@@ -111,5 +110,18 @@ export class XMLParser {
     }
 
     return doc;
+  }
+
+  _end(current: Parent, tag: string): Parent {
+    let node: Parent | null = current;
+    while (node !== null) {
+      const parent: Parent | null = node.parentNode;
+      if (parent === null) break;
+
+      if (node.nodeType === '#element' && node.tagName === tag) return parent;
+      node = parent;
+    }
+
+    return current;
   }
 }

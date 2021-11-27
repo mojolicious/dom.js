@@ -113,10 +113,18 @@ export class ElementNode extends ParentNode {
         result.push(' ', name, '="', xmlEscape(value), '"');
       }
     }
-    result.push('>');
 
-    if (xml === true || EMPTY_HTML_TAGS[name] !== true) {
-      result.push(this.childNodes.map(node => node.toString(options)).join(''), '</', name, '>');
+    const children = this.childNodes;
+    if (xml === true) {
+      if (children.length > 0) {
+        result.push('>', children.map(node => node.toString(options)).join(''), '</', name, '>');
+      } else {
+        result.push(' />');
+      }
+    } else if (EMPTY_HTML_TAGS[name] !== true) {
+      result.push('>', children.map(node => node.toString(options)).join(''), '</', name, '>');
+    } else {
+      result.push('>');
     }
 
     return result.join('');

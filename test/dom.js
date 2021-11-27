@@ -128,30 +128,29 @@ t.test('DOM', t => {
   t.test('Combinators', t => {
     const dom = new DOM(
       `
-<html>
-  <head>
-    <title>Foo</title>
-  </head>
-  <body>
-    <div id="container">
-      <div id="header">
-        <div id="logo">Hello World</div>
-        <div id="buttons">
-          <p id="foo">Foo</p>
-        </div>
-        <div id="baz">Baz</div>
-        <div id="yada">Yada</div>
-      </div>
-      <form>
-        <div id="buttons">
-          <p id="bar">Bar</p>
-        </div>
-      </form>
-      <div id="content">More stuff</div>
-    </div>
-  </body>
-</html>
-`
+      <html>
+        <head>
+          <title>Foo</title>
+        </head>
+        <body>
+          <div id="container">
+            <div id="header">
+              <div id="logo">Hello World</div>
+              <div id="buttons">
+                <p id="foo">Foo</p>
+              </div>
+              <div id="baz">Baz</div>
+              <div id="yada">Yada</div>
+            </div>
+            <form>
+              <div id="buttons">
+                <p id="bar">Bar</p>
+              </div>
+            </form>
+            <div id="content">More stuff</div>
+          </div>
+        </body>
+      </html>`
     );
     t.equal(dom.at('#container #foo').text(), 'Foo');
     t.same(dom.at('#container > #foo'), null);
@@ -169,7 +168,7 @@ t.test('DOM', t => {
   t.test('HTML to XML', t => {
     const dom = new DOM('<p data-test data-two="data-two">Hello<br>Mojo!</p>', {fragment: true});
     t.equal(dom.at('p').text(), 'HelloMojo!');
-    t.equal(dom.toString({xml: true}), '<p data-test="data-test" data-two="data-two">Hello<br></br>Mojo!</p>');
+    t.equal(dom.toString({xml: true}), '<p data-test="data-test" data-two="data-two">Hello<br />Mojo!</p>');
     t.equal(dom.toString(), '<p data-test data-two="data-two">Hello<br>Mojo!</p>');
     t.end();
   });
@@ -177,10 +176,10 @@ t.test('DOM', t => {
   t.test('Select based on parent', t => {
     const dom = new DOM(
       `
-  <body>
-    <div>test1</div>
-    <div><div>test2</div></div>
-  </body>`
+      <body>
+        <div>test1</div>
+        <div><div>test2</div></div>
+      </body>`
     );
     t.equal(dom.find('body > div')[0].text(), 'test1');
     t.equal(dom.find('body > div')[1].text(), '');
@@ -196,31 +195,71 @@ t.test('DOM', t => {
     t.end();
   });
 
+  t.test('A bit of everything (basic navigation)', t => {
+    const dom = new DOM(
+      `
+      <!doctype foo>
+      <foo bar="ba&lt;z">
+        test
+        <simple class="working">easy</simple>
+        <test foo="bar" id="test" />
+        <!-- lala -->
+        works well
+        <![CDATA[ yada yada]]>
+        <?boom lalalala ?>
+        <a little bit broken>
+        < very broken
+        <br />
+        more text
+      </foo>`,
+      {xml: true}
+    );
+    t.equal(
+      dom.toString(),
+      `
+      <!DOCTYPE foo>
+      <foo bar="ba&lt;z">
+        test
+        <simple class="working">easy</simple>
+        <test foo="bar" id="test" />
+        <!-- lala -->
+        works well
+        <![CDATA[ yada yada]]>
+        <?boom lalalala ?>
+        <a little="little" bit="bit" broken="broken">
+        &lt; very broken
+        <br />
+        more text
+      </a></foo>`
+    );
+    t.end();
+  });
+
   t.test('RSS', t => {
     const rss = `
-<?xml version="1.0" encoding="UTF-8"?>
-<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
-  <channel>
-    <title>Test Blog</title>
-    <link>http://blog.example.com</link>
-    <description>lalala</description>
-    <generator>Mojolicious</generator>
-    <item>
-      <pubDate>Mon, 12 Jul 2010 20:42:00</pubDate>
-      <title>Works!</title>
-      <link>http://blog.example.com/test</link>
-      <guid>http://blog.example.com/test</guid>
-      <description>
-        <![CDATA[<p>trololololo>]]>
-      </description>
-      <my:extension foo:id="works" bar:id="too">
-        <![CDATA[
-          [awesome]]
-        ]]>
-      </my:extension>
-    </item>
-  </channel>
-</rss>`;
+      <?xml version="1.0" encoding="UTF-8"?>
+      <rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+        <channel>
+          <title>Test Blog</title>
+          <link>http://blog.example.com</link>
+          <description>lalala</description>
+          <generator>Mojolicious</generator>
+          <item>
+            <pubDate>Mon, 12 Jul 2010 20:42:00</pubDate>
+            <title>Works!</title>
+            <link>http://blog.example.com/test</link>
+            <guid>http://blog.example.com/test</guid>
+            <description>
+              <![CDATA[<p>trololololo>]]>
+            </description>
+            <my:extension foo:id="works" bar:id="too">
+              <![CDATA[
+                [awesome]]
+              ]]>
+            </my:extension>
+          </item>
+        </channel>
+      </rss>`;
     const dom = new DOM(rss, {xml: true});
     t.same(
       dom.find('*').map(e => e.tag),
@@ -251,7 +290,7 @@ t.test('DOM', t => {
     t.equal(dom.at('extension').attr['foo:id'], 'works');
     t.match(dom.at('#works').text(), /\[awesome\]\]/);
     t.match(dom.at('[id="works"]').text(), /\[awesome\]\]/);
-    t.equal(dom.find('description')[1].text(), '\n        <p>trololololo>\n      ');
+    t.equal(dom.find('description')[1].text(), '\n              <p>trololololo>\n            ');
     t.equal(dom.at('pubDate').text(), 'Mon, 12 Jul 2010 20:42:00');
     t.match(dom.at('[id*="ork"]').text(), /\[awesome\]\]/);
     t.match(dom.at('[id*="orks"]').text(), /\[awesome\]\]/);
