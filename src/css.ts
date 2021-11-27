@@ -10,7 +10,7 @@ interface Attribute {
 }
 
 interface Tag {
-  name: string | null;
+  name: RegExp | null;
   type: 'tag';
 }
 
@@ -66,10 +66,6 @@ export class Selector {
   }
 }
 
-function compileAttrName(value: string): RegExp {
-  return new RegExp('(?:^|\\:)' + escapeRegExp(cssUnescape(value)) + '$');
-}
-
 function compileAttrValue(op: string, value: string | undefined, insensitive: boolean): RegExp | null {
   if (value === undefined) return null;
   const flags = insensitive === true ? 'i' : undefined;
@@ -92,6 +88,10 @@ function compileAttrValue(op: string, value: string | undefined, insensitive: bo
 
   // Everything else
   return new RegExp(`^${value}$`, flags);
+}
+
+function compileName(value: string): RegExp {
+  return new RegExp('(?:^|\\:)' + escapeRegExp(cssUnescape(value)) + '$');
 }
 
 function compileSelector(selector: string): SelectorList {
@@ -123,9 +123,9 @@ function compileSelector(selector: string): SelectorList {
     const classMatch = stickyMatch(sticky, CLASS_ID_RE);
     if (classMatch !== null) {
       if (classMatch[1] === '#') {
-        last.push({type: 'attr', name: compileAttrName('id'), value: compileAttrValue('', classMatch[2], false)});
+        last.push({type: 'attr', name: compileName('id'), value: compileAttrValue('', classMatch[2], false)});
       } else {
-        last.push({type: 'attr', name: compileAttrName('class'), value: compileAttrValue('~', classMatch[2], false)});
+        last.push({type: 'attr', name: compileName('class'), value: compileAttrValue('~', classMatch[2], false)});
       }
       continue;
     }
@@ -136,7 +136,7 @@ function compileSelector(selector: string): SelectorList {
       const insensitive = attrMatch[6] === undefined ? false : true;
       last.push({
         type: 'attr',
-        name: compileAttrName(attrMatch[1]),
+        name: compileName(attrMatch[1]),
         value: compileAttrValue(attrMatch[2] ?? '', attrMatch[3] ?? attrMatch[4] ?? attrMatch[5], insensitive)
       });
       continue;
@@ -146,7 +146,7 @@ function compileSelector(selector: string): SelectorList {
     const tagMatch = stickyMatch(sticky, TAG_RE);
     if (tagMatch !== null) {
       const tag = tagMatch[0];
-      last.push({type: 'tag', name: tag === '*' ? null : tag});
+      last.push({type: 'tag', name: tag === '*' ? null : compileName(tag)});
       continue;
     }
 
@@ -248,7 +248,7 @@ function matchSelector(compound: CompoundSelector, current: ElementNode, tree: P
     // Tag
     if (type === 'tag') {
       const name = selector.name;
-      if (name !== null && name !== current.tagName) return false;
+      if (name !== null && name.test(current.tagName) === false) return false;
     }
 
     // Attribute

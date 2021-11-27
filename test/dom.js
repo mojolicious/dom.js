@@ -248,6 +248,11 @@ t.test('DOM', t => {
         .map(e => e.tag),
       ['channel', 'rss']
     );
+    t.equal(dom.at('extension').attr['foo:id'], 'works');
+    t.match(dom.at('#works').text(), /\[awesome\]\]/);
+    t.match(dom.at('[id="works"]').text(), /\[awesome\]\]/);
+    t.equal(dom.find('description')[1].text(), '\n        <p>trololololo>\n      ');
+    t.equal(dom.at('pubDate').text(), 'Mon, 12 Jul 2010 20:42:00');
     t.equal(dom.toString(), rss);
     t.end();
   });

@@ -4,18 +4,18 @@ import {ChildNode} from './child.js';
  * CDATA node class.
  */
 export class CDATANode extends ChildNode {
-  data: string;
+  value: string;
   readonly nodeType = '#cdata';
 
-  constructor(data: string) {
+  constructor(value: string) {
     super();
-    this.data = data;
+    this.value = value;
   }
 
   /**
    * Render node to string.
    */
   toString(): string {
-    return `<![CDATA[${this.data}]]>`;
+    return `<![CDATA[${this.value}]]>`;
   }
 }

@@ -119,9 +119,8 @@ export default class DOM {
 
     const buffer: string[] = [];
     for (const node of tree.childNodes) {
-      if (node.nodeType === '#text') {
-        buffer.push(node.value);
-      }
+      const type = node.nodeType;
+      if (type === '#text' || type === '#cdata') buffer.push(node.value);
     }
 
     return buffer.join('');
