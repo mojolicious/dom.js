@@ -44,7 +44,7 @@ t.test('DOM', t => {
     t.ok(dom.tree.childNodes[0].childNodes[0] instanceof TextNode);
     t.equal(dom.tree.childNodes[0].childNodes[0].value, 'Mojo');
     t.ok(dom.tree.childNodes[1] instanceof CommentNode);
-    t.equal(dom.tree.childNodes[1].data, ' Test ');
+    t.equal(dom.tree.childNodes[1].value, ' Test ');
     t.same(dom.tree.childNodes[2], undefined);
     t.equal(dom.toString(), '<p class="foo">Mojo</p><!-- Test -->');
     t.end();
@@ -253,6 +253,10 @@ t.test('DOM', t => {
     t.match(dom.at('[id="works"]').text(), /\[awesome\]\]/);
     t.equal(dom.find('description')[1].text(), '\n        <p>trololololo>\n      ');
     t.equal(dom.at('pubDate').text(), 'Mon, 12 Jul 2010 20:42:00');
+    t.match(dom.at('[id*="ork"]').text(), /\[awesome\]\]/);
+    t.match(dom.at('[id*="orks"]').text(), /\[awesome\]\]/);
+    t.match(dom.at('[id*="work"]').text(), /\[awesome\]\]/);
+    t.match(dom.at('[id*="or"]').text(), /\[awesome\]\]/);
     t.equal(dom.toString(), rss);
     t.end();
   });

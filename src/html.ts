@@ -116,7 +116,7 @@ class TreeAdapter {
   }
 
   getCommentNodeContent(commentNode: CommentNode): string {
-    return commentNode.data;
+    return commentNode.value;
   }
 
   getDocumentTypeNodeName(doctypeNode: DoctypeNode): string {

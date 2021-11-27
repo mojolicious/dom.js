@@ -4,18 +4,18 @@ import {ChildNode} from './child.js';
  * Comment node class.
  */
 export class CommentNode extends ChildNode {
-  data: string;
+  value: string;
   readonly nodeType = '#comment';
 
-  constructor(data: string) {
+  constructor(value: string) {
     super();
-    this.data = data;
+    this.value = value;
   }
 
   /**
    * Render node to string.
    */
   toString(): string {
-    return `<!--${this.data}-->`;
+    return `<!--${this.value}-->`;
   }
 }
