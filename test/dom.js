@@ -52,7 +52,7 @@ t.test('DOM', t => {
 
   t.test('XML document', t => {
     const dom = new DOM('<link>http://mojolicious.org</link>', {xml: true});
-    t.ok(dom.tree instanceof FragmentNode);
+    t.ok(dom.tree instanceof DocumentNode);
     t.ok(dom.tree.childNodes[0] instanceof ElementNode);
     t.equal(dom.tree.childNodes[0].tagName, 'link');
     t.ok(dom.tree.childNodes[0].childNodes[0] instanceof TextNode);
@@ -80,7 +80,11 @@ t.test('DOM', t => {
   t.test('Tag', t => {
     const dom = new DOM('<p class="foo">Foo</p><div>Bar</div>', {fragment: true});
     t.equal(dom.tag, '');
+    t.same(dom.matches('*'), false);
     t.equal(dom.at('p').tag, 'p');
+    t.same(dom.at('p').matches('div'), false);
+    t.same(dom.at('p').matches('p'), true);
+    t.same(dom.at('p').matches('*'), true);
     t.equal(dom.at('div').tag, 'div');
     t.equal(dom.at('.foo').tag, 'p');
     t.same(
@@ -218,6 +222,32 @@ t.test('DOM', t => {
   </channel>
 </rss>`;
     const dom = new DOM(rss, {xml: true});
+    t.same(
+      dom.find('*').map(e => e.tag),
+      [
+        'rss',
+        'channel',
+        'title',
+        'link',
+        'description',
+        'generator',
+        'item',
+        'pubDate',
+        'title',
+        'link',
+        'guid',
+        'description',
+        'my:extension'
+      ]
+    );
+    t.equal(dom.find('rss')[0].attr.version, '2.0');
+    t.same(
+      dom
+        .at('title')
+        .ancestors()
+        .map(e => e.tag),
+      ['channel', 'rss']
+    );
     t.equal(dom.toString(), rss);
     t.end();
   });

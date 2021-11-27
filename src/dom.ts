@@ -38,6 +38,13 @@ export default class DOM {
   }
 
   /**
+   * Ancestor elements of this element.
+   */
+  ancestors(): DOM[] {
+    return this.tree.ancestors().map(node => new DOM(node, {xml: this._xml}));
+  }
+
+  /**
    * Find first descendant element of this element matching the CSS selector.
    */
   at(selector: string): DOM | null {
@@ -77,6 +84,15 @@ export default class DOM {
    */
   find(selector: string): DOM[] {
     return new Selector(selector).all(this.tree).map(node => new DOM(node, {xml: this._xml}));
+  }
+
+  /**
+   * Check if this element matches the CSS selector.
+   */
+  matches(selector: string): boolean {
+    const tree = this.tree;
+    if (tree.nodeType !== '#element') return false;
+    return new Selector(selector).matches(tree);
   }
 
   /**

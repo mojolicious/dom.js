@@ -2,8 +2,8 @@ import type {Parent} from './types.js';
 import {CDATANode} from './nodes/cdata.js';
 import {CommentNode} from './nodes/comment.js';
 import {DoctypeNode} from './nodes/doctype.js';
+import {DocumentNode} from './nodes/document.js';
 import {ElementNode} from './nodes/element.js';
-import {FragmentNode} from './nodes/fragment.js';
 import {PINode} from './nodes/pi.js';
 import {stickyMatch, xmlUnescape} from './util.js';
 
@@ -20,8 +20,8 @@ const TAG_RE = new RegExp(`<\\s*(\\/)?\\s*([^<>\\s]+)\\s*((?:${ATTR_RE.source})*
 const RUNAWAY_RE = new RegExp(`<`, 'y');
 
 export class XMLParser {
-  parse(xml: string): FragmentNode {
-    const doc = new FragmentNode();
+  parse(xml: string): DocumentNode {
+    const doc = new DocumentNode();
     let current: Parent = doc;
 
     const sticky = {offset: 0, value: xml};

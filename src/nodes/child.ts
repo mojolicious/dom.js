@@ -8,6 +8,21 @@ export class ChildNode {
   parentNode: Parent | null = null;
 
   /**
+   * Ancestor elements of this node.
+   */
+  ancestors(): Parent[] {
+    const ancestors: Parent[] = [];
+
+    let current = this.parentNode;
+    while (current !== null && current.nodeType === '#element') {
+      ancestors.push(current);
+      current = current.parentNode;
+    }
+
+    return ancestors;
+  }
+
+  /**
    * Remove this node from its parent node.
    */
   detach(): void {

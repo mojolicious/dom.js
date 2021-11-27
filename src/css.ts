@@ -60,6 +60,10 @@ export class Selector {
   first(tree: Parent): ElementNode | null {
     return selectElements(true, tree, this._ast)[0] ?? null;
   }
+
+  matches(tree: ElementNode): boolean {
+    return matchList(this._ast, tree, tree, tree);
+  }
 }
 
 function compileAttrName(value: string): RegExp {
