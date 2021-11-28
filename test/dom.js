@@ -340,8 +340,8 @@ t.test('DOM', t => {
 
   t.test('Unusual order', t => {
     const dom = new DOM('<a href="http://example.com" id="foo" class="bar">Ok!</a>', {fragment: true});
-    t.equal(dom.at('a:not([href$=foo][href^=h])').text(), 'Ok!');
-    t.same(dom.at('a:not([href$=example.com][href^=h])'), null);
+    t.equal(dom.at('a:not([href$=foo])[href^=h]').text(), 'Ok!');
+    t.same(dom.at('a:not([href$=example.com])[href^=h]'), null);
     t.equal(dom.at('a[href^=h]#foo.bar').text(), 'Ok!');
     t.same(dom.at('a[href^=h]#foo.baz'), null);
     t.equal(dom.at('a[href^=h]#foo:not(b)').text(), 'Ok!');
@@ -350,8 +350,14 @@ t.test('DOM', t => {
     t.same(dom.at('[href^=h].bar:not(b)[href$=m]#bar'), null);
     t.equal(dom.at(':not(b)#foo#foo').text(), 'Ok!');
     t.same(dom.at(':not(b)#foo#bar'), null);
-    t.equal(dom.at(':not([href^=h]#foo#bar)').text(), 'Ok!');
-    t.same(dom.at(':not([href^=h]#foo#foo)'), null);
+    t.equal(dom.at('*:not([href^=h]#foo#bar)').text(), 'Ok!');
+    t.same(dom.at('*:not([href^=h]#foo#foo)'), null);
+
+    t.same(dom.at(':is(b)#foo#foo'), null);
+    t.equal(dom.at(':is(#foo):not(b).bar').text(), 'Ok!');
+    t.same(dom.at(':is(#foo):is(b).bar'), null);
+    t.same(dom.at('*:is([href^=h]#foo#bar)'), null);
+    t.equal(dom.at('*:is([href^=h]#foo#foo)').text(), 'Ok!');
     t.end();
   });
 

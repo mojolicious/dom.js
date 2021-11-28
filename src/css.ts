@@ -14,13 +14,13 @@ interface Tag {
   type: 'tag';
 }
 
-interface PseudoClassNot {
-  class: 'not';
+interface PseudoClassIsNot {
+  class: 'is' | 'not';
   type: 'pc';
   value: SelectorList;
 }
 
-type PseudoClass = PseudoClassNot;
+type PseudoClass = PseudoClassIsNot;
 
 type SimpleSelector = Attribute | Tag | PseudoClass;
 
@@ -155,7 +155,7 @@ function compileSelector(selector: string): SelectorList {
     const pcMatch = stickyMatch(sticky, PC_RE);
     if (pcMatch !== null) {
       const pseudoClass = pcMatch[1];
-      if (pseudoClass === 'not') {
+      if (pseudoClass === 'not' || pseudoClass === 'is') {
         last.push({type: 'pc', class: pseudoClass, value: compileSelector(pcMatch[2])});
       }
       continue;
@@ -266,6 +266,11 @@ function matchPseudoClass(simple: PseudoClass, current: ElementNode, tree: Paren
   // ":not"
   if (pseudoClass === 'not') {
     if (matchList(simple.value, current, tree, scope) === false) return true;
+  }
+
+  // ":is"
+  else if (pseudoClass === 'is') {
+    if (matchList(simple.value, current, tree, scope) === true) return true;
   }
 
   return false;

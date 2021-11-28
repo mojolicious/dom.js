@@ -50,6 +50,7 @@ CSS selector support is still fairly incomplete, but will increase quickly.
 | `*`                | any element                                                                                                           |
 | `E`                | an element of type E                                                                                                  |
 | `E:not(s1, s2, …)` | an E element that does not match either compound selector s1 or compound selector s2                                  |
+| `E:is(s1, s2, …)`  | an E element that matches compound selector s1 and/or compound selector s2                                            |
 | `E.warning`        | an E element belonging to the class warning                                                                           |
 | `E#myid`           | an E element with ID equal to myid                                                                                    |
 | `E[foo]`           | an E element with a foo attribute                                                                                     |
