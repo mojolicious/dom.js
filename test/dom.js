@@ -232,6 +232,44 @@ t.test('DOM', t => {
         more text
       </a></foo>`
     );
+
+    const simple = dom.at('foo simple.working[class^="wor"]');
+    t.same(simple.root().tag, '');
+    t.same(dom.root().tag, '');
+    t.equal(simple.root().children()[0].tag, 'foo');
+    t.equal(simple.tag, 'simple');
+    t.equal(simple.attr.class, 'working');
+    t.equal(simple.text(), 'easy');
+    t.equal(simple.parent().tag, 'foo');
+    t.equal(simple.parent().attr.bar, 'ba<z');
+    t.equal(simple.parent().children()[1].tag, 'test');
+    t.equal(simple.toString(), '<simple class="working">easy</simple>');
+    simple.parent().attr.bar = 'baz';
+    t.equal(simple.parent().attr.bar, 'baz');
+
+    t.equal(dom.at('test#test').tag, 'test');
+    t.equal(dom.at('[class$="ing"]').tag, 'simple');
+    t.equal(dom.at('[class="working"]').tag, 'simple');
+    t.equal(dom.at('[class$=ing]').tag, 'simple');
+    t.equal(dom.at('[class=working][class]').tag, 'simple');
+    t.equal(dom.at('foo > simple').next().tag, 'test');
+    t.equal(dom.at('foo > simple').next().next().tag, 'a');
+    t.same(
+      dom
+        .at('foo > simple')
+        .following()
+        .map(e => e.tag),
+      ['test', 'a']
+    );
+    t.equal(dom.at('foo > test').previous().tag, 'simple');
+    t.same(
+      dom
+        .at('foo > test')
+        .preceding()
+        .map(e => e.tag),
+      ['simple']
+    );
+
     t.end();
   });
 

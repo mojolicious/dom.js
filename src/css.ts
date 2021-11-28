@@ -81,7 +81,7 @@ function compileAttrValue(op: string, value: string | undefined, insensitive: bo
   if (op === '*') return new RegExp(value, flags);
 
   // "^=" (begins with)
-  if (op === '~') return new RegExp(`^${value}`, flags);
+  if (op === '^') return new RegExp(`^${value}`, flags);
 
   // "$=" (ends with)
   if (op === '$') return new RegExp(`${value}$`, flags);

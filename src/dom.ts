@@ -41,7 +41,7 @@ export default class DOM {
    * Ancestor elements of this element.
    */
   ancestors(): DOM[] {
-    return this.tree.ancestors().map(node => new DOM(node, {xml: this._xml}));
+    return this.tree.ancestors().map(node => this._newDOM(node));
   }
 
   /**
@@ -49,7 +49,7 @@ export default class DOM {
    */
   at(selector: string): DOM | null {
     const first = new Selector(selector).first(this.tree);
-    return first === null ? null : new DOM(first, {xml: this._xml});
+    return first === null ? null : this._newDOM(first);
   }
 
   /**
@@ -80,10 +80,24 @@ export default class DOM {
   }
 
   /**
+   * Child elements of this element.
+   */
+  children(): DOM[] {
+    return this.tree.childNodes.filter(node => node.nodeType === '#element').map(node => this._newDOM(node as Parent));
+  }
+
+  /**
    * Find all descendant elements of this element matching the CSS selector.
    */
   find(selector: string): DOM[] {
-    return new Selector(selector).all(this.tree).map(node => new DOM(node, {xml: this._xml}));
+    return new Selector(selector).all(this.tree).map(node => this._newDOM(node));
+  }
+
+  /**
+   * Sibling elements after this element.
+   */
+  following(): DOM[] {
+    return this.tree.siblings().following.map(node => this._newDOM(node));
   }
 
   /**
@@ -93,6 +107,48 @@ export default class DOM {
     const tree = this.tree;
     if (tree.nodeType !== '#element') return false;
     return new Selector(selector).matches(tree);
+  }
+
+  /**
+   * Sibling element after this element.
+   */
+  next(): DOM | null {
+    const following = this.tree.siblings().following;
+    if (following.length === 0) return null;
+    return this._newDOM(following[0]);
+  }
+
+  /**
+   * Parent of this element.
+   */
+  parent(): DOM | null {
+    const parent = this.tree.parentNode;
+    return parent === null ? null : this._newDOM(parent);
+  }
+
+  /**
+   * Sibling elements before this element.
+   */
+  preceding(): DOM[] {
+    return this.tree.siblings().preceding.map(node => this._newDOM(node));
+  }
+
+  /**
+   * Sibling element before this element.
+   */
+  previous(): DOM | null {
+    const preceding = this.tree.siblings().preceding;
+    if (preceding.length === 0) return null;
+    return this._newDOM(preceding[preceding.length - 1]);
+  }
+
+  /**
+   * Root node.
+   */
+  root(): DOM | null {
+    const root = this.tree.root();
+    const type = root.nodeType;
+    return type === '#document' || type === '#fragment' ? this._newDOM(root) : null;
   }
 
   /**
@@ -131,5 +187,9 @@ export default class DOM {
    */
   toString(options = {xml: this._xml}): string {
     return this.tree.toString(options);
+  }
+
+  _newDOM(tree: Parent): DOM {
+    return new DOM(tree, {xml: this._xml});
   }
 }
