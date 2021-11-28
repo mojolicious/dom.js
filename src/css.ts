@@ -14,7 +14,15 @@ interface Tag {
   type: 'tag';
 }
 
-type SimpleSelector = Attribute | Tag;
+interface PseudoClassNot {
+  class: 'not';
+  type: 'pc';
+  value: SelectorList;
+}
+
+type PseudoClass = PseudoClassNot;
+
+type SimpleSelector = Attribute | Tag | PseudoClass;
 
 interface Combinator {
   type: 'combinator';
@@ -32,11 +40,12 @@ type SelectorList = ComplexSelector[];
 const ESCAPE_RE = '\\\\[^0-9a-fA-F]|\\\\[0-9a-fA-F]{1,6}';
 const SEPARATOR_RE = new RegExp(`\\s*,\\s*`, 'y');
 const COMBINATOR_RE = new RegExp(`\\s*([ >+~])\\s*`, 'y');
+const PC_RE = new RegExp(`:([\\w\\-]+)(?:\\(((?:\\([^)]+\\)|[^)])+)\\))?`, 'y');
 const TAG_RE = new RegExp(`((?:${ESCAPE_RE}\\s|\\\\.|[^,.#:[ >~+])+)`, 'y');
 const CLASS_ID_RE = new RegExp(`([.#])((?:${ESCAPE_RE}\\s|\\\\.|[^,.#:[ >~+])+)`, 'y');
 const ATTR_RE = new RegExp(
   `\\[` +
-    `((?:${ESCAPE_RE}|[\\w-])+)` +
+    `((?:${ESCAPE_RE}|[\\w\\-])+)` +
     `(?:` +
     `(\\W)?=` +
     `(?:"((?:\\\\"|[^"])*)"|'((?:\\\\'|[^'])*)'|([^\\]]+?))` +
@@ -142,6 +151,16 @@ function compileSelector(selector: string): SelectorList {
       continue;
     }
 
+    // Pseudo-class
+    const pcMatch = stickyMatch(sticky, PC_RE);
+    if (pcMatch !== null) {
+      const pseudoClass = pcMatch[1];
+      if (pseudoClass === 'not') {
+        last.push({type: 'pc', class: pseudoClass, value: compileSelector(pcMatch[2])});
+      }
+      continue;
+    }
+
     // Tag
     const tagMatch = stickyMatch(sticky, TAG_RE);
     if (tagMatch !== null) {
@@ -241,6 +260,17 @@ function matchList(group: SelectorList, current: ElementNode, tree: Parent, scop
   return false;
 }
 
+function matchPseudoClass(simple: PseudoClass, current: ElementNode, tree: Parent, scope: Parent): boolean {
+  const pseudoClass = simple.class;
+
+  // ":not"
+  if (pseudoClass === 'not') {
+    if (matchList(simple.value, current, tree, scope) === false) return true;
+  }
+
+  return false;
+}
+
 function matchSelector(compound: CompoundSelector, current: ElementNode, tree: Parent, scope: Parent): boolean {
   for (const selector of compound.value) {
     const type = selector.type;
@@ -254,6 +284,11 @@ function matchSelector(compound: CompoundSelector, current: ElementNode, tree: P
     // Attribute
     else if (type === 'attr') {
       if (matchAttribute(selector, current) === false) return false;
+    }
+
+    // Pseudo-class
+    else if (type === 'pc') {
+      if (matchPseudoClass(selector, current, tree, scope) === false) return false;
     }
 
     // No match
