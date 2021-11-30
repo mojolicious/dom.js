@@ -7,7 +7,8 @@
 [![](https://github.com/mojolicious/dom.js/workflows/test/badge.svg)](https://github.com/mojolicious/dom.js/actions)
 [![npm](https://img.shields.io/npm/v/@mojojs/dom.svg)](https://www.npmjs.com/package/@mojojs/dom)
 
-A convenient HTML/XML DOM API class. Written in TypeScript. **IN DEVELOPMENT AND UNSTABLE!**
+A convenient HTML/XML DOM API class. Written in TypeScript. This will be a full port of the popular
+[Mojo::DOM](https://docs.mojolicious.org/Mojo/DOM) module. **IN DEVELOPMENT AND UNSTABLE!**
 
 ```js
 import DOM from '@mojojs/dom';
@@ -67,6 +68,74 @@ CSS selector support is still fairly incomplete, but will increase quickly.
 | `E ~ F`            | an F element preceded by an E element                                                                                 |
 
 All supported CSS4 selectors are considered experimental and might change as the spec evolves.
+
+### API
+
+The API for navigating the DOM tree is already quite complete, it's mostly DOM manipulation methods that are still
+missing.
+
+```js
+// Parse HTML
+const dom = new DOM('<div class="greeting">Hello World!</div>');
+
+// Render `DOM` object to HTML
+const html = dom.toString();
+
+// Find one element matching the CSS selector and return it as `DOM` objects
+const div = dom.at('div.greeting');
+
+// Find all elements marching the CSS selector and teturn them as `DOM` objects
+const divs = dom.find('div.greeting');
+
+// Get root element as `DOM` object (document or fragment node)
+const root = dom.root();
+
+// Get parent element as `DOM` object
+const parent = dom.parent();
+
+// Get all ancestor elements as `DOM` objects
+const ancestors = dom.ancestors();
+
+// Get all child elements as `DOM` objects
+const children = dom.children();
+
+// Get all sibling elements before this element as `DOM` objects
+const preceding = dom.preceding();
+
+// Get all sibling elements after this element as `DOM` objects
+const following = dom.following();
+
+// Get sibling element before this element as `DOM` objects
+const previous = dom.previous();
+
+// Get sibling element after this element as `DOM` objects
+const next = dom.next();
+```
+```js
+// Check is element matches the given CSS selector
+const isDiv = dom.matches('div');
+
+// Extract text content from element
+const greeting = dom.text();
+
+// Get element tag
+const tag = dom.tag;
+
+// Set element tag
+dom.tag = 'div';
+
+// Get element attribute value
+const class = dom.attr.class;
+
+// Set element attribute value
+dom.attr.class = 'whatever';
+
+// Remove element attribute
+delete dom.attr.class;
+
+// Get element attribute names
+const names = Object.keys(dom.attr);
+```
 
 ## Installation
 
