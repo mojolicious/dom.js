@@ -80,7 +80,8 @@ const dom = new DOM('<div class="greeting">Hello World!</div>');
 
 // Render `DOM` object to HTML
 const html = dom.toString();
-
+```
+```js
 // Find one element matching the CSS selector and return it as `DOM` objects
 const div = dom.at('div.greeting');
 
