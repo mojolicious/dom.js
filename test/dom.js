@@ -273,6 +273,15 @@ t.test('DOM', t => {
     t.end();
   });
 
+  t.test('Remove elements', t => {
+    const dom = new DOM('<div>foo<p>lalala</p><br>bar</div>', {fragment: true});
+    dom.remove();
+    t.equal(dom.toString(), '<div>foo<p>lalala</p><br>bar</div>');
+    dom.at('p').remove();
+    t.equal(dom.toString(), '<div>foo<br>bar</div>');
+    t.end();
+  });
+
   t.test('RSS', t => {
     const rss = `
       <?xml version="1.0" encoding="UTF-8"?>

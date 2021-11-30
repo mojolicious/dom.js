@@ -143,6 +143,13 @@ export default class DOM {
   }
 
   /**
+   * Remove this element and its children.
+   */
+  remove(): void {
+    this.tree.detach();
+  }
+
+  /**
    * Root node.
    */
   root(): DOM | null {

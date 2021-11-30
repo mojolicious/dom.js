@@ -81,6 +81,9 @@ const dom = new DOM('<div class="greeting">Hello World!</div>');
 // Render `DOM` object to HTML
 const html = dom.toString();
 ```
+
+Navigate the DOM tree with and without CSS selectors.
+
 ```js
 // Find one element matching the CSS selector and return it as `DOM` objects
 const div = dom.at('div.greeting');
@@ -112,6 +115,9 @@ const previous = dom.previous();
 // Get sibling element after this element as `DOM` objects
 const next = dom.next();
 ```
+
+Extract information and manipulate elements.
+
 ```js
 // Check is element matches the given CSS selector
 const isDiv = dom.matches('div');
@@ -136,6 +142,9 @@ delete dom.attr.class;
 
 // Get element attribute names
 const names = Object.keys(dom.attr);
+
+// Remove element and its children
+dom.remove();
 ```
 
 ## Installation
