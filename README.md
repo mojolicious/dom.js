@@ -18,8 +18,11 @@ const dom = new DOM('<div><p id="a">Test</p><p id="b">123</p></div>');
 
 // Find
 console.log(dom.at('#b').text());
-console.log(dom.find('p').map(e => e.text()).join('\n'));
-console.log(dom.find('[id]').map(e => e.attr.id).join('\n'));
+console.log(dom.find('p').map(el => el.text()).join('\n'));
+console.log(dom.find('[id]').map(el => el.attr.id).join('\n'));
+
+// Modify
+dom.find(':not(p)').forEach(el => el.strip());
 
 // Render
 console.log(dom.toString());
@@ -41,6 +44,35 @@ const dom = new DOM('<p>Hello World!</p>', {fragment: true});
 // XML
 const dom = new DOM('<rss><link>http://example.com</link></rss>', {xml: true});
 ```
+
+#### Nodes and Elements
+
+When we parse an HTML/XML document or fragment, it gets turned into a tree of nodes.
+
+```html
+<!DOCTYPE html>
+<html>
+  <head><title>Hello</title></head>
+  <body>World!</body>
+</html>
+```
+
+There are currently eight different kinds of nodes, `#cdata`, `#comment`, `#doctype`, `#document`, `#element`,
+`#fragment`,`#pi`, and `#text`.
+
+```
+#document
+|- #doctype (html)
++- #element (html)
+   |- #element (head)
+   |  +- #element (title)
+   |     +- #text (Hello)
+   +- #element (body)
+      +- #text (World!)
+```
+
+While nodes such as `#document` and `#fragment` can be represented by `DOM` objects, features like `dom.attr` and
+`dom.tag` will not work for them.
 
 #### CSS Selectors
 
@@ -119,7 +151,7 @@ const next = dom.next();
 Extract information and manipulate elements.
 
 ```js
-// Check is element matches the given CSS selector
+// Check if element matches the given CSS selector
 const isDiv = dom.matches('div');
 
 // Extract text content from element
@@ -145,6 +177,9 @@ const names = Object.keys(dom.attr);
 
 // Remove element and its children
 dom.remove();
+
+// Remove element but preserve its children
+dom.strip();
 ```
 
 ## Installation

@@ -88,7 +88,7 @@ t.test('DOM', t => {
     t.equal(dom.at('div').tag, 'div');
     t.equal(dom.at('.foo').tag, 'p');
     t.same(
-      dom.find('*').map(e => e.tag),
+      dom.find('*').map(el => el.tag),
       ['p', 'div']
     );
     dom.at('.foo').tag = 'div';
@@ -258,7 +258,7 @@ t.test('DOM', t => {
       dom
         .at('foo > simple')
         .following()
-        .map(e => e.tag),
+        .map(el => el.tag),
       ['test', 'a']
     );
     t.equal(dom.at('foo > test').previous().tag, 'simple');
@@ -266,7 +266,7 @@ t.test('DOM', t => {
       dom
         .at('foo > test')
         .preceding()
-        .map(e => e.tag),
+        .map(el => el.tag),
       ['simple']
     );
 
@@ -274,10 +274,13 @@ t.test('DOM', t => {
   });
 
   t.test('Remove elements', t => {
-    const dom = new DOM('<div>foo<p>lalala</p><br>bar</div>', {fragment: true});
+    const dom = new DOM('<div>foo<p>lalala</p><br><i>bar</i></div>', {fragment: true});
     dom.remove();
-    t.equal(dom.toString(), '<div>foo<p>lalala</p><br>bar</div>');
+    dom.strip();
+    t.equal(dom.toString(), '<div>foo<p>lalala</p><br><i>bar</i></div>');
     dom.at('p').remove();
+    t.equal(dom.toString(), '<div>foo<br><i>bar</i></div>');
+    dom.at('i').strip();
     t.equal(dom.toString(), '<div>foo<br>bar</div>');
     t.end();
   });
@@ -309,7 +312,7 @@ t.test('DOM', t => {
       </rss>`;
     const dom = new DOM(rss, {xml: true});
     t.same(
-      dom.find('*').map(e => e.tag),
+      dom.find('*').map(el => el.tag),
       [
         'rss',
         'channel',
@@ -331,7 +334,7 @@ t.test('DOM', t => {
       dom
         .at('title')
         .ancestors()
-        .map(e => e.tag),
+        .map(el => el.tag),
       ['channel', 'rss']
     );
     t.equal(dom.at('extension').attr['foo:id'], 'works');

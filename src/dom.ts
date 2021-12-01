@@ -1,4 +1,4 @@
-import type {Parent} from './types.js';
+import type {Child, Parent} from './types.js';
 import {Selector} from './css.js';
 import {HTMLParser} from './html.js';
 import {XMLParser} from './xml.js';
@@ -156,6 +156,22 @@ export default class DOM {
     const root = this.tree.root();
     const type = root.nodeType;
     return type === '#document' || type === '#fragment' ? this._newDOM(root) : null;
+  }
+
+  /**
+   * Remove this element while preserving its content.
+   */
+  strip(): void {
+    const tree = this.tree;
+    const parent = tree.parentNode;
+    if (parent === null) return;
+
+    const children = this.tree.childNodes;
+    for (const node of children) {
+      node.detach();
+      parent.insertBefore(node, tree as Child);
+    }
+    tree.detach();
   }
 
   /**
