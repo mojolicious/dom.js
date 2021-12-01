@@ -180,6 +180,18 @@ dom.remove();
 
 // Remove element but preserve its children
 dom.strip();
+
+// Append HTML/XML fragment after this element
+dom.append('<p>Hello World!</p>');
+
+// Append HTML/XML fragment to this element's content
+dom.appendContent('<p>Hello World!</p>');
+
+// Prepend HTML/XML fragment before this element
+dom.prepend('<p>Hello World!</p>');
+
+// Prepend HTML/XML fragment to this element's content
+dom.prependContent('<p>Hello World!</p>');
 ```
 
 ## Installation

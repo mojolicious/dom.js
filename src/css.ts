@@ -343,7 +343,7 @@ function selectElements(one: boolean, scope: Parent, group: SelectorList): Eleme
     const current = queue.shift();
     if (current?.nodeType !== '#element') continue;
 
-    queue.push(...current.childNodes);
+    queue.unshift(...current.childNodes);
     if (matchList(group, current, scope, scope) !== true) continue;
     results.push(current);
     if (one === true) break;

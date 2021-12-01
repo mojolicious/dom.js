@@ -285,6 +285,108 @@ t.test('DOM', t => {
     t.end();
   });
 
+  t.test('Adding nodes', t => {
+    const dom = new DOM(
+      `
+      <ul>
+        <li>A</li>
+        <p>B</p>
+        <li>C</li>
+      </ul>
+      <div>D</div>`,
+      {fragment: true}
+    );
+
+    dom.at('li').append('<p>A1</p>23').append('22');
+    t.equal(
+      dom.toString(),
+      `
+      <ul>
+        <li>A</li>22<p>A1</p>23
+        <p>B</p>
+        <li>C</li>
+      </ul>
+      <div>D</div>`
+    );
+
+    dom.at('li').prepend('24').prepend('<div>A-1</div>25');
+    t.equal(
+      dom.toString(),
+      `
+      <ul>
+        24<div>A-1</div>25<li>A</li>22<p>A1</p>23
+        <p>B</p>
+        <li>C</li>
+      </ul>
+      <div>D</div>`
+    );
+    t.equal(dom.at('div').text(), 'A-1');
+    t.equal(dom.at('iv'), null);
+
+    dom.prependContent('a').prependContent('lal').prependContent('la');
+    t.equal(
+      dom.toString(),
+      `lalala
+      <ul>
+        24<div>A-1</div>25<li>A</li>22<p>A1</p>23
+        <p>B</p>
+        <li>C</li>
+      </ul>
+      <div>D</div>`
+    );
+
+    dom.appendContent('la').appendContent('lal').appendContent('a');
+    t.equal(
+      dom.toString(),
+      `lalala
+      <ul>
+        24<div>A-1</div>25<li>A</li>22<p>A1</p>23
+        <p>B</p>
+        <li>C</li>
+      </ul>
+      <div>D</div>lalala`
+    );
+
+    dom.find('div').forEach(el => el.append('works'));
+    t.equal(
+      dom.toString(),
+      `lalala
+      <ul>
+        24<div>A-1</div>works25<li>A</li>22<p>A1</p>23
+        <p>B</p>
+        <li>C</li>
+      </ul>
+      <div>D</div>workslalala`
+    );
+
+    dom.at('li').prependContent('A3<p>A2</p>').prependContent('A4');
+    t.equal(dom.at('li').text(), 'A4A3A');
+    t.equal(
+      dom.toString(),
+      `lalala
+      <ul>
+        24<div>A-1</div>works25<li>A4A3<p>A2</p>A</li>22<p>A1</p>23
+        <p>B</p>
+        <li>C</li>
+      </ul>
+      <div>D</div>workslalala`
+    );
+
+    dom.find('li')[1].appendContent('<p>C2</p>C3').appendContent(' C4').appendContent('C5');
+    t.equal(
+      dom.toString(),
+      `lalala
+      <ul>
+        24<div>A-1</div>works25<li>A4A3<p>A2</p>A</li>22<p>A1</p>23
+        <p>B</p>
+        <li>C<p>C2</p>C3 C4C5</li>
+      </ul>
+      <div>D</div>workslalala`
+    );
+
+    t.end();
+  });
+
   t.test('RSS', t => {
     const rss = `
       <?xml version="1.0" encoding="UTF-8"?>

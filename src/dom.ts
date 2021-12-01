@@ -45,6 +45,20 @@ export default class DOM {
   }
 
   /**
+   * Append HTML/XML fragment to this element.
+   */
+  append(content: string): this {
+    return this._addSibling(content, false);
+  }
+
+  /**
+   * Append HTML/XML fragment to this element's content.
+   */
+  appendContent(content: string): this {
+    return this._addChild(content, false);
+  }
+
+  /**
    * Find first descendant element of this element matching the CSS selector.
    */
   at(selector: string): DOM | null {
@@ -134,6 +148,20 @@ export default class DOM {
   }
 
   /**
+   * Prepend HTML/XML fragment to this element.
+   */
+  prepend(content: string): this {
+    return this._addSibling(content, true);
+  }
+
+  /**
+   * Prepend HTML/XML fragment to this element's content.
+   */
+  prependContent(content: string): this {
+    return this._addChild(content, true);
+  }
+
+  /**
    * Sibling element before this element.
    */
   previous(): DOM | null {
@@ -212,7 +240,49 @@ export default class DOM {
     return this.tree.toString(options);
   }
 
-  _newDOM(tree: Parent): DOM {
-    return new DOM(tree, {xml: this._xml});
+  _addChild(content: string, before: boolean): this {
+    const contentTree = this._ensureNode(content);
+    const tree = this.tree;
+    const nodes: Child[] = this._extractNodes(contentTree);
+
+    if (before === true) {
+      nodes.reverse().forEach(node => tree.prependChild(node));
+    } else {
+      nodes.forEach(node => tree.appendChild(node));
+    }
+
+    return this;
+  }
+
+  _addSibling(content: string, before: boolean): this {
+    const contentTree = this._ensureNode(content);
+
+    const tree = this.tree;
+    const parent = tree.parentNode;
+    if (parent === null) return this;
+
+    const nodes: Child[] = this._extractNodes(contentTree);
+
+    if (before === true) {
+      nodes.forEach(node => parent.insertBefore(node, tree as Child));
+    } else {
+      nodes.reverse().forEach(node => parent.insertAfter(node, tree as Child));
+    }
+
+    return this;
+  }
+
+  _ensureNode(content: string): Parent {
+    const xml = this._xml;
+    return new DOM(content, xml === true ? {xml} : {fragment: true}).tree;
+  }
+
+  _extractNodes(tree: Parent): Child[] {
+    const type = tree.nodeType;
+    return type === '#document' || type === '#fragment' ? tree.childNodes : [tree];
+  }
+
+  _newDOM(node: Parent): DOM {
+    return new DOM(node, {xml: this._xml});
   }
 }
