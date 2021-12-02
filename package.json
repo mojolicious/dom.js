@@ -1,11 +1,13 @@
 {
   "name": "@mojojs/dom",
   "version": "0.0.7",
-  "description": "DOM",
+  "description": "A fast and minimalistic HTML/XML DOM parser with CSS selectors",
   "keywords": [
     "dom",
     "html",
-    "css"
+    "xml",
+    "css",
+    "scraping"
   ],
   "author": "Sebastian Riedel <kraih@mojolicious.org>",
   "license": "MIT",

@@ -20,18 +20,14 @@ export class ParentNode extends ChildNode {
    * Insert a child node to this parent node after the given reference node.
    */
   insertAfter(node: Child, referenceNode: Child): void {
-    const idx = this.childNodes.indexOf(referenceNode);
-    this.childNodes.splice(idx + 1, 0, node);
-    node.parentNode = this as Parent;
+    this._insertNode(node, referenceNode, 1);
   }
 
   /**
    * Insert a child node to this parent node before the given reference node.
    */
   insertBefore(node: Child, referenceNode: Child): void {
-    const idx = this.childNodes.indexOf(referenceNode);
-    this.childNodes.splice(idx, 0, node);
-    node.parentNode = this as Parent;
+    this._insertNode(node, referenceNode, 0);
   }
 
   /**
@@ -79,5 +75,11 @@ export class ParentNode extends ChildNode {
    */
   toString(options = {xml: false}): string {
     return this.childNodes.map(node => node.toString(options)).join('');
+  }
+
+  _insertNode(node: Child, referenceNode: Child, offset: number): void {
+    const idx = this.childNodes.indexOf(referenceNode);
+    this.childNodes.splice(idx + offset, 0, node);
+    node.parentNode = this as Parent;
   }
 }

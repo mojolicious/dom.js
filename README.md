@@ -7,8 +7,7 @@
 [![](https://github.com/mojolicious/dom.js/workflows/test/badge.svg)](https://github.com/mojolicious/dom.js/actions)
 [![npm](https://img.shields.io/npm/v/@mojojs/dom.svg)](https://www.npmjs.com/package/@mojojs/dom)
 
-A convenient HTML/XML DOM API class. Written in TypeScript. This will be a full port of the popular
-[Mojo::DOM](https://docs.mojolicious.org/Mojo/DOM) module. **IN DEVELOPMENT AND UNSTABLE!**
+A fast and minimalistic HTML/XML DOM parser with CSS selectors. Written in TypeScript.
 
 ```js
 import DOM from '@mojojs/dom';
@@ -103,8 +102,7 @@ All supported CSS4 selectors are considered experimental and might change as the
 
 ### API
 
-The API for navigating the DOM tree is already quite complete, it's mostly DOM manipulation methods that are still
-missing.
+Everything you need to extract information from HTML/XML documents and make changes to the DOM tree.
 
 ```js
 // Parse HTML
