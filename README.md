@@ -155,6 +155,9 @@ const isDiv = dom.matches('div');
 // Extract text content from element
 const greeting = dom.text();
 
+// Extract text content from element and its descendants
+const everything = dom.text({recursive: true});
+
 // Get element tag
 const tag = dom.tag;
 

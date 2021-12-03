@@ -119,9 +119,11 @@ t.test('DOM', t => {
   });
 
   t.test('Text', t => {
-    const dom = new DOM('<p>Hello Mojo!</p>', {fragment: true});
+    const dom = new DOM('<p>Hello Mojo<b>!</b></p>', {fragment: true});
     t.equal(dom.text(), '');
-    t.equal(dom.at('p').text(), 'Hello Mojo!');
+    t.equal(dom.text({recursive: true}), 'Hello Mojo!');
+    t.equal(dom.at('p').text(), 'Hello Mojo');
+    t.equal(dom.at('p').text({recursive: true}), 'Hello Mojo!');
     t.end();
   });
 
@@ -231,6 +233,24 @@ t.test('DOM', t => {
         <br />
         more text
       </a></foo>`
+    );
+    t.equal(
+      dom.text({recursive: true}),
+      `
+      
+      
+        test
+        easy
+        
+        
+        works well
+         yada yada
+        
+        
+        < very broken
+        
+        more text
+      `
     );
 
     const simple = dom.at('foo simple.working[class^="wor"]');

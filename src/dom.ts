@@ -232,16 +232,30 @@ export default class DOM {
   }
 
   /**
-   * Extract text content from this element only (not including child elements).
+   * Extract text content from this element.
    */
-  text(): string {
-    const tree = this.tree;
-    if (tree.nodeType !== '#element') return '';
+  text(options = {recursive: false}): string {
+    const recursive = options.recursive;
 
+    const tree = this.tree;
+    const type = tree.nodeType;
+    if (type !== '#element' && type !== '#fragment' && type !== '#document') return '';
+
+    const nodes = [...tree.childNodes];
     const buffer: string[] = [];
-    for (const node of tree.childNodes) {
+    let node;
+    while ((node = nodes.shift()) !== undefined) {
       const type = node.nodeType;
-      if (type === '#text' || type === '#cdata') buffer.push(node.value);
+
+      // Text
+      if (type === '#text' || type === '#cdata') {
+        buffer.push(node.value);
+      }
+
+      // Element
+      else if (recursive === true && type === '#element') {
+        nodes.unshift(...node.childNodes);
+      }
     }
 
     return buffer.join('');

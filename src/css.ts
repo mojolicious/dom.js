@@ -339,9 +339,9 @@ function selectElements(one: boolean, scope: Parent, group: SelectorList): Eleme
   const results: ElementNode[] = [];
 
   const queue = [...scope.childNodes];
-  while (queue.length > 0) {
-    const current = queue.shift();
-    if (current?.nodeType !== '#element') continue;
+  let current;
+  while ((current = queue.shift()) !== undefined) {
+    if (current.nodeType !== '#element') continue;
 
     queue.unshift(...current.childNodes);
     if (matchList(group, current, scope, scope) !== true) continue;
