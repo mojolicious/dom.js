@@ -173,11 +173,17 @@ delete dom.attr.class;
 // Get element attribute names
 const names = Object.keys(dom.attr);
 
+// Get element's rendered content
+const content = dom.content();
+
 // Remove element and its children
 dom.remove();
 
 // Remove element but preserve its children
 dom.strip();
+
+// Replace element and its children
+dom.replace('<p>Hello World!</p>');
 
 // Append HTML/XML fragment after this element
 dom.append('<p>Hello World!</p>');

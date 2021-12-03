@@ -101,6 +101,13 @@ export default class DOM {
   }
 
   /**
+   * This element's rendered content.
+   */
+  content(): string {
+    return this.tree.childNodes.map(node => node.toString({xml: this._xml})).join('');
+  }
+
+  /**
    * Find all descendant elements of this element matching the CSS selector.
    */
   find(selector: string): DOM[] {
@@ -175,6 +182,13 @@ export default class DOM {
    */
   remove(): void {
     this.tree.detach();
+  }
+
+  /**
+   * Replace this element with HTML/XML fragment.
+   */
+  replace(content: string): void {
+    this.prepend(content).remove();
   }
 
   /**

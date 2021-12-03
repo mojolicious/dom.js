@@ -387,6 +387,42 @@ t.test('DOM', t => {
     t.end();
   });
 
+  t.test('Replace elements', t => {
+    const dom = new DOM('<div>foo<p>lalala</p>bar</div>', {fragment: true});
+    dom.at('p').replace('<foo>bar</foo>');
+    t.equal(dom.toString(), '<div>foo<foo>bar</foo>bar</div>');
+    dom.at('foo').replace(new DOM('text', {fragment: true}));
+    t.equal(dom.toString(), '<div>footextbar</div>');
+
+    const dom2 = new DOM('<div>foo</div><div>bar</div>', {fragment: true});
+    dom2.find('div').forEach(el => el.replace('<p>test</p>'));
+    t.equal(dom2.toString(), '<p>test</p><p>test</p>');
+
+    const dom3 = new DOM('<div>foo<p>lalala</p>bar</div>', {fragment: true});
+    t.equal(dom3.at('div').content(), 'foo<p>lalala</p>bar');
+    dom3.at('p').replace('♥');
+    t.equal(dom3.toString(), '<div>foo♥bar</div>');
+    t.equal(dom3.at('div').content(), 'foo♥bar');
+
+    const dom4 = new DOM('<div>foo<p>lalala</p>bar</div>', {fragment: true});
+    dom4.at('p').replace('');
+    t.equal(dom4.toString(), '<div>foobar</div>');
+
+    const dom5 = new DOM('A<div>B<p>C<b>D<i><u>E</u></i>F</b>G</p><div>H</div></div>I', {fragment: true});
+    dom5.find(':not(div):not(i):not(u)').forEach(el => el.strip());
+    t.equal(dom5.toString(), 'A<div>BCG<div>H</div></div>I');
+
+    const dom6 = new DOM('<div><div>A</div><div>B</div>C</div>', {fragment: true});
+    t.equal(dom6.at('div').at('div').text(), 'A');
+    dom6
+      .at('div')
+      .find('div')
+      .forEach(el => el.strip());
+    t.equal(dom6.toString(), '<div>ABC</div>');
+
+    t.end();
+  });
+
   t.test('RSS', t => {
     const rss = `
       <?xml version="1.0" encoding="UTF-8"?>
