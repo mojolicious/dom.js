@@ -31,7 +31,13 @@ interface PseudoClassOnly {
   type: 'pc';
 }
 
-type PseudoClass = PseudoClassIsNot | PseudoClassNth | PseudoClassOnly;
+interface PseudoClassText {
+  class: 'text';
+  type: 'pc';
+  value: RegExp;
+}
+
+type PseudoClass = PseudoClassIsNot | PseudoClassNth | PseudoClassOnly | PseudoClassText;
 
 type SimpleSelector = Attribute | Tag | PseudoClass;
 
@@ -136,6 +142,46 @@ function compileName(value: string): RegExp {
   return new RegExp('(?:^|\\:)' + escapeRegExp(cssUnescape(value)) + '$');
 }
 
+function compilePseudoClass(name: string, args: string): PseudoClass {
+  // ":is" and ":not" (contains more selectors)
+  if (name === 'not' || name === 'is') {
+    return {type: 'pc', class: name, value: compileSelector(args)};
+  }
+
+  // ":nth-*" (with An+B notation)
+  else if (name === 'nth-child' || name === 'nth-last-child' || name === 'nth-of-type' || name === 'nth-last-of-type') {
+    return {type: 'pc', class: name, value: compileEquation(args)};
+  }
+
+  // ":first-child"
+  else if (name === 'first-child') {
+    return {type: 'pc', class: 'nth-child', value: [0, 1]};
+  }
+
+  // ":first-of-type"
+  else if (name === 'first-of-type') {
+    return {type: 'pc', class: 'nth-of-type', value: [0, 1]};
+  }
+
+  // ":last-child"
+  else if (name === 'last-child') {
+    return {type: 'pc', class: 'nth-last-child', value: [-1, 1]};
+  }
+
+  // ":last-of-type"
+  else if (name === 'last-of-type') {
+    return {type: 'pc', class: 'nth-last-of-type', value: [-1, 1]};
+  }
+
+  // ":only-child" and ":only-of-type"
+  else if (name === 'only-child' || name === 'only-of-type') {
+    return {type: 'pc', class: name};
+  }
+
+  // Unknown
+  return {type: 'pc', class: 'nth-child', value: [0, 0]};
+}
+
 function compileSelector(selector: string): SelectorList {
   const group: SelectorList = [[]];
 
@@ -187,52 +233,7 @@ function compileSelector(selector: string): SelectorList {
     // Pseudo-class
     const pcMatch = stickyMatch(sticky, PC_RE);
     if (pcMatch !== null) {
-      const pseudoClass = pcMatch[1];
-
-      // ":is" and ":not" (contains more selectors)
-      if (pseudoClass === 'not' || pseudoClass === 'is') {
-        last.push({type: 'pc', class: pseudoClass, value: compileSelector(pcMatch[2])});
-      }
-
-      // ":nth-*" (with An+B notation)
-      else if (
-        pseudoClass === 'nth-child' ||
-        pseudoClass === 'nth-last-child' ||
-        pseudoClass === 'nth-of-type' ||
-        pseudoClass === 'nth-last-of-type'
-      ) {
-        last.push({type: 'pc', class: pseudoClass, value: compileEquation(pcMatch[2])});
-      }
-
-      // ":first-child"
-      else if (pseudoClass === 'first-child') {
-        last.push({type: 'pc', class: 'nth-child', value: [0, 1]});
-      }
-
-      // ":first-of-type"
-      else if (pseudoClass === 'first-of-type') {
-        last.push({type: 'pc', class: 'nth-of-type', value: [0, 1]});
-      }
-
-      // ":last-child"
-      else if (pseudoClass === 'last-child') {
-        last.push({type: 'pc', class: 'nth-last-child', value: [-1, 1]});
-      }
-
-      // ":last-of-type"
-      else if (pseudoClass === 'last-of-type') {
-        last.push({type: 'pc', class: 'nth-last-of-type', value: [-1, 1]});
-      }
-
-      // ":only-child" and ":only-of-type"
-      else if (pseudoClass === 'only-child' || pseudoClass === 'only-of-type') {
-        last.push({type: 'pc', class: pseudoClass});
-      }
-
-      // Unknown
-      else {
-        last.push({type: 'pc', class: 'nth-child', value: [0, 0]});
-      }
+      last.push(compilePseudoClass(pcMatch[1], pcMatch[2]));
       continue;
     }
 
