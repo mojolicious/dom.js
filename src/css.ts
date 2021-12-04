@@ -20,7 +20,13 @@ interface PseudoClassIsNot {
   value: SelectorList;
 }
 
-type PseudoClass = PseudoClassIsNot;
+interface PseudoClassNth {
+  class: 'nth-child' | 'nth-last-child';
+  type: 'pc';
+  value: [number, number];
+}
+
+type PseudoClass = PseudoClassIsNot | PseudoClassNth;
 
 type SimpleSelector = Attribute | Tag | PseudoClass;
 
@@ -99,6 +105,28 @@ function compileAttrValue(op: string, value: string | undefined, insensitive: bo
   return new RegExp(`^${value}$`, flags);
 }
 
+function compileEquation(values: string | undefined): [number, number] {
+  if (values === undefined) return [0, 0];
+
+  // "even"
+  if (/^\s*even\s*$/i.test(values)) return [2, 2];
+
+  // "odd"
+  if (/^\s*odd\s*$/i.test(values)) return [2, 1];
+
+  // "4", "+4" or "-4"
+  const numMatch = values.match(/^\s*((?:\+|-)?\d+)\s*$/);
+  if (numMatch !== null) return [0, parseInt(numMatch[1])];
+
+  // "n", "4n", "+4n", "-4n", "n+1", "4n-1", "+4n-1" (and other variations)
+  const complexMatch = values.match(/^\s*((?:\+|-)?(?:\d+)?)?n\s*((?:\+|-)\s*\d+)?\s*$/i);
+  if (complexMatch === null) return [0, 0];
+
+  const first = complexMatch[1] ?? '1';
+  const second = complexMatch[2]?.replaceAll(' ', '') ?? '0';
+  return [first === '-' ? -1 : parseInt(first), parseInt(second)];
+}
+
 function compileName(value: string): RegExp {
   return new RegExp('(?:^|\\:)' + escapeRegExp(cssUnescape(value)) + '$');
 }
@@ -157,6 +185,8 @@ function compileSelector(selector: string): SelectorList {
       const pseudoClass = pcMatch[1];
       if (pseudoClass === 'not' || pseudoClass === 'is') {
         last.push({type: 'pc', class: pseudoClass, value: compileSelector(pcMatch[2])});
+      } else if (pseudoClass === 'nth-child' || pseudoClass === 'nth-last-child') {
+        last.push({type: 'pc', class: pseudoClass, value: compileEquation(pcMatch[2])});
       }
       continue;
     }
@@ -271,6 +301,24 @@ function matchPseudoClass(simple: PseudoClass, current: ElementNode, tree: Paren
   // ":is"
   else if (pseudoClass === 'is') {
     if (matchList(simple.value, current, tree, scope) === true) return true;
+  }
+
+  // ":nth-*"
+  else if (pseudoClass === 'nth-child' || pseudoClass === 'nth-last-child') {
+    const equation = simple.value;
+    const nodes = current.parentNode?.childNodes.filter(node => node.nodeType === '#element') ?? [];
+
+    // "nth-last-child"
+    if (pseudoClass === 'nth-last-child') nodes.reverse();
+
+    for (let i = 0; i <= nodes.length; i++) {
+      const result = equation[0] * i + equation[1];
+      if (result < 1) continue;
+      const sibling = nodes[result - 1];
+
+      if (sibling === undefined) return false;
+      if (sibling === current) return true;
+    }
   }
 
   return false;

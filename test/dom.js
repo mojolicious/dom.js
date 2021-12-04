@@ -443,6 +443,209 @@ t.test('DOM', t => {
     t.end();
   });
 
+  t.test('More pseudo-classes', t => {
+    const dom = new DOM(
+      `
+      <ul>
+        <li>A</li>
+        <li>B</li>
+        <li>C</li>
+        <li>D</li>
+        <li>E</li>
+        <li>F</li>
+        <li>G</li>
+        <li>H</li>
+      </ul>`,
+      {fragment: true}
+    );
+
+    t.same(
+      dom.find('li:nth-child(even)').map(el => el.text()),
+      ['B', 'D', 'F', 'H']
+    );
+    t.same(
+      dom.find('li:nth-child(   Even )').map(el => el.text()),
+      ['B', 'D', 'F', 'H']
+    );
+
+    t.same(
+      dom.find('li:nth-child(odd)').map(el => el.text()),
+      ['A', 'C', 'E', 'G']
+    );
+    t.same(
+      dom.find('li:nth-child(  ODD  )').map(el => el.text()),
+      ['A', 'C', 'E', 'G']
+    );
+
+    t.same(
+      dom.find('li:nth-last-child(odd)').map(el => el.text()),
+      ['B', 'D', 'F', 'H']
+    );
+    t.same(
+      dom.find('li:nth-last-child(even)').map(el => el.text()),
+      ['A', 'C', 'E', 'G']
+    );
+
+    t.equal(dom.find(':nth-child(odd)')[0].tag, 'ul');
+    t.equal(dom.find(':nth-child(odd)')[1].text(), 'A');
+    t.equal(dom.find(':nth-child(1)')[0].tag, 'ul');
+    t.equal(dom.find(':nth-child(1)')[1].text(), 'A');
+    t.equal(dom.find(':nth-child(  1  )')[1].text(), 'A');
+    t.equal(dom.find(':nth-child(+1)')[1].text(), 'A');
+    t.equal(dom.find(':nth-last-child(odd)')[0].tag, 'ul');
+    t.equal(dom.find(':nth-last-child(odd)')[4].text(), 'H');
+    t.equal(dom.find(':nth-last-child(1)')[0].tag, 'ul');
+    t.equal(dom.find(':nth-last-child(1)')[1].text(), 'H');
+
+    t.same(
+      dom.find('li:nth-child(2n+1)').map(el => el.text()),
+      ['A', 'C', 'E', 'G']
+    );
+    t.same(
+      dom.find('li:nth-child(2n + 1)').map(el => el.text()),
+      ['A', 'C', 'E', 'G']
+    );
+    t.same(
+      dom.find('li:nth-last-child(2n+1)').map(el => el.text()),
+      ['B', 'D', 'F', 'H']
+    );
+    t.same(
+      dom.find('li:nth-child(even)').map(el => el.text()),
+      ['B', 'D', 'F', 'H']
+    );
+    t.same(
+      dom.find('li:nth-last-child( even )').map(el => el.text()),
+      ['A', 'C', 'E', 'G']
+    );
+    t.same(
+      dom.find('li:nth-child(2n+2)').map(el => el.text()),
+      ['B', 'D', 'F', 'H']
+    );
+    t.same(
+      dom.find('li:nth-child( 2N + 2 )').map(el => el.text()),
+      ['B', 'D', 'F', 'H']
+    );
+    t.same(
+      dom.find('li:nth-last-child(2n+2)').map(el => el.text()),
+      ['A', 'C', 'E', 'G']
+    );
+    t.same(
+      dom.find('li:nth-child(4n+1)').map(el => el.text()),
+      ['A', 'E']
+    );
+    t.same(
+      dom.find('li:nth-last-child(4n+1)').map(el => el.text()),
+      ['D', 'H']
+    );
+    t.same(
+      dom.find('li:nth-child(4n+4)').map(el => el.text()),
+      ['D', 'H']
+    );
+    t.same(
+      dom.find('li:nth-last-child(4n+4)').map(el => el.text()),
+      ['A', 'E']
+    );
+    t.same(
+      dom.find('li:nth-child(4n)').map(el => el.text()),
+      ['D', 'H']
+    );
+    t.same(
+      dom.find('li:nth-child( 4n )').map(el => el.text()),
+      ['D', 'H']
+    );
+    t.same(
+      dom.find('li:nth-last-child(4n)').map(el => el.text()),
+      ['A', 'E']
+    );
+    t.same(
+      dom.find('li:nth-child(5n-2)').map(el => el.text()),
+      ['C', 'H']
+    );
+    t.same(
+      dom.find('li:nth-child( 5n - 2 )').map(el => el.text()),
+      ['C', 'H']
+    );
+    t.same(
+      dom.find('li:nth-last-child(5n-2)').map(el => el.text()),
+      ['A', 'F']
+    );
+    t.same(
+      dom.find('li:nth-child(-n+3)').map(el => el.text()),
+      ['A', 'B', 'C']
+    );
+    t.same(
+      dom.find('li:nth-child( -n + 3 )').map(el => el.text()),
+      ['A', 'B', 'C']
+    );
+    t.same(
+      dom.find('li:nth-last-child(-n+3)').map(el => el.text()),
+      ['F', 'G', 'H']
+    );
+    t.same(
+      dom.find('li:nth-child(-1n+3)').map(el => el.text()),
+      ['A', 'B', 'C']
+    );
+    t.same(
+      dom.find('li:nth-last-child(-1n+3)').map(el => el.text()),
+      ['F', 'G', 'H']
+    );
+    t.same(
+      dom.find('li:nth-child(3n)').map(el => el.text()),
+      ['C', 'F']
+    );
+    t.same(
+      dom.find('li:nth-last-child(3n)').map(el => el.text()),
+      ['C', 'F']
+    );
+    t.same(
+      dom.find('li:nth-child(3)').map(el => el.text()),
+      ['C']
+    );
+    t.same(
+      dom.find('li:nth-last-child(+3)').map(el => el.text()),
+      ['F']
+    );
+    t.same(
+      dom.find('li:nth-child(1n+0)').map(el => el.text()),
+      ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+    );
+    t.same(
+      dom.find('li:nth-child(1n-0)').map(el => el.text()),
+      ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+    );
+    t.same(
+      dom.find('li:nth-child(n+0)').map(el => el.text()),
+      ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+    );
+    t.same(
+      dom.find('li:nth-child(n)').map(el => el.text()),
+      ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+    );
+    t.same(
+      dom.find('li:nth-child(n)').map(el => el.text()),
+      ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+    );
+    t.same(
+      dom.find('li:nth-child(n+0)').map(el => el.text()),
+      ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+    );
+    t.same(
+      dom.find('li:nth-child(N+0)').map(el => el.text()),
+      ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+    );
+    t.same(
+      dom.find('li:nth-child(N+0)').map(el => el.text()),
+      ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+    );
+
+    t.equal(dom.find('li:nth-child(0n+0)').length, 0);
+    t.equal(dom.find('li:nth-child(0)').length, 0);
+    t.equal(dom.find('li:nth-child()').length, 0);
+    t.equal(dom.find('li:nth-child(whatever)').length, 0);
+
+    t.end();
+  });
+
   t.test('RSS', t => {
     const rss = `
       <?xml version="1.0" encoding="UTF-8"?>
