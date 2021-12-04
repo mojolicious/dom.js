@@ -80,6 +80,16 @@ export class ElementNode extends ParentNode {
   }
 
   /**
+   * Check if an attribute exists.
+   */
+  hasAttribute(name: string): boolean {
+    for (const attr of this.attrs) {
+      if (attr.name === name) return true;
+    }
+    return false;
+  }
+
+  /**
    * Set attribute value for this node.
    */
   setAttributeValue(name: string, value: string): boolean {

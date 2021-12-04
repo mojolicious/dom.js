@@ -27,7 +27,7 @@ interface PseudoClassNth {
 }
 
 interface PseudoClassPlain {
-  class: 'only-child' | 'only-of-type' | 'root';
+  class: 'checked' | 'only-child' | 'only-of-type' | 'root';
   type: 'pc';
 }
 
@@ -181,8 +181,8 @@ function compilePseudoClass(name: string, args: string): PseudoClass {
     return {type: 'pc', class: 'nth-last-of-type', value: [-1, 1]};
   }
 
-  // ":only-child", ":only-of-type", "root"
-  else if (name === 'only-child' || name === 'only-of-type' || name === 'root') {
+  // ":checked", ":only-child", ":only-of-type", "root"
+  else if (name === 'checked' || name === 'only-child' || name === 'only-of-type' || name === 'root') {
     return {type: 'pc', class: name};
   }
 
@@ -360,6 +360,11 @@ function matchPseudoClass(simple: PseudoClass, current: ElementNode, tree: Paren
   // ":root"
   else if (name === 'root') {
     if (current.parentNode === current.root()) return true;
+  }
+
+  // ":checked"
+  else if (name === 'checked') {
+    if (current.hasAttribute('checked') === true || current.hasAttribute('selected') === true) return true;
   }
 
   // ":text"

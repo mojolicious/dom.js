@@ -472,6 +472,27 @@ t.test('DOM', t => {
     t.equal(dom.find('form:root')[0].tag, 'form');
     t.same(dom.find(':root')[1], null);
 
+    t.equal(dom.find(':checked')[0].attr.name, 'groovy');
+    t.equal(dom.find('option:checked')[0].attr.value, 'e');
+    t.equal(dom.find(':checked')[1].text(), 'E');
+    t.equal(dom.find('*:checked')[1].text(), 'E');
+    t.equal(dom.find(':checked')[2].text(), 'H');
+    t.equal(dom.find(':checked')[3].attr.name, 'I');
+    t.same(dom.find(':checked')[4], null);
+    t.equal(dom.find('option[selected]')[0].attr.value, 'e');
+    t.equal(dom.find('option[selected]')[1].text(), 'H');
+    t.same(dom.find('option[selected]')[2], null);
+    t.equal(dom.find(':checked[value="e"]')[0].text(), 'E');
+    t.equal(dom.find('*:checked[value="e"]')[0].text(), 'E');
+    t.equal(dom.find('option:checked[value="e"]')[0].text(), 'E');
+    t.equal(dom.at('optgroup option:checked[value="e"]').text(), 'E');
+    t.equal(dom.at('select option:checked[value="e"]').text(), 'E');
+    t.equal(dom.at('select :checked[value="e"]').text(), 'E');
+    t.equal(dom.at('optgroup > :checked[value="e"]').text(), 'E');
+    t.equal(dom.at('select *:checked[value="e"]').text(), 'E');
+    t.equal(dom.at('optgroup > *:checked[value="e"]').text(), 'E');
+    t.same(dom.find(':checked[value="e"]')[1], null);
+
     t.end();
   });
 
