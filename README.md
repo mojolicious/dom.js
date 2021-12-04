@@ -93,10 +93,6 @@ All CSS selectors that make sense for a standalone parser are supported.
 | `E[foo^="bar"]`               | an E element whose foo attribute value begins exactly with the string bar                                             |
 | `E[foo$="bar"]`               | an E element whose foo attribute value ends exactly with the string bar                                               |
 | `E[foo*="bar"]`               | an E element whose foo attribute value contains the substring bar                                                     |
-| `E F`                         | an F element descendant of an E element                                                                               |
-| `E > F`                       | an F element child of an E element                                                                                    |
-| `E + F`                       | an F element immediately preceded by an E element                                                                     |
-| `E ~ F`                       | an F element preceded by an E element                                                                                 |
 | `E:nth-child(n [of S]?)`      | an E element, the n-th child of its parent matching S                                                                 |
 | `E:nth-last-child(n [of S]?)` | an E element, the n-th child of its parent matching S, counting from the last one                                     |
 | `E:first-child`               | an E element, first child of its parent                                                                               |
@@ -107,6 +103,10 @@ All CSS selectors that make sense for a standalone parser are supported.
 | `E:first-of-type`             | an E element, first sibling of its type                                                                               |
 | `E:last-of-type`              | an E element, last sibling of its type                                                                                |
 | `E:only-of-type`              | an E element, only sibling of its type                                                                                |
+| `E F`                         | an F element descendant of an E element                                                                               |
+| `E > F`                       | an F element child of an E element                                                                                    |
+| `E + F`                       | an F element immediately preceded by an E element                                                                     |
+| `E ~ F`                       | an F element preceded by an E element                                                                                 |
 
 All supported CSS4 selectors are considered experimental and might change as the spec evolves.
 
