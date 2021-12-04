@@ -26,8 +26,8 @@ interface PseudoClassNth {
   value: [number, number];
 }
 
-interface PseudoClassOnly {
-  class: 'only-child' | 'only-of-type';
+interface PseudoClassPlain {
+  class: 'only-child' | 'only-of-type' | 'root';
   type: 'pc';
 }
 
@@ -37,7 +37,7 @@ interface PseudoClassText {
   value: RegExp;
 }
 
-type PseudoClass = PseudoClassIsNot | PseudoClassNth | PseudoClassOnly | PseudoClassText;
+type PseudoClass = PseudoClassIsNot | PseudoClassNth | PseudoClassPlain | PseudoClassText;
 
 type SimpleSelector = Attribute | Tag | PseudoClass;
 
@@ -181,8 +181,8 @@ function compilePseudoClass(name: string, args: string): PseudoClass {
     return {type: 'pc', class: 'nth-last-of-type', value: [-1, 1]};
   }
 
-  // ":only-child" and ":only-of-type"
-  else if (name === 'only-child' || name === 'only-of-type') {
+  // ":only-child", ":only-of-type", "root"
+  else if (name === 'only-child' || name === 'only-of-type' || name === 'root') {
     return {type: 'pc', class: name};
   }
 
@@ -355,6 +355,11 @@ function matchPseudoClass(simple: PseudoClass, current: ElementNode, tree: Paren
   // ":is"
   else if (name === 'is') {
     if (matchList(simple.value, current, tree, scope) === true) return true;
+  }
+
+  // ":root"
+  else if (name === 'root') {
+    if (current.parentNode === current.root()) return true;
   }
 
   // ":text"

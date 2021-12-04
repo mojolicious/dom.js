@@ -443,6 +443,38 @@ t.test('DOM', t => {
     t.end();
   });
 
+  t.test('Pseudo-classes', t => {
+    const dom = new DOM(
+      `
+      <form action="/foo">
+        <input type="text" name="user" value="test" />
+        <input type="checkbox" checked="checked" name="groovy">
+        <select name="a">
+            <option value="b">b</option>
+            <optgroup label="c">
+                <option value="d">d</option>
+                <option selected="selected" value="e">E</option>
+                <option value="f">f</option>
+            </optgroup>
+            <option value="g">g</option>
+            <option selected value="h">H</option>
+        </select>
+        <input type="submit" value="Ok!" />
+        <input type="checkbox" checked name="I">
+        <p id="content">test 123</p>
+        <p id="no_content"><? test ?><!-- 123 --></p>
+      </form>`,
+      {fragment: true}
+    );
+
+    t.equal(dom.find(':root')[0].tag, 'form');
+    t.equal(dom.find('*:root')[0].tag, 'form');
+    t.equal(dom.find('form:root')[0].tag, 'form');
+    t.same(dom.find(':root')[1], null);
+
+    t.end();
+  });
+
   t.test('More pseudo-classes', t => {
     const dom = new DOM(
       `
