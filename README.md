@@ -95,6 +95,7 @@ All CSS selectors that make sense for a standalone parser are supported.
 | `E[foo*="bar"]`               | an E element whose foo attribute value contains the substring bar                                                     |
 | `E:checked`                   | a user interface element E that is checked/selected (for instance a radio-button or checkbox)                         |
 | `E:root`                      | an E element, root of the document                                                                                    |
+| `E:empty`                     | an E element that has no children (neither elements nor text) except perhaps white space                              |
 | `E:nth-child(n [of S]?)`      | an E element, the n-th child of its parent matching S                                                                 |
 | `E:nth-last-child(n [of S]?)` | an E element, the n-th child of its parent matching S, counting from the last one                                     |
 | `E:first-child`               | an E element, first child of its parent                                                                               |

@@ -493,6 +493,12 @@ t.test('DOM', t => {
     t.equal(dom.at('optgroup > *:checked[value="e"]').text(), 'E');
     t.same(dom.find(':checked[value="e"]')[1], null);
 
+    t.equal(dom.find(':empty')[0].attr.name, 'user');
+    t.equal(dom.find('input:empty')[0].attr.name, 'user');
+    t.equal(dom.at(':empty[type^="ch"]').attr.name, 'groovy');
+    t.equal(dom.at('p').attr.id, 'content');
+    t.equal(dom.at('p:empty').attr.id, 'no_content');
+
     t.end();
   });
 
