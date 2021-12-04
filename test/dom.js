@@ -989,11 +989,12 @@ t.test('DOM', t => {
     t.equal(dom.at(':text(eight)').text({recursive: true}), 'Five SixSevenEight');
     t.equal(dom.at(':text(/Ei.ht/)').text({recursive: true}), 'Five SixSevenEight');
     t.equal(dom.at(':text(/ei.ht/i)').text({recursive: true}), 'Five SixSevenEight');
+    t.equal(dom.at(':text(/zero/i)').text(), 'Zero');
+    t.equal(dom.at(':text(/z\\w+/i)').text(), 'Zero');
     t.same(dom.at(':text(v) :text(x)'), null);
     t.same(dom.at('div:text(x)'), null);
     t.same(dom.at(':text(three)'), null);
     t.same(dom.at(':text(/three/)'), null);
-    t.same(dom.at(':text(/zero/)'), null);
     t.same(dom.at(':text(/zero/)'), null);
 
     t.end();
