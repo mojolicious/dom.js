@@ -467,7 +467,6 @@ t.test('DOM', t => {
       dom.find('li:nth-child(   Even )').map(el => el.text()),
       ['B', 'D', 'F', 'H']
     );
-
     t.same(
       dom.find('li:nth-child(odd)').map(el => el.text()),
       ['A', 'C', 'E', 'G']
@@ -476,7 +475,6 @@ t.test('DOM', t => {
       dom.find('li:nth-child(  ODD  )').map(el => el.text()),
       ['A', 'C', 'E', 'G']
     );
-
     t.same(
       dom.find('li:nth-last-child(odd)').map(el => el.text()),
       ['B', 'D', 'F', 'H']
@@ -607,41 +605,214 @@ t.test('DOM', t => {
     );
     t.same(
       dom.find('li:nth-child(1n+0)').map(el => el.text()),
-      ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+      ['A', 'B', 'C', 'D', 'E', 'F', 'G']
     );
     t.same(
       dom.find('li:nth-child(1n-0)').map(el => el.text()),
-      ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+      ['A', 'B', 'C', 'D', 'E', 'F', 'G']
     );
     t.same(
       dom.find('li:nth-child(n+0)').map(el => el.text()),
-      ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+      ['A', 'B', 'C', 'D', 'E', 'F', 'G']
     );
     t.same(
       dom.find('li:nth-child(n)').map(el => el.text()),
-      ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+      ['A', 'B', 'C', 'D', 'E', 'F', 'G']
     );
     t.same(
       dom.find('li:nth-child(n)').map(el => el.text()),
-      ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+      ['A', 'B', 'C', 'D', 'E', 'F', 'G']
     );
     t.same(
       dom.find('li:nth-child(n+0)').map(el => el.text()),
-      ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+      ['A', 'B', 'C', 'D', 'E', 'F', 'G']
     );
     t.same(
       dom.find('li:nth-child(N+0)').map(el => el.text()),
-      ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+      ['A', 'B', 'C', 'D', 'E', 'F', 'G']
     );
     t.same(
       dom.find('li:nth-child(N+0)').map(el => el.text()),
-      ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+      ['A', 'B', 'C', 'D', 'E', 'F', 'G']
     );
 
     t.equal(dom.find('li:nth-child(0n+0)').length, 0);
     t.equal(dom.find('li:nth-child(0)').length, 0);
     t.equal(dom.find('li:nth-child()').length, 0);
     t.equal(dom.find('li:nth-child(whatever)').length, 0);
+
+    t.end();
+  });
+
+  t.test('Even more pseudo-classes', t => {
+    const dom = new DOM(
+      `
+      <ul>
+        <li>A</li>
+        <p>B</p>
+        <li class="test ♥">C</li>
+        <p>D</p>
+        <li>E</li>
+        <li>F</li>
+        <p>G</p>
+        <li>H</li>
+        <li>I</li>
+      </ul>
+      <div>
+          <div class="☃">J</div>
+      </div>
+      <div>
+          <a href="http://mojolicious.org">Mojo!</a>
+          <div class="☃">K</div>
+          <a href="http://mojolicious.org">Mojolicious!</a>
+      </div>`,
+      {fragment: true}
+    );
+
+    t.same(
+      dom.find('li:nth-last-child(-n+2)').map(el => el.text()),
+      ['H', 'I']
+    );
+    t.same(
+      dom.find('ul :nth-child(odd)').map(el => el.text()),
+      ['A', 'C', 'E', 'G', 'I']
+    );
+    t.same(
+      dom.find('li:first-child').map(el => el.text()),
+      ['A']
+    );
+    t.same(
+      dom.find('p:first-of-type').map(el => el.text()),
+      ['B']
+    );
+    t.same(
+      dom.find('p:last-of-type').map(el => el.text()),
+      ['G']
+    );
+    t.same(
+      dom.find('li:last-child').map(el => el.text()),
+      ['I']
+    );
+    t.same(
+      dom.find('li:nth-of-type(odd)').map(el => el.text()),
+      ['A', 'E', 'H']
+    );
+    t.same(
+      dom.find('ul li:not(:first-child, :last-child)').map(el => el.text()),
+      ['C', 'E', 'F', 'H']
+    );
+    t.same(
+      dom.find('ul li:is(:first-child, :last-child)').map(el => el.text()),
+      ['A', 'I']
+    );
+    t.same(
+      dom.find('li:nth-last-of-type( odd )').map(el => el.text()),
+      ['C', 'F', 'I']
+    );
+    t.same(
+      dom.find('p:nth-of-type(odd)').map(el => el.text()),
+      ['B', 'G']
+    );
+    t.same(
+      dom.find('p:nth-last-of-type(odd)').map(el => el.text()),
+      ['B', 'G']
+    );
+    t.same(
+      dom.find('ul :nth-child(1)').map(el => el.text()),
+      ['A']
+    );
+    t.same(
+      dom.find('ul :first-child').map(el => el.text()),
+      ['A']
+    );
+    t.same(
+      dom.find('p:nth-of-type(1)').map(el => el.text()),
+      ['B']
+    );
+    t.same(
+      dom.find('p:first-of-type').map(el => el.text()),
+      ['B']
+    );
+    t.same(
+      dom.find('li:nth-of-type(1)').map(el => el.text()),
+      ['A']
+    );
+    t.same(
+      dom.find('li:first-of-type').map(el => el.text()),
+      ['A']
+    );
+    t.same(
+      dom.find('ul :nth-last-child(-n+1)').map(el => el.text()),
+      ['I']
+    );
+    t.same(
+      dom.find('ul :last-child').map(el => el.text()),
+      ['I']
+    );
+    t.same(
+      dom.find('p:nth-last-of-type(-n+1)').map(el => el.text()),
+      ['G']
+    );
+    t.same(
+      dom.find('li:nth-last-of-type(-n+1)').map(el => el.text()),
+      ['I']
+    );
+    t.same(
+      dom.find('li:last-of-type').map(el => el.text()),
+      ['I']
+    );
+    t.same(
+      dom.find('ul :nth-child(-n+3):not(li)').map(el => el.text()),
+      ['B']
+    );
+    t.same(
+      dom.find('ul :nth-child(-n+3):not(:first-child)').map(el => el.text()),
+      ['B', 'C']
+    );
+    t.same(
+      dom.find('ul :nth-child(-n+3):not(.♥)').map(el => el.text()),
+      ['A', 'B']
+    );
+    t.same(
+      dom.find('ul :nth-child(-n+3):not([class$="♥"])').map(el => el.text()),
+      ['A', 'B']
+    );
+    t.same(
+      dom.find('ul :nth-child(-n+3):not(li[class$="♥"])').map(el => el.text()),
+      ['A', 'B']
+    );
+    t.same(
+      dom.find('ul :nth-child(-n+3):not([class$="♥"][class^="test"])').map(el => el.text()),
+      ['A', 'B']
+    );
+    t.same(
+      dom.find('ul :nth-child(-n+3):not(*[class$="♥"])').map(el => el.text()),
+      ['A', 'B']
+    );
+    t.same(
+      dom.find('ul :nth-child(-n+3):not(:nth-child(-n+2))').map(el => el.text()),
+      ['C']
+    );
+    t.same(
+      dom.find('ul :nth-child(-n+3):not(:nth-child(1)):not(:nth-child(2))').map(el => el.text()),
+      ['C']
+    );
+    t.same(
+      dom.find(':only-child').map(el => el.text()),
+      ['J']
+    );
+    t.same(
+      dom.find('div :only-of-type').map(el => el.text()),
+      ['J', 'K']
+    );
+    t.same(
+      dom.find('div:only-child').map(el => el.text()),
+      ['J']
+    );
+    t.same(
+      dom.find('div div:only-of-type').map(el => el.text()),
+      ['J', 'K']
+    );
 
     t.end();
   });

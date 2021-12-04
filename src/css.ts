@@ -21,12 +21,17 @@ interface PseudoClassIsNot {
 }
 
 interface PseudoClassNth {
-  class: 'nth-child' | 'nth-last-child';
+  class: 'nth-child' | 'nth-last-child' | 'nth-of-type' | 'nth-last-of-type';
   type: 'pc';
   value: [number, number];
 }
 
-type PseudoClass = PseudoClassIsNot | PseudoClassNth;
+interface PseudoClassOnly {
+  class: 'only-child' | 'only-of-type';
+  type: 'pc';
+}
+
+type PseudoClass = PseudoClassIsNot | PseudoClassNth | PseudoClassOnly;
 
 type SimpleSelector = Attribute | Tag | PseudoClass;
 
@@ -183,10 +188,50 @@ function compileSelector(selector: string): SelectorList {
     const pcMatch = stickyMatch(sticky, PC_RE);
     if (pcMatch !== null) {
       const pseudoClass = pcMatch[1];
+
+      // ":is" and ":not" (contains more selectors)
       if (pseudoClass === 'not' || pseudoClass === 'is') {
         last.push({type: 'pc', class: pseudoClass, value: compileSelector(pcMatch[2])});
-      } else if (pseudoClass === 'nth-child' || pseudoClass === 'nth-last-child') {
+      }
+
+      // ":nth-*" (with An+B notation)
+      else if (
+        pseudoClass === 'nth-child' ||
+        pseudoClass === 'nth-last-child' ||
+        pseudoClass === 'nth-of-type' ||
+        pseudoClass === 'nth-last-of-type'
+      ) {
         last.push({type: 'pc', class: pseudoClass, value: compileEquation(pcMatch[2])});
+      }
+
+      // ":first-child"
+      else if (pseudoClass === 'first-child') {
+        last.push({type: 'pc', class: 'nth-child', value: [0, 1]});
+      }
+
+      // ":first-of-type"
+      else if (pseudoClass === 'first-of-type') {
+        last.push({type: 'pc', class: 'nth-of-type', value: [0, 1]});
+      }
+
+      // ":last-child"
+      else if (pseudoClass === 'last-child') {
+        last.push({type: 'pc', class: 'nth-last-child', value: [-1, 1]});
+      }
+
+      // ":last-of-type"
+      else if (pseudoClass === 'last-of-type') {
+        last.push({type: 'pc', class: 'nth-last-of-type', value: [-1, 1]});
+      }
+
+      // ":only-child" and ":only-of-type"
+      else if (pseudoClass === 'only-child' || pseudoClass === 'only-of-type') {
+        last.push({type: 'pc', class: pseudoClass});
+      }
+
+      // Unknown
+      else {
+        last.push({type: 'pc', class: 'nth-child', value: [0, 0]});
       }
       continue;
     }
@@ -303,19 +348,35 @@ function matchPseudoClass(simple: PseudoClass, current: ElementNode, tree: Paren
     if (matchList(simple.value, current, tree, scope) === true) return true;
   }
 
+  // ":only-child"
+  else if (pseudoClass === 'only-child' || pseudoClass === 'only-of-type') {
+    let nodes = current.parentNode?.childNodes.filter(node => node.nodeType === '#element') ?? [];
+    if (pseudoClass === 'only-of-type') nodes = nodes.filter(el => (el as ElementNode).tagName === current.tagName);
+    if (nodes.length === 1) return true;
+  }
+
   // ":nth-*"
-  else if (pseudoClass === 'nth-child' || pseudoClass === 'nth-last-child') {
+  else if (
+    pseudoClass === 'nth-child' ||
+    pseudoClass === 'nth-last-child' ||
+    pseudoClass === 'nth-of-type' ||
+    pseudoClass === 'nth-last-of-type'
+  ) {
     const equation = simple.value;
-    const nodes = current.parentNode?.childNodes.filter(node => node.nodeType === '#element') ?? [];
+    let nodes = current.parentNode?.childNodes.filter(node => node.nodeType === '#element') ?? [];
+
+    // "*-of-type"
+    if (pseudoClass === 'nth-of-type' || pseudoClass === 'nth-last-of-type') {
+      nodes = nodes.filter(el => (el as ElementNode).tagName === current.tagName);
+    }
 
     // "nth-last-child"
-    if (pseudoClass === 'nth-last-child') nodes.reverse();
+    if (pseudoClass === 'nth-last-child' || pseudoClass === 'nth-last-of-type') nodes.reverse();
 
-    for (let i = 0; i <= nodes.length; i++) {
+    for (let i = 0; i < nodes.length; i++) {
       const result = equation[0] * i + equation[1];
       if (result < 1) continue;
       const sibling = nodes[result - 1];
-
       if (sibling === undefined) return false;
       if (sibling === current) return true;
     }

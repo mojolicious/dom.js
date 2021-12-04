@@ -75,7 +75,7 @@ While nodes such as `#document` and `#fragment` can be represented by `DOM` obje
 
 #### CSS Selectors
 
-CSS selector support is still fairly incomplete, but will increase quickly.
+All CSS selectors that make sense for a standalone parser are supported.
 
 | Pattern                       | Represents                                                                                                            |
 | ---                           | ---                                                                                                                   |
@@ -99,6 +99,14 @@ CSS selector support is still fairly incomplete, but will increase quickly.
 | `E ~ F`                       | an F element preceded by an E element                                                                                 |
 | `E:nth-child(n [of S]?)`      | an E element, the n-th child of its parent matching S                                                                 |
 | `E:nth-last-child(n [of S]?)` | an E element, the n-th child of its parent matching S, counting from the last one                                     |
+| `E:first-child`               | an E element, first child of its parent                                                                               |
+| `E:last-child`                | an E element, last child of its parent                                                                                |
+| `E:only-child`                | an E element, only child of its parent                                                                                |
+| `E:nth-of-type(n)`            | an E element, the n-th sibling of its type                                                                            |
+| `E:nth-last-of-type(n)`       | an E element, the n-th sibling of its type, counting from the last one                                                |
+| `E:first-of-type`             | an E element, first sibling of its type                                                                               |
+| `E:last-of-type`              | an E element, last sibling of its type                                                                                |
+| `E:only-of-type`              | an E element, only sibling of its type                                                                                |
 
 All supported CSS4 selectors are considered experimental and might change as the spec evolves.
 
