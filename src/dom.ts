@@ -40,8 +40,11 @@ export default class DOM {
   /**
    * Ancestor elements of this element.
    */
-  ancestors(): DOM[] {
-    return this.tree.ancestors().map(node => this._newDOM(node));
+  ancestors(selector?: string): DOM[] {
+    return this._filter(
+      selector,
+      this.tree.ancestors().map(node => this._newDOM(node))
+    );
   }
 
   /**
@@ -96,8 +99,11 @@ export default class DOM {
   /**
    * Child elements of this element.
    */
-  children(): DOM[] {
-    return this.tree.childNodes.filter(node => node.nodeType === '#element').map(node => this._newDOM(node as Parent));
+  children(selector?: string): DOM[] {
+    return this._filter(
+      selector,
+      this.tree.childNodes.filter(node => node.nodeType === '#element').map(node => this._newDOM(node as Parent))
+    );
   }
 
   /**
@@ -117,8 +123,11 @@ export default class DOM {
   /**
    * Sibling elements after this element.
    */
-  following(): DOM[] {
-    return this.tree.siblings().following.map(node => this._newDOM(node));
+  following(selector?: string): DOM[] {
+    return this._filter(
+      selector,
+      this.tree.siblings().following.map(node => this._newDOM(node))
+    );
   }
 
   /**
@@ -150,8 +159,11 @@ export default class DOM {
   /**
    * Sibling elements before this element.
    */
-  preceding(): DOM[] {
-    return this.tree.siblings().preceding.map(node => this._newDOM(node));
+  preceding(selector?: string): DOM[] {
+    return this._filter(
+      selector,
+      this.tree.siblings().preceding.map(node => this._newDOM(node))
+    );
   }
 
   /**
@@ -308,6 +320,10 @@ export default class DOM {
   _extractNodes(tree: Parent): Child[] {
     const type = tree.nodeType;
     return type === '#document' || type === '#fragment' ? tree.childNodes : [tree];
+  }
+
+  _filter(selector: string | undefined, elements: DOM[]): DOM[] {
+    return selector === undefined ? elements : elements.filter(el => el.matches(selector));
   }
 
   _newDOM(node: Parent): DOM {

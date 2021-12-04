@@ -131,10 +131,10 @@ Navigate the DOM tree with and without CSS selectors.
 
 ```js
 // Find one element matching the CSS selector and return it as `DOM` objects
-const div = dom.at('div.greeting');
+const div = dom.at('div > p');
 
 // Find all elements marching the CSS selector and teturn them as `DOM` objects
-const divs = dom.find('div.greeting');
+const divs = dom.find('div > p');
 
 // Get root element as `DOM` object (document or fragment node)
 const root = dom.root();
@@ -144,15 +144,19 @@ const parent = dom.parent();
 
 // Get all ancestor elements as `DOM` objects
 const ancestors = dom.ancestors();
+const ancestors = dom.ancestors('div > p');
 
 // Get all child elements as `DOM` objects
 const children = dom.children();
+const children = dom.children('div > p');
 
 // Get all sibling elements before this element as `DOM` objects
 const preceding = dom.preceding();
+const preceding = dom.preceding('div > p');
 
 // Get all sibling elements after this element as `DOM` objects
 const following = dom.following();
+const following = dom.following('div > p');
 
 // Get sibling element before this element as `DOM` objects
 const previous = dom.previous();
@@ -165,10 +169,11 @@ Extract information and manipulate elements.
 
 ```js
 // Check if element matches the given CSS selector
-const isDiv = dom.matches('div');
+const isDiv = dom.matches('div > p');
 
 // Extract text content from element
 const greeting = dom.text();
+const greeting = dom.text({recursive: true});
 
 // Get element tag
 const tag = dom.tag;

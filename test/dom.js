@@ -902,6 +902,7 @@ t.test('DOM', t => {
         </channel>
       </rss>`;
     const dom = new DOM(rss, {xml: true});
+
     t.same(
       dom.find('*').map(el => el.tag),
       [
@@ -921,6 +922,7 @@ t.test('DOM', t => {
       ]
     );
     t.equal(dom.find('rss')[0].attr.version, '2.0');
+
     t.same(
       dom
         .at('title')
@@ -928,6 +930,35 @@ t.test('DOM', t => {
         .map(el => el.tag),
       ['channel', 'rss']
     );
+    t.same(
+      dom
+        .at('title')
+        .ancestors('channel')
+        .map(el => el.tag),
+      ['channel']
+    );
+    t.same(
+      dom
+        .at('item')
+        .preceding('generator, link')
+        .map(el => el.tag),
+      ['link', 'generator']
+    );
+    t.same(
+      dom
+        .at('title')
+        .following('generator, link')
+        .map(el => el.tag),
+      ['link', 'generator']
+    );
+    t.same(
+      dom
+        .at('channel')
+        .children('description, link')
+        .map(el => el.tag),
+      ['link', 'description']
+    );
+
     t.equal(dom.at('extension').attr['foo:id'], 'works');
     t.match(dom.at('#works').text(), /\[awesome\]\]/);
     t.match(dom.at('[id="works"]').text(), /\[awesome\]\]/);
