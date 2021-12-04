@@ -143,6 +143,14 @@ function compileName(value: string): RegExp {
 }
 
 function compilePseudoClass(name: string, args: string): PseudoClass {
+  // ":text"
+  if (name === 'text') {
+    const textMatch = args.match(/^\/(.+)\/(i)?$/);
+    const regex =
+      textMatch === null ? new RegExp(escapeRegExp(args), 'i') : new RegExp(textMatch[1], textMatch[2] ?? '');
+    return {type: 'pc', class: 'text', value: regex};
+  }
+
   // ":is" and ":not" (contains more selectors)
   if (name === 'not' || name === 'is') {
     return {type: 'pc', class: name, value: compileSelector(args)};
@@ -337,42 +345,45 @@ function matchList(group: SelectorList, current: ElementNode, tree: Parent, scop
 }
 
 function matchPseudoClass(simple: PseudoClass, current: ElementNode, tree: Parent, scope: Parent): boolean {
-  const pseudoClass = simple.class;
+  const name = simple.class;
 
   // ":not"
-  if (pseudoClass === 'not') {
+  if (name === 'not') {
     if (matchList(simple.value, current, tree, scope) === false) return true;
   }
 
   // ":is"
-  else if (pseudoClass === 'is') {
+  else if (name === 'is') {
     if (matchList(simple.value, current, tree, scope) === true) return true;
   }
 
+  // ":text"
+  else if (name === 'text') {
+    const regex = simple.value;
+    for (const node of current.childNodes) {
+      if (node.nodeType === '#text' && regex.test(node.value) === true) return true;
+    }
+  }
+
   // ":only-child"
-  else if (pseudoClass === 'only-child' || pseudoClass === 'only-of-type') {
+  else if (name === 'only-child' || name === 'only-of-type') {
     let nodes = current.parentNode?.childNodes.filter(node => node.nodeType === '#element') ?? [];
-    if (pseudoClass === 'only-of-type') nodes = nodes.filter(el => (el as ElementNode).tagName === current.tagName);
+    if (name === 'only-of-type') nodes = nodes.filter(el => (el as ElementNode).tagName === current.tagName);
     if (nodes.length === 1) return true;
   }
 
   // ":nth-*"
-  else if (
-    pseudoClass === 'nth-child' ||
-    pseudoClass === 'nth-last-child' ||
-    pseudoClass === 'nth-of-type' ||
-    pseudoClass === 'nth-last-of-type'
-  ) {
+  else if (name === 'nth-child' || name === 'nth-last-child' || name === 'nth-of-type' || name === 'nth-last-of-type') {
     const equation = simple.value;
     let nodes = current.parentNode?.childNodes.filter(node => node.nodeType === '#element') ?? [];
 
     // "*-of-type"
-    if (pseudoClass === 'nth-of-type' || pseudoClass === 'nth-last-of-type') {
+    if (name === 'nth-of-type' || name === 'nth-last-of-type') {
       nodes = nodes.filter(el => (el as ElementNode).tagName === current.tagName);
     }
 
     // "nth-last-child"
-    if (pseudoClass === 'nth-last-child' || pseudoClass === 'nth-last-of-type') nodes.reverse();
+    if (name === 'nth-last-child' || name === 'nth-last-of-type') nodes.reverse();
 
     for (let i = 0; i < nodes.length; i++) {
       const result = equation[0] * i + equation[1];

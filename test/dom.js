@@ -905,5 +905,40 @@ t.test('DOM', t => {
     t.end();
   });
 
+  t.test('Text matching', t => {
+    const dom = new DOM(
+      `
+      <p>Zero</p>
+      <div>
+        <p>One&lt;Two&gt;</p>
+        <div>Two<!-- Three -->Four</div>
+        <p>Five Six<a href="#">Seven</a>Eight</p>
+      </div>`,
+      {fragment: true}
+    );
+
+    t.equal(dom.at(':text(ero)').text(), 'Zero');
+    t.equal(dom.at(':text(Zero)').text(), 'Zero');
+    t.equal(dom.at('p:text(Zero)').text(), 'Zero');
+    t.same(dom.at('div:text(Zero)'), null);
+    t.equal(dom.at('p:text(w)').text(), 'One<Two>');
+    t.equal(dom.at(':text(<Two>)').text(), 'One<Two>');
+    t.equal(dom.at(':text(Sev)').text(), 'Seven');
+    t.equal(dom.at(':text(/^Seven$/)').text(), 'Seven');
+    t.equal(dom.at('p a:text(even)').text(), 'Seven');
+    t.equal(dom.at(':text(v) :text(e)').text(), 'Seven');
+    t.equal(dom.at(':text(eight)').text({recursive: true}), 'Five SixSevenEight');
+    t.equal(dom.at(':text(/Ei.ht/)').text({recursive: true}), 'Five SixSevenEight');
+    t.equal(dom.at(':text(/ei.ht/i)').text({recursive: true}), 'Five SixSevenEight');
+    t.same(dom.at(':text(v) :text(x)'), null);
+    t.same(dom.at('div:text(x)'), null);
+    t.same(dom.at(':text(three)'), null);
+    t.same(dom.at(':text(/three/)'), null);
+    t.same(dom.at(':text(/zero/)'), null);
+    t.same(dom.at(':text(/zero/)'), null);
+
+    t.end();
+  });
+
   t.end();
 });

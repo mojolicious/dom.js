@@ -103,6 +103,8 @@ All CSS selectors that make sense for a standalone parser are supported.
 | `E:first-of-type`             | an E element, first sibling of its type                                                                               |
 | `E:last-of-type`              | an E element, last sibling of its type                                                                                |
 | `E:only-of-type`              | an E element, only sibling of its type                                                                                |
+| `E:text(string)`              | an E element containing text content that substring matches the given string case-insensitively                       |
+| `E:text(/pattern/i)`          | an E element containing text content that regex matches the given pattern                                             |
 | `E F`                         | an F element descendant of an E element                                                                               |
 | `E > F`                       | an F element child of an E element                                                                                    |
 | `E + F`                       | an F element immediately preceded by an E element                                                                     |
