@@ -198,7 +198,11 @@ const names = Object.keys(dom.attr);
 const content = dom.content();
 
 // Get form value
-const formValue = dom.at('form > input').val();
+const formValue = dom.at('input').val();
+const formValue = dom.at('option').val();
+const formValue = dom.at('select').val();
+const formValue = dom.at('textarea').val();
+const formValue = dom.at('button').val();
 
 // Remove element and its children
 dom.remove();
