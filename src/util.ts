@@ -28,11 +28,7 @@ export class SafeString {
 }
 
 export function cssUnescape(value: string): string {
-  // Remove escaped newlines
-  value = value.replaceAll('\\n', '');
-
-  // Unescape Unicode characters
-  return value.replace(/\\([0-9a-fA-F]{1,6})\s?/g, cssUnescapeReplace);
+  return value.replaceAll('\\n', '').replace(/\\([0-9a-fA-F]{1,6})\s?/g, cssUnescapeReplace);
 }
 
 function cssUnescapeReplace(value: string): string {
