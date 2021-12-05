@@ -21,6 +21,7 @@ console.log(dom.find('p').map(el => el.text()).join('\n'));
 console.log(dom.find('[id]').map(el => el.attr.id).join('\n'));
 
 // Modify
+dom.at('div p').append('<p id="c">456</p>');
 dom.find(':not(p)').forEach(el => el.strip());
 
 // Render
