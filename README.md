@@ -197,6 +197,9 @@ const names = Object.keys(dom.attr);
 // Get element's rendered content
 const content = dom.content();
 
+// Get form value
+const formValue = dom.at('form > input').val();
+
 // Remove element and its children
 dom.remove();
 

@@ -6,6 +6,8 @@ export * from './util.js';
 
 type AttributeProxy = Record<string, string | null>;
 
+type FormValue = string | string[] | null | FormValue[];
+
 /**
  * HTML/XML DOM API class.
  */
@@ -278,6 +280,34 @@ export default class DOM {
    */
   toString(options = {xml: this._xml}): string {
     return this.tree.toString(options);
+  }
+
+  /**
+   * Extract value from form element (such as `<button>`, `<input>`, `<option>`, `<select>` and `<textarea>`), or
+   * return `null` if this element has no value. In the case of `<select>` with `multiple` attribute, find `<option>`
+   * elements with `selected` attribute and return an array with all values, or `null` if none could be found.
+   */
+  val(): FormValue {
+    const tag = this.tag;
+    const attr = this.attr;
+
+    // "option"
+    if (tag === 'option') return attr.value ?? this.text();
+
+    // "input" ("type=checkbox" and "type=radio")
+    if (tag === 'input') {
+      const type = attr.type;
+      if (type === 'radio' || type === 'checkbox') return attr.value ?? 'on';
+    }
+
+    // "textarea", "input" or "button"
+    if (tag !== 'select') return tag === 'textarea' ? this.text() : attr.value;
+
+    // "select"
+    const values = this.find('option:checked:not([disabled])')
+      .filter(el => el.ancestors('optgroup[disabled]').length === 0)
+      .map(el => el.val());
+    return attr.multiple !== null ? (values.length > 0 ? values : null) : values[values.length - 1];
   }
 
   _addChild(content: string, before: boolean): this {

@@ -1031,5 +1031,72 @@ t.test('DOM', t => {
     t.end();
   });
 
+  t.test('Form values', t => {
+    const dom = new DOM(
+      `
+      <form action="/foo">
+        <p>Test</p>
+        <input type="text" name="a" value="A" />
+        <input type="checkbox" name="q">
+        <input type="checkbox" checked name="b" value="B">
+        <input type="radio" name="r">
+        <input type="radio" checked name="c" value="C">
+        <input name="s">
+        <input type="checkbox" name="t" value="">
+        <input type=text name="u">
+        <select multiple name="f">
+          <option value="F">G</option>
+          <optgroup>
+            <option>H</option>
+            <option selected>I</option>
+            <option selected disabled>V</option>
+          </optgroup>
+          <option value="J" selected>K</option>
+          <optgroup disabled>
+            <option selected>I2</option>
+          </optgroup>
+        </select>
+        <select name="n"><option>N</option></select>
+        <select multiple name="q"><option>Q</option></select>
+        <select name="y" disabled>
+          <option selected>Y</option>
+        </select>
+        <select name="d">
+          <option selected>R</option>
+          <option selected>D</option>
+        </select>
+        <textarea name="m">M</textarea>
+        <button name="o" value="O">No!</button>
+        <input type="submit" name="p" value="P" />
+      </form>`,
+      {fragment: true}
+    );
+
+    t.same(dom.at('p').val(), null);
+    t.equal(dom.at('input').val(), 'A');
+    t.equal(dom.at('input:checked').val(), 'B');
+    t.equal(dom.at('input:checked[type=radio]').val(), 'C');
+    t.same(dom.at('select').val(), ['I', 'J']);
+    t.equal(dom.at('select option').val(), 'F');
+    t.equal(dom.at('select optgroup option:not([selected])').val(), 'H');
+    t.equal(dom.find('select')[1].at('option').val(), 'N');
+    t.same(dom.find('select')[1].val(), null);
+    t.same(dom.find('select')[2].val(), null);
+    t.equal(dom.find('select')[2].at('option').val(), 'Q');
+    t.equal(dom.at('select[disabled]').val(), 'Y');
+    t.equal(dom.find('select')[4].val(), 'D');
+    t.equal(dom.find('select')[4].at('option').val(), 'R');
+    t.equal(dom.at('textarea').val(), 'M');
+    t.equal(dom.at('button').val(), 'O');
+    t.equal(dom.at('form').find('input')[8].val(), 'P');
+    t.equal(dom.at('input[name=q]').val(), 'on');
+    t.equal(dom.at('input[name=r]').val(), 'on');
+    t.same(dom.at('input[name=s]').val(), null);
+    t.equal(dom.at('input[name=t]').val(), '');
+    t.same(dom.at('input[name=u]').val(), null);
+
+    t.end();
+  });
+
   t.end();
 });
