@@ -1031,6 +1031,74 @@ t.test('DOM', t => {
     t.end();
   });
 
+  t.test('Unicode and escaped selectors', t => {
+    const dom = new DOM('<html><div id="☃x">Snowman</div><div class="x ♥">Heart</div></html>');
+
+    t.equal(dom.at('#\\n\\002603x').text(), 'Snowman');
+    t.equal(dom.at('#\\2603 x').text(), 'Snowman');
+    t.equal(dom.at('#\\n\\2603 x').text(), 'Snowman');
+    t.equal(dom.at('[id="\\n\\2603 x"]').text(), 'Snowman');
+    t.equal(dom.at('[id="\\n\\002603x"]').text(), 'Snowman');
+    t.equal(dom.at('[id="\\2603 x"]').text(), 'Snowman');
+    t.equal(dom.at('html #\\n\\002603x').text(), 'Snowman');
+    t.equal(dom.at('html #\\2603 x').text(), 'Snowman');
+    t.equal(dom.at('html #\\n\\2603 x').text(), 'Snowman');
+    t.equal(dom.at('html [id="\\n\\2603 x"]').text(), 'Snowman');
+    t.equal(dom.at('html [id="\\n\\002603x"]').text(), 'Snowman');
+    t.equal(dom.at('html [id="\\2603 x"]').text(), 'Snowman');
+    t.equal(dom.at('#☃x').text(), 'Snowman');
+    t.equal(dom.at('div#☃x').text(), 'Snowman');
+    t.equal(dom.at('html div#☃x').text(), 'Snowman');
+    t.equal(dom.at('[id^="☃"]').text(), 'Snowman');
+    t.equal(dom.at('div[id^="☃"]').text(), 'Snowman');
+    t.equal(dom.at('html div[id^="☃"]').text(), 'Snowman');
+    t.equal(dom.at('html > body > div[id^="☃"]').text(), 'Snowman');
+    t.equal(dom.at('[id^=☃]').text(), 'Snowman');
+    t.equal(dom.at('div[id^=☃]').text(), 'Snowman');
+    t.equal(dom.at('html div[id^=☃]').text(), 'Snowman');
+    t.equal(dom.at('html > body > div[id^=☃]').text(), 'Snowman');
+    t.equal(dom.at('.\\n\\002665').text(), 'Heart');
+    t.equal(dom.at('.\\2665').text(), 'Heart');
+    t.equal(dom.at('html .\\n\\002665').text(), 'Heart');
+    t.equal(dom.at('html .\\2665').text(), 'Heart');
+    t.equal(dom.at('html [class$="\\n\\002665"]').text(), 'Heart');
+    t.equal(dom.at('html [class$="\\2665"]').text(), 'Heart');
+    t.equal(dom.at('[class$="\\n\\002665"]').text(), 'Heart');
+    t.equal(dom.at('[class$="\\2665"]').text(), 'Heart');
+    t.equal(dom.at('.x').text(), 'Heart');
+    t.equal(dom.at('html .x').text(), 'Heart');
+    t.equal(dom.at('.♥').text(), 'Heart');
+    t.equal(dom.at('html .♥').text(), 'Heart');
+    t.equal(dom.at('div.♥').text(), 'Heart');
+    t.equal(dom.at('html div.♥').text(), 'Heart');
+    t.equal(dom.at('[class$="♥"]').text(), 'Heart');
+    t.equal(dom.at('div[class$="♥"]').text(), 'Heart');
+    t.equal(dom.at('html div[class$="♥"]').text(), 'Heart');
+    t.equal(dom.at('html > body > div[class$="♥"]').text(), 'Heart');
+    t.equal(dom.at('[class$=♥]').text(), 'Heart');
+    t.equal(dom.at('div[class$=♥]').text(), 'Heart');
+    t.equal(dom.at('html div[class$=♥]').text(), 'Heart');
+    t.equal(dom.at('html > body > div[class$=♥]').text(), 'Heart');
+    t.equal(dom.at('[class~="♥"]').text(), 'Heart');
+    t.equal(dom.at('div[class~="♥"]').text(), 'Heart');
+    t.equal(dom.at('html div[class~="♥"]').text(), 'Heart');
+    t.equal(dom.at('html > body > div[class~="♥"]').text(), 'Heart');
+    t.equal(dom.at('[class~=♥]').text(), 'Heart');
+    t.equal(dom.at('div[class~=♥]').text(), 'Heart');
+    t.equal(dom.at('html div[class~=♥]').text(), 'Heart');
+    t.equal(dom.at('html > body > div[class~=♥]').text(), 'Heart');
+    t.equal(dom.at('[class~="x"]').text(), 'Heart');
+    t.equal(dom.at('div[class~="x"]').text(), 'Heart');
+    t.equal(dom.at('html div[class~="x"]').text(), 'Heart');
+    t.equal(dom.at('html > body > div[class~="x"]').text(), 'Heart');
+    t.equal(dom.at('[class~=x]').text(), 'Heart');
+    t.equal(dom.at('div[class~=x]').text(), 'Heart');
+    t.equal(dom.at('html div[class~=x]').text(), 'Heart');
+    t.equal(dom.at('html > body > div[class~=x]').text(), 'Heart');
+
+    t.end();
+  });
+
   t.test('Form values', t => {
     const dom = new DOM(
       `

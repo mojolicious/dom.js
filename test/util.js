@@ -1,9 +1,14 @@
-import {SafeString, escapeRegExp, stickyMatch, xmlEscape, xmlUnescape} from '../lib/dom.js';
+import {SafeString, cssUnescape, escapeRegExp, stickyMatch, xmlEscape, xmlUnescape} from '../lib/dom.js';
 import t from 'tap';
 
+t.test('cssUnescape', t => {
+  t.equal(cssUnescape('#\\n\\002603x'), '#☃x');
+  t.end();
+});
+
 t.test('escapeRegExp', t => {
-  t.equal(escapeRegExp('te*s?t'), 'te\\*s\\?t', 'escaped');
-  t.equal(escapeRegExp('\\^$.*+?()[]{}|'), '\\\\\\^\\$\\.\\*\\+\\?\\(\\)\\[\\]\\{\\}\\|', 'escaped');
+  t.equal(escapeRegExp('te*s?t'), 'te\\*s\\?t');
+  t.equal(escapeRegExp('\\^$.*+?()[]{}|'), '\\\\\\^\\$\\.\\*\\+\\?\\(\\)\\[\\]\\{\\}\\|');
   t.end();
 });
 

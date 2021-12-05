@@ -1,7 +1,7 @@
 import type {ElementNode} from './nodes/element.js';
 import type {Parent} from './types.js';
 import {inspect} from 'util';
-import {escapeRegExp, stickyMatch} from './util.js';
+import {cssUnescape, escapeRegExp, stickyMatch} from './util.js';
 
 interface Attribute {
   name: RegExp;
@@ -95,7 +95,7 @@ export class Selector {
 function compileAttrValue(op: string, value: string | undefined, insensitive: boolean): RegExp | null {
   if (value === undefined) return null;
   const flags = insensitive === true ? 'i' : undefined;
-  value = escapeRegExp(value);
+  value = escapeRegExp(cssUnescape(value));
 
   // "~=" (word)
   if (op === '~') return new RegExp(`(?:^|\\s+)${value}(?:\\s+|$)`, flags);
@@ -264,21 +264,6 @@ function compileSelector(selector: string): SelectorList {
 
   if (process.env.MOJO_DOM_CSS_DEBUG === '1') console.log(inspect(group, {depth: 10}));
   return group;
-}
-
-function cssUnescape(value: string): string {
-  // Remove escaped newlines
-  value = value.replaceAll('\\\n', '');
-
-  // Unescape Unicode characters
-  value = value.replace(/\\([0-9a-fA-F]{1,6})\s?/g, cssReplace);
-
-  // Remove backslash
-  return value.replaceAll('\\', '');
-}
-
-function cssReplace(value: string): string {
-  return String.fromCharCode(parseInt(value, 16));
 }
 
 function matchAncestor(
