@@ -181,7 +181,7 @@ function compilePseudoClass(name: string, args: string): PseudoClass {
     return {type: 'pc', class: 'nth-last-of-type', value: [-1, 1]};
   }
 
-  // ":checked", "empty", ":only-child", ":only-of-type", "root"
+  // ":checked", ":empty", ":only-child", ":only-of-type", ":root"
   else if (
     name === 'checked' ||
     name === 'empty' ||
@@ -388,7 +388,7 @@ function matchPseudoClass(simple: PseudoClass, current: ElementNode, tree: Paren
     }
   }
 
-  // ":only-child"
+  // ":only-*"
   else if (name === 'only-child' || name === 'only-of-type') {
     let nodes = current.parentNode?.childNodes.filter(node => node.nodeType === '#element') ?? [];
     if (name === 'only-of-type') nodes = nodes.filter(el => (el as ElementNode).tagName === current.tagName);
@@ -400,12 +400,12 @@ function matchPseudoClass(simple: PseudoClass, current: ElementNode, tree: Paren
     const equation = simple.value;
     let nodes = current.parentNode?.childNodes.filter(node => node.nodeType === '#element') ?? [];
 
-    // "*-of-type"
+    // ":*-of-type"
     if (name === 'nth-of-type' || name === 'nth-last-of-type') {
       nodes = nodes.filter(el => (el as ElementNode).tagName === current.tagName);
     }
 
-    // "nth-last-child"
+    // ":*-last-*"
     if (name === 'nth-last-child' || name === 'nth-last-of-type') nodes.reverse();
 
     for (let i = 0; i < nodes.length; i++) {
