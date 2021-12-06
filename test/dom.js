@@ -972,6 +972,54 @@ t.test('DOM', t => {
     t.end();
   });
 
+  t.test('Links', t => {
+    const dom = new DOM(
+      `
+      <a>A</a>
+      <a href=/>B</a>
+      <link rel=C>
+      <link href=/ rel=D>
+      <area alt=E>
+      <area href=/ alt=F>
+      <div href=borked>very borked</div>`,
+      {fragment: true}
+    );
+
+    t.equal(
+      dom
+        .find(':any-link')
+        .map(el => el.tag)
+        .join(','),
+      'a,link,area'
+    );
+    t.equal(
+      dom
+        .find(':link')
+        .map(el => el.tag)
+        .join(','),
+      'a,link,area'
+    );
+    t.equal(
+      dom
+        .find(':visited')
+        .map(el => el.tag)
+        .join(','),
+      'a,link,area'
+    );
+
+    t.equal(dom.at('a:link').text(), 'B');
+    t.equal(dom.at('a:any-link').text(), 'B');
+    t.equal(dom.at('a:visited').text(), 'B');
+    t.equal(dom.at('link:any-link').attr.rel, 'D');
+    t.equal(dom.at('link:link').attr.rel, 'D');
+    t.equal(dom.at('link:visited').attr.rel, 'D');
+    t.equal(dom.at('area:link').attr.alt, 'F');
+    t.equal(dom.at('area:any-link').attr.alt, 'F');
+    t.equal(dom.at('area:visited').attr.alt, 'F');
+
+    t.end();
+  });
+
   t.test('Unusual order', t => {
     const dom = new DOM('<a href="http://example.com" id="foo" class="bar">Ok!</a>', {fragment: true});
     t.equal(dom.at('a:not([href$=foo])[href^=h]').text(), 'Ok!');

@@ -94,6 +94,9 @@ All CSS selectors that make sense for a standalone parser are supported.
 | `E[foo^="bar"]`               | an E element whose foo attribute value begins exactly with the string bar                                             |
 | `E[foo$="bar"]`               | an E element whose foo attribute value ends exactly with the string bar                                               |
 | `E[foo*="bar"]`               | an E element whose foo attribute value contains the substring bar                                                     |
+| `E:any-link`                  | an E element being the source anchor of a hyperlink                                                                   |
+| `E:link`                      | an E element being the source anchor of a hyperlink of which the target is not yet visited                            |
+| `E:visited`                   | an E element being the source anchor of a hyperlink of which the target is already visited                            |
 | `E:checked`                   | a user interface element E that is checked/selected (for instance a radio-button or checkbox)                         |
 | `E:root`                      | an E element, root of the document                                                                                    |
 | `E:empty`                     | an E element that has no children (neither elements nor text) except perhaps white space                              |

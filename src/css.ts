@@ -27,7 +27,7 @@ interface PseudoClassNth {
 }
 
 interface PseudoClassPlain {
-  class: 'checked' | 'empty' | 'only-child' | 'only-of-type' | 'root';
+  class: 'any-link' | 'checked' | 'empty' | 'link' | 'only-child' | 'only-of-type' | 'root' | 'visited';
   type: 'pc';
 }
 
@@ -183,11 +183,14 @@ function compilePseudoClass(name: string, args: string): PseudoClass {
 
   // ":checked", ":empty", ":only-child", ":only-of-type", ":root"
   else if (
+    name === 'any-link' ||
     name === 'checked' ||
     name === 'empty' ||
+    name === 'link' ||
     name === 'only-child' ||
     name === 'only-of-type' ||
-    name === 'root'
+    name === 'root' ||
+    name === 'visited'
   ) {
     return {type: 'pc', class: name};
   }
@@ -371,6 +374,12 @@ function matchPseudoClass(simple: PseudoClass, current: ElementNode, tree: Paren
     for (const node of current.childNodes) {
       if (node.nodeType === '#text' && regex.test(node.value) === true) return true;
     }
+  }
+
+  // ":any-link", ":link", ":visited"
+  else if (name === 'any-link' || name === 'link' || name === 'visited') {
+    const tag = current.tagName;
+    if ((tag === 'a' || tag === 'area' || tag === 'link') && current.hasAttribute('href') === true) return true;
   }
 
   // ":only-*"
