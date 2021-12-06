@@ -10,7 +10,13 @@ interface Siblings {
  * Base class for nodes that might have parents.
  */
 export class ChildNode {
+  /**
+   * Node type.
+   */
   nodeType = '#none';
+  /**
+   * Parent node.
+   */
   parentNode: Parent | null = null;
 
   /**

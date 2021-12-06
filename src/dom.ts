@@ -13,9 +13,9 @@ type FormValue = string | string[] | null | FormValue[];
  */
 export default class DOM {
   /**
-   * DOM tree.
+   * Current node in the DOM tree.
    */
-  tree: Parent;
+  currentNode: Parent;
   _attr: AttributeProxy | undefined;
   _xml: boolean;
 
@@ -25,17 +25,17 @@ export default class DOM {
     // Parse
     if (typeof input === 'string') {
       if (xml === true) {
-        this.tree = new XMLParser().parse(input);
+        this.currentNode = new XMLParser().parse(input);
       } else if (options.fragment === true) {
-        this.tree = new HTMLParser().parseFragment(input);
+        this.currentNode = new HTMLParser().parseFragment(input);
       } else {
-        this.tree = new HTMLParser().parse(input);
+        this.currentNode = new HTMLParser().parse(input);
       }
     }
 
     // Node
     else {
-      this.tree = input;
+      this.currentNode = input;
     }
   }
 
@@ -45,7 +45,7 @@ export default class DOM {
   ancestors(selector?: string): DOM[] {
     return this._filter(
       selector,
-      this.tree.ancestors().map(node => this._newDOM(node))
+      this.currentNode.ancestors().map(node => this._newDOM(node))
     );
   }
 
@@ -67,7 +67,7 @@ export default class DOM {
    * Find first descendant element of this element matching the CSS selector.
    */
   at(selector: string): DOM | null {
-    const first = new Selector(selector).first(this.tree);
+    const first = new Selector(selector).first(this.currentNode);
     return first === null ? null : this._newDOM(first);
   }
 
@@ -76,7 +76,7 @@ export default class DOM {
    */
   get attr(): AttributeProxy {
     if (this._attr === undefined) {
-      this._attr = new Proxy(this.tree, {
+      this._attr = new Proxy(this.currentNode, {
         deleteProperty: function (target: Parent, name: string): boolean {
           return target.nodeType === '#element' ? target.deleteAttribute(name) : false;
         },
@@ -104,7 +104,7 @@ export default class DOM {
   children(selector?: string): DOM[] {
     return this._filter(
       selector,
-      this.tree.childNodes.filter(node => node.nodeType === '#element').map(node => this._newDOM(node as Parent))
+      this.currentNode.childNodes.filter(node => node.nodeType === '#element').map(node => this._newDOM(node as Parent))
     );
   }
 
@@ -112,14 +112,14 @@ export default class DOM {
    * This element's rendered content.
    */
   content(): string {
-    return this.tree.childNodes.map(node => node.toString({xml: this._xml})).join('');
+    return this.currentNode.childNodes.map(node => node.toString({xml: this._xml})).join('');
   }
 
   /**
    * Find all descendant elements of this element matching the CSS selector.
    */
   find(selector: string): DOM[] {
-    return new Selector(selector).all(this.tree).map(node => this._newDOM(node));
+    return new Selector(selector).all(this.currentNode).map(node => this._newDOM(node));
   }
 
   /**
@@ -128,7 +128,7 @@ export default class DOM {
   following(selector?: string): DOM[] {
     return this._filter(
       selector,
-      this.tree.siblings().following.map(node => this._newDOM(node))
+      this.currentNode.siblings().following.map(node => this._newDOM(node))
     );
   }
 
@@ -136,16 +136,16 @@ export default class DOM {
    * Check if this element matches the CSS selector.
    */
   matches(selector: string): boolean {
-    const tree = this.tree;
-    if (tree.nodeType !== '#element') return false;
-    return new Selector(selector).matches(tree);
+    const current = this.currentNode;
+    if (current.nodeType !== '#element') return false;
+    return new Selector(selector).matches(current);
   }
 
   /**
    * Sibling element after this element.
    */
   next(): DOM | null {
-    const following = this.tree.siblings().following;
+    const following = this.currentNode.siblings().following;
     if (following.length === 0) return null;
     return this._newDOM(following[0]);
   }
@@ -154,7 +154,7 @@ export default class DOM {
    * Parent of this element.
    */
   parent(): DOM | null {
-    const parent = this.tree.parentNode;
+    const parent = this.currentNode.parentNode;
     return parent === null ? null : this._newDOM(parent);
   }
 
@@ -164,7 +164,7 @@ export default class DOM {
   preceding(selector?: string): DOM[] {
     return this._filter(
       selector,
-      this.tree.siblings().preceding.map(node => this._newDOM(node))
+      this.currentNode.siblings().preceding.map(node => this._newDOM(node))
     );
   }
 
@@ -186,7 +186,7 @@ export default class DOM {
    * Sibling element before this element.
    */
   previous(): DOM | null {
-    const preceding = this.tree.siblings().preceding;
+    const preceding = this.currentNode.siblings().preceding;
     if (preceding.length === 0) return null;
     return this._newDOM(preceding[preceding.length - 1]);
   }
@@ -195,7 +195,7 @@ export default class DOM {
    * Remove this element and its children.
    */
   remove(): void {
-    this.tree.detach();
+    this.currentNode.detach();
   }
 
   /**
@@ -209,7 +209,7 @@ export default class DOM {
    * Root node.
    */
   root(): DOM | null {
-    const root = this.tree.root();
+    const root = this.currentNode.root();
     const type = root.nodeType;
     return type === '#document' || type === '#fragment' ? this._newDOM(root) : null;
   }
@@ -218,31 +218,31 @@ export default class DOM {
    * Remove this element while preserving its content.
    */
   strip(): void {
-    const tree = this.tree;
-    const parent = tree.parentNode;
+    const current = this.currentNode;
+    const parent = current.parentNode;
     if (parent === null) return;
 
-    const children = this.tree.childNodes;
-    for (const node of children) {
-      node.detach();
-      parent.insertBefore(node, tree as Child);
+    const children = this.currentNode.childNodes;
+    for (const child of children) {
+      child.detach();
+      parent.insertBefore(child, current as Child);
     }
-    tree.detach();
+    current.detach();
   }
 
   /**
    * This element's tag name.
    */
   get tag(): string {
-    const tree = this.tree;
-    if (tree.nodeType !== '#element') return '';
-    return tree.tagName;
+    const current = this.currentNode;
+    if (current.nodeType !== '#element') return '';
+    return current.tagName;
   }
 
   set tag(name: string) {
-    const tree = this.tree;
-    if (tree.nodeType !== '#element') return;
-    tree.tagName = name;
+    const current = this.currentNode;
+    if (current.nodeType !== '#element') return;
+    current.tagName = name;
   }
 
   /**
@@ -251,11 +251,11 @@ export default class DOM {
   text(options = {recursive: false}): string {
     const recursive = options.recursive;
 
-    const tree = this.tree;
-    const type = tree.nodeType;
+    const current = this.currentNode;
+    const type = current.nodeType;
     if (type !== '#element' && type !== '#fragment' && type !== '#document') return '';
 
-    const nodes = [...tree.childNodes];
+    const nodes = [...current.childNodes];
     const buffer: string[] = [];
     let node;
     while ((node = nodes.shift()) !== undefined) {
@@ -279,7 +279,7 @@ export default class DOM {
    * Render DOM to HTML or XML.
    */
   toString(options = {xml: this._xml}): string {
-    return this.tree.toString(options);
+    return this.currentNode.toString(options);
   }
 
   /**
@@ -312,13 +312,13 @@ export default class DOM {
 
   _addChild(content: string, before: boolean): this {
     const contentTree = this._ensureNode(content);
-    const tree = this.tree;
+    const current = this.currentNode;
     const nodes: Child[] = this._extractNodes(contentTree);
 
     if (before === true) {
-      nodes.reverse().forEach(node => tree.prependChild(node));
+      nodes.reverse().forEach(node => current.prependChild(node));
     } else {
-      nodes.forEach(node => tree.appendChild(node));
+      nodes.forEach(node => current.appendChild(node));
     }
 
     return this;
@@ -327,16 +327,16 @@ export default class DOM {
   _addSibling(content: string, before: boolean): this {
     const contentTree = this._ensureNode(content);
 
-    const tree = this.tree;
-    const parent = tree.parentNode;
+    const current = this.currentNode;
+    const parent = current.parentNode;
     if (parent === null) return this;
 
     const nodes: Child[] = this._extractNodes(contentTree);
 
     if (before === true) {
-      nodes.forEach(node => parent.insertBefore(node, tree as Child));
+      nodes.forEach(node => parent.insertBefore(node, current as Child));
     } else {
-      nodes.reverse().forEach(node => parent.insertAfter(node, tree as Child));
+      nodes.reverse().forEach(node => parent.insertAfter(node, current as Child));
     }
 
     return this;
@@ -344,12 +344,12 @@ export default class DOM {
 
   _ensureNode(content: string): Parent {
     const xml = this._xml;
-    return new DOM(content, xml === true ? {xml} : {fragment: true}).tree;
+    return new DOM(content, xml === true ? {xml} : {fragment: true}).currentNode;
   }
 
-  _extractNodes(tree: Parent): Child[] {
-    const type = tree.nodeType;
-    return type === '#document' || type === '#fragment' ? tree.childNodes : [tree];
+  _extractNodes(current: Parent): Child[] {
+    const type = current.nodeType;
+    return type === '#document' || type === '#fragment' ? current.childNodes : [current];
   }
 
   _filter(selector: string | undefined, elements: DOM[]): DOM[] {

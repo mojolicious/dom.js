@@ -4,9 +4,21 @@ import {ChildNode} from './child.js';
  * Docuement type node class.
  */
 export class DoctypeNode extends ChildNode {
+  /**
+   * Document type name.
+   */
   name: string;
+  /**
+   * Node type.
+   */
   readonly nodeType = '#doctype';
+  /**
+   * Public ID.
+   */
   publicId: string;
+  /**
+   * System ID.
+   */
   systemId: string;
 
   constructor(name: string, publicId: string, systemId: string) {

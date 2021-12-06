@@ -6,6 +6,9 @@ import {TextNode} from './text.js';
  * Base class for nodes with children.
  */
 export class ParentNode extends ChildNode {
+  /**
+   * Child nodes.
+   */
   childNodes: Child[] = [];
 
   /**

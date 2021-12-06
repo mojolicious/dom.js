@@ -2,7 +2,13 @@ import {DoctypeNode} from './doctype.js';
 import {ParentNode} from './parent.js';
 
 export class DocumentNode extends ParentNode {
+  /**
+   * Document mode.
+   */
   mode = 'no-quirks';
+  /**
+   * Node type.
+   */
   readonly nodeType = '#document';
 
   /**

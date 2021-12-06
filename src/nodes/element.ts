@@ -26,10 +26,25 @@ const EMPTY_HTML_TAGS: Record<string, boolean> = {
  * Element node class.
  */
 export class ElementNode extends ParentNode {
+  /**
+   * Attributes.
+   */
   attrs: Attribute[];
+  /**
+   * Node content.
+   */
   content: FragmentNode | null = null;
+  /**
+   * Namespace URI.
+   */
   namespaceUri: string;
+  /**
+   * Node type.
+   */
   readonly nodeType = '#element';
+  /**
+   * Tag name.
+   */
   tagName: string;
 
   constructor(tagName: string, namespaceUri: string, attrs: Attribute[]) {

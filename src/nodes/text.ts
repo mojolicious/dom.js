@@ -5,7 +5,13 @@ import {ChildNode} from './child.js';
  * Text node class.
  */
 export class TextNode extends ChildNode {
+  /**
+   * Node type.
+   */
   readonly nodeType = '#text';
+  /**
+   * Text value.
+   */
   value: string;
 
   constructor(value: string) {
