@@ -134,10 +134,10 @@ const html = dom.toString();
 Navigate the DOM tree with and without CSS selectors.
 
 ```js
-// Find one element matching the CSS selector and return it as `DOM` objects
+// Find one element matching the CSS selector and return it as `DOM` object
 const div = dom.at('div > p');
 
-// Find all elements marching the CSS selector and teturn them as `DOM` objects
+// Find all elements marching the CSS selector and return them as `DOM` objects
 const divs = dom.find('div > p');
 
 // Get root element as `DOM` object (document or fragment node)
