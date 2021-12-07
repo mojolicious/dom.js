@@ -1173,6 +1173,38 @@ t.test('DOM', t => {
     t.end();
   });
 
+  t.test('Generate selector', t => {
+    const dom = new DOM(
+      `
+      <html>
+        <head>
+          <title>Test</title>
+        </head>
+        <body>
+          <p id="a">A</p>
+          <p id="b">B</p>
+          <p id="c">C</p>
+          <p id="d">D</p>
+        </body>
+      <html>`
+    );
+
+    t.same(dom.selector(), null);
+    t.equal(dom.at('#a').selector(), 'html:nth-child(1) > body:nth-child(2) > p:nth-child(1)');
+    t.equal(dom.at(dom.at('#a').selector()).text(), 'A');
+    t.equal(dom.at('#b').selector(), 'html:nth-child(1) > body:nth-child(2) > p:nth-child(2)');
+    t.equal(dom.at(dom.at('#b').selector()).text(), 'B');
+    t.equal(dom.at('#c').selector(), 'html:nth-child(1) > body:nth-child(2) > p:nth-child(3)');
+    t.equal(dom.at(dom.at('#c').selector()).text(), 'C');
+    t.equal(dom.at('#d').selector(), 'html:nth-child(1) > body:nth-child(2) > p:nth-child(4)');
+    t.equal(dom.at(dom.at('#d').selector()).text(), 'D');
+    t.equal(dom.at('title').selector(), 'html:nth-child(1) > head:nth-child(1) > title:nth-child(1)');
+    t.equal(dom.at(dom.at('title').selector()).text(), 'Test');
+    t.equal(dom.at('html').selector(), 'html:nth-child(1)');
+
+    t.end();
+  });
+
   t.test('Form values', t => {
     const dom = new DOM(
       `

@@ -241,6 +241,20 @@ export default class DOM {
   }
 
   /**
+   * Get a unique CSS selector for this element.
+   */
+  selector(): string | null {
+    const current = this.currentNode;
+    if (current.nodeType !== '#element') return null;
+
+    const selector: string[] = [];
+    for (const node of [current, ...current.ancestors()]) {
+      selector.push(node.tagName + ':nth-child(' + (node.siblings().preceding.length + 1) + ')');
+    }
+    return selector.reverse().join(' > ');
+  }
+
+  /**
    * Remove this element while preserving its content.
    */
   strip(): void {

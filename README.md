@@ -210,6 +210,9 @@ const formValue = dom.at('button').val();
 // Find this element's namespace
 const namespace = dom.namespace();
 
+// Get a unique CSS selector for this element
+const selector = dom.selector();
+
 // Remove element and its children
 dom.remove();
 
