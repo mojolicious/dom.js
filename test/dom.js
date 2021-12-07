@@ -1240,5 +1240,121 @@ t.test('DOM', t => {
     t.end();
   });
 
+  t.test('Namespaces', t => {
+    const dom = new DOM(
+      `
+      <?xml version="1.0"?>
+      <bk:book xmlns='uri:default-ns'
+              xmlns:bk='uri:book-ns'
+              xmlns:isbn='uri:isbn-ns'>
+        <bk:title>Programming Perl</bk:title>
+        <comment>rocks!</comment>
+        <nons xmlns=''>
+          <section>Nothing</section>
+        </nons>
+        <meta xmlns='uri:meta-ns'>
+          <isbn:number>978-0596000271</isbn:number>
+        </meta>
+      </bk:book>`,
+      {xml: true}
+    );
+
+    t.same(dom.namespace(), null);
+    t.equal(dom.at('book comment').namespace(), 'uri:default-ns');
+    t.equal(dom.at('book comment').text(), 'rocks!');
+    t.equal(dom.at('book nons section').namespace(), '');
+    t.equal(dom.at('book nons section').text(), 'Nothing');
+    t.equal(dom.at('book meta number').namespace(), 'uri:isbn-ns');
+    t.equal(dom.at('book meta number').text(), '978-0596000271');
+    t.equal(dom.children('book')[0].attr.xmlns, 'uri:default-ns');
+    t.same(dom.children('k:book')[0], null);
+    t.same(dom.children('ook')[0], null);
+    t.same(dom.at('k:book'), null);
+    t.same(dom.at('ook'), null);
+    t.equal(dom.at('[bk]').attr['xmlns:bk'], 'uri:book-ns');
+    t.same(dom.at('[bk]').attr['s:bk'], null);
+    t.same(dom.at('[bk]').attr['bk'], null);
+    t.same(dom.at('[bk]').attr['k'], null);
+    t.same(dom.at('[k]'), null);
+    t.equal(dom.at('number').ancestors('meta')[0].attr.xmlns, 'uri:meta-ns');
+    t.same(dom.at('nons').matches('book > nons'), true);
+    t.same(dom.at('title').matches('book > nons > section'), false);
+
+    t.end();
+  });
+
+  t.test('Yadis', t => {
+    const dom = new DOM(
+      `
+      <?xml version="1.0" encoding="UTF-8"?>
+      <XRDS xmlns="xri://$xrds">
+        <XRD xmlns="xri://$xrd*($v*2.0)">
+          <Service>
+            <Type>http://o.r.g/sso/2.0</Type>
+          </Service>
+          <Service>
+            <Type>http://o.r.g/sso/1.0</Type>
+          </Service>
+        </XRD>
+      </XRDS>`,
+      {xml: true}
+    );
+
+    t.equal(dom.at('XRDS').namespace(), 'xri://$xrds');
+    t.equal(dom.at('XRD').namespace(), 'xri://$xrd*($v*2.0)');
+    const service = dom.find('XRDS XRD Service');
+    t.equal(service[0].at('Type').text(), 'http://o.r.g/sso/2.0');
+    t.equal(service[0].namespace(), 'xri://$xrd*($v*2.0)');
+    t.equal(service[1].at('Type').text(), 'http://o.r.g/sso/1.0');
+    t.equal(service[1].namespace(), 'xri://$xrd*($v*2.0)');
+    t.same(service[2], null);
+    t.equal(service.length, 2);
+
+    t.end();
+  });
+
+  t.test('Yadis (roundtrip with namespace)', t => {
+    const yadis = `
+    <?xml version="1.0" encoding="UTF-8"?>
+    <xrds:XRDS xmlns="xri://$xrd*($v*2.0)" xmlns:xrds="xri://$xrds">
+      <XRD>
+        <Service>
+          <Type>http://o.r.g/sso/3.0</Type>
+        </Service>
+        <xrds:Service>
+          <Type>http://o.r.g/sso/4.0</Type>
+        </xrds:Service>
+      </XRD>
+      <XRD>
+        <Service>
+          <Type test="23">http://o.r.g/sso/2.0</Type>
+        </Service>
+        <Service>
+          <Type Test="23" test="24">http://o.r.g/sso/1.0</Type>
+        </Service>
+      </XRD>
+    </xrds:XRDS>`;
+    const dom = new DOM(yadis, {xml: true});
+
+    t.equal(dom.at('XRDS').namespace(), 'xri://$xrds');
+    t.equal(dom.at('XRD').namespace(), 'xri://$xrd*($v*2.0)');
+    const service = dom.find('XRDS XRD Service');
+    t.equal(service[0].at('Type').text(), 'http://o.r.g/sso/3.0');
+    t.equal(service[0].namespace(), 'xri://$xrd*($v*2.0)');
+    t.equal(service[1].at('Type').text(), 'http://o.r.g/sso/4.0');
+    t.equal(service[1].namespace(), 'xri://$xrds');
+    t.equal(service[2].at('Type').text(), 'http://o.r.g/sso/2.0');
+    t.equal(service[2].namespace(), 'xri://$xrd*($v*2.0)');
+    t.equal(service[3].at('Type').text(), 'http://o.r.g/sso/1.0');
+    t.equal(service[3].namespace(), 'xri://$xrd*($v*2.0)');
+    t.same(service[4], null);
+    t.equal(service.length, 4);
+    t.equal(dom.at('[Test="23"]').text(), 'http://o.r.g/sso/1.0');
+    t.equal(dom.at('[test="23"]').text(), 'http://o.r.g/sso/2.0');
+    t.equal(dom.toString(), yadis);
+
+    t.end();
+  });
+
   t.end();
 });

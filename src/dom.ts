@@ -133,6 +133,32 @@ export default class DOM {
   }
 
   /**
+   * Find this element's namespace.
+   */
+  namespace(): string | null {
+    const current = this.currentNode;
+    if (current.nodeType !== '#element') return null;
+
+    // Extract namespace prefix and search parents
+    const nsMatch = current.tagName.match(/^(.*?):/);
+    const namespace = nsMatch?.[1] ?? null;
+    for (const node of [current, ...current.ancestors()]) {
+      // Namespace for prefix
+      if (namespace !== null) {
+        const value = node.getAttributeValue(`xmlns:${namespace}`);
+        if (value !== null) return value;
+      }
+
+      // Namespace attribute
+      else if (node.hasAttribute('xmlns')) {
+        return node.getAttributeValue('xmlns');
+      }
+    }
+
+    return null;
+  }
+
+  /**
    * Check if this element matches the CSS selector.
    */
   matches(selector: string): boolean {

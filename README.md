@@ -207,6 +207,9 @@ const formValue = dom.at('select').val();
 const formValue = dom.at('textarea').val();
 const formValue = dom.at('button').val();
 
+// Find this element's namespace
+const namespace = dom.namespace();
+
 // Remove element and its children
 dom.remove();
 
