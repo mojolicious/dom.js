@@ -227,6 +227,12 @@ dom.prepend('<p>Hello World!</p>');
 
 // Prepend HTML/XML fragment to this element's content
 dom.prependContent('<p>Hello World!</p>');
+
+// Wrap HTML/XML fragment around this element
+dom.wrap('<div></div>');
+
+// Wrap HTML/XML fragment around the content of this element
+dom.wrapContent('<div></div>');
 ```
 
 There is also a node level API that you can for example use to extend the `DOM` class. It is however still in flux, and

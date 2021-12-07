@@ -53,7 +53,7 @@ export default class DOM {
    * Append HTML/XML fragment to this element.
    */
   append(content: string): this {
-    return this._addSibling(content, false);
+    return this._addSibling(this._ensureNode(content), false);
   }
 
   /**
@@ -172,7 +172,7 @@ export default class DOM {
    * Prepend HTML/XML fragment to this element.
    */
   prepend(content: string): this {
-    return this._addSibling(content, true);
+    return this._addSibling(this._ensureNode(content), true);
   }
 
   /**
@@ -310,10 +310,24 @@ export default class DOM {
     return attr.multiple !== null ? (values.length > 0 ? values : null) : values[values.length - 1];
   }
 
+  /**
+   * Wrap HTML/XML fragment around this element.
+   */
+  wrap(content: string): void {
+    this._wrap(content, true);
+  }
+
+  /**
+   * Wrap HTML/XML fragment around the content of this element.
+   */
+  wrapContent(content: string): void {
+    this._wrap(content, false);
+  }
+
   _addChild(content: string, before: boolean): this {
-    const contentTree = this._ensureNode(content);
+    const contentNode = this._ensureNode(content);
     const current = this.currentNode;
-    const nodes: Child[] = this._extractNodes(contentTree);
+    const nodes: Child[] = this._extractNodes(contentNode);
 
     if (before === true) {
       nodes.reverse().forEach(node => current.prependChild(node));
@@ -324,14 +338,12 @@ export default class DOM {
     return this;
   }
 
-  _addSibling(content: string, before: boolean): this {
-    const contentTree = this._ensureNode(content);
-
+  _addSibling(contentNode: Parent, before: boolean): this {
     const current = this.currentNode;
     const parent = current.parentNode;
     if (parent === null) return this;
 
-    const nodes: Child[] = this._extractNodes(contentTree);
+    const nodes: Child[] = this._extractNodes(contentNode);
 
     if (before === true) {
       nodes.forEach(node => parent.insertBefore(node, current as Child));
@@ -356,7 +368,37 @@ export default class DOM {
     return selector === undefined ? elements : elements.filter(el => el.matches(selector));
   }
 
+  _innermostElement(node: Parent): Parent {
+    const nodes = node.childNodes.filter(node => node.nodeType === '#element') as Parent[];
+    return nodes.length > 0 ? this._innermostElement(nodes[0]) : node;
+  }
+
   _newDOM(node: Parent): DOM {
     return new DOM(node, {xml: this._xml});
+  }
+
+  _wrap(content: string, outer: boolean): void {
+    const current = this.currentNode;
+
+    const contentNode = this._ensureNode(content);
+    const innerNode = this._innermostElement(contentNode);
+    if (innerNode === contentNode) return;
+
+    // Wrap around element
+    if (outer === true) {
+      if (current.parentNode === null) return;
+
+      this._addSibling(contentNode, true);
+      current.detach();
+      innerNode.appendChild(current as Child);
+    }
+
+    // Wrap content
+    else {
+      const children = current.childNodes;
+      current.childNodes = [];
+      children.reverse().forEach(node => innerNode.prependChild(node));
+      contentNode.childNodes.forEach(node => current.appendChild(node));
+    }
   }
 }

@@ -1079,6 +1079,32 @@ t.test('DOM', t => {
     t.end();
   });
 
+  t.test('Wrap elements', t => {
+    const dom = new DOM('<a>Test</a>', {xml: true});
+
+    t.equal(`${dom}`, '<a>Test</a>');
+    dom.at('a').wrap('<b></b>');
+    t.equal(dom.toString(), '<b><a>Test</a></b>');
+    dom.at('a').wrap('C<c><d>D</d><e>E</e></c>F');
+    t.equal(dom.toString(), '<b>C<c><d>D<a>Test</a></d><e>E</e></c>F</b>');
+
+    t.end();
+  });
+
+  t.test('Wrap content', t => {
+    const dom = new DOM('<a>Test</a>', {xml: true});
+
+    t.equal(`${dom}`, '<a>Test</a>');
+    dom.wrapContent('<b></b>');
+    t.equal(dom.toString(), '<b><a>Test</a></b>');
+    dom.at('a').wrapContent('1<e c="d"></e>');
+    t.equal(dom.toString(), '<b><a>1<e c="d">Test</e></a></b>');
+    dom.at('a').wrapContent('C<c><d>D</d><e>E</e></c>F');
+    t.equal(dom.toString(), '<b><a>C<c><d>1<e c="d">Test</e>D</d><e>E</e></c>F</a></b>');
+
+    t.end();
+  });
+
   t.test('Unicode and escaped selectors', t => {
     const dom = new DOM('<html><div id="☃x">Snowman</div><div class="x ♥">Heart</div></html>');
 
