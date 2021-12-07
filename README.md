@@ -234,10 +234,15 @@ therefore not fully documented yet.
 
 ```js
 // Remove comment nodes that are children of this element
-dom.currentNode.childNodes.filter(node => node.nodeType === '#comment').forEach(node => node.detach());
+dom.currentNode.childNodes
+  .filter(node => node.nodeType === '#comment')
+  .forEach(node => node.detach());
 
 // Extract text surrounding this element
-const text = dom.currentNode.parentNode.childNodes.filter(node => node.nodeType === '#text').map(node => node.value);
+const text = dom.currentNode.parentNode.childNodes
+  .filter(node => node.nodeType === '#text')
+  .map(node => node.value)
+  .join('');
 ```
 
 ## Installation
