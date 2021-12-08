@@ -112,7 +112,7 @@ class TreeAdapter {
   }
 
   getTextNodeContent(textNode: TextNode): string {
-    return textNode.value;
+    return textNode.value.toString();
   }
 
   getCommentNodeContent(commentNode: CommentNode): string {

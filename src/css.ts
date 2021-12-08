@@ -372,7 +372,7 @@ function matchPseudoClass(simple: PseudoClass, current: ElementNode, tree: Paren
   else if (name === 'text') {
     const regex = simple.value;
     for (const node of current.childNodes) {
-      if (node.nodeType === '#text' && regex.test(node.value) === true) return true;
+      if (node.nodeType === '#text' && regex.test(node.value.toString()) === true) return true;
     }
   }
 

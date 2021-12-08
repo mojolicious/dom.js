@@ -1,4 +1,4 @@
-import DOM from '../lib/dom.js';
+import DOM, {SafeString} from '../lib/dom.js';
 import {CommentNode} from '../lib/nodes/comment.js';
 import {DoctypeNode} from '../lib/nodes/doctype.js';
 import {DocumentNode} from '../lib/nodes/document.js';
@@ -1384,6 +1384,40 @@ t.test('DOM', t => {
     t.equal(dom.at('[Test="23"]').text(), 'http://o.r.g/sso/1.0');
     t.equal(dom.at('[test="23"]').text(), 'http://o.r.g/sso/2.0');
     t.equal(dom.toString(), yadis);
+
+    t.end();
+  });
+
+  t.test('Create tags', t => {
+    t.equal(DOM.newTag('p', {}, 'Test').toString(), '<p>Test</p>');
+    t.equal(DOM.newTag('p', 'Test').toString(), '<p>Test</p>');
+    t.equal(DOM.newTag('p', new SafeString(DOM.newTag('i', 'Tes&t').toString())).toString(), '<p><i>Tes&amp;t</i></p>');
+    t.equal(DOM.newTag('div').toString(), '<div></div>');
+    t.equal(DOM.newTag('div', {id: 'foo', class: 'bar baz'}).toString(), '<div id="foo" class="bar baz"></div>');
+    t.equal(
+      DOM.newTag('div', {id: 'f&oo'}, new SafeString(DOM.newTag('i', {}, 'I ♥ Mojo&!').toString())).toString(),
+      '<div id="f&amp;oo"><i>I ♥ Mojo&amp;!</i></div>'
+    );
+
+    t.equal(DOM.newTag('area').toString(), '<area>');
+    t.equal(DOM.newTag('base').toString(), '<base>');
+    t.equal(DOM.newTag('br').toString(), '<br>');
+    t.equal(DOM.newTag('col').toString(), '<col>');
+    t.equal(DOM.newTag('embed').toString(), '<embed>');
+    t.equal(DOM.newTag('hr').toString(), '<hr>');
+    t.equal(DOM.newTag('img').toString(), '<img>');
+    t.equal(DOM.newTag('input').toString(), '<input>');
+    t.equal(DOM.newTag('keygen').toString(), '<keygen>');
+    t.equal(DOM.newTag('link').toString(), '<link>');
+    t.equal(DOM.newTag('menuitem').toString(), '<menuitem>');
+    t.equal(DOM.newTag('meta').toString(), '<meta>');
+    t.equal(DOM.newTag('param').toString(), '<param>');
+    t.equal(DOM.newTag('source').toString(), '<source>');
+    t.equal(DOM.newTag('track').toString(), '<track>');
+    t.equal(DOM.newTag('wbr').toString(), '<wbr>');
+
+    t.equal(DOM.newTag('base').toString({xml: true}), '<base></base>');
+    t.equal(DOM.newTag('link').toString({xml: true}), '<link></link>');
 
     t.end();
   });

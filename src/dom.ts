@@ -1,6 +1,10 @@
-import type {Child, Parent} from './types.js';
+import type {Attribute, Child, Parent} from './types.js';
 import {Selector} from './css.js';
 import {HTMLParser} from './html.js';
+import {ElementNode} from './nodes/element.js';
+import {FragmentNode} from './nodes/fragment.js';
+import {TextNode} from './nodes/text.js';
+import {SafeString} from './util.js';
 import {XMLParser} from './xml.js';
 export * from './util.js';
 
@@ -177,6 +181,29 @@ export default class DOM {
   }
 
   /**
+   * Create a new `DOM` object with one tag.
+   */
+  static newTag(
+    name: string,
+    attrs: Record<string, string> | string | SafeString = {},
+    content: string | SafeString = ''
+  ): DOM {
+    if (typeof attrs === 'string' || attrs instanceof SafeString) [content, attrs] = [attrs, {}];
+
+    const attrArray: Attribute[] = [];
+    for (const [name, value] of Object.entries(attrs)) {
+      attrArray.push({name, value});
+    }
+
+    const fragment = new FragmentNode();
+    const el = new ElementNode(name, '', attrArray);
+    fragment.appendChild(el);
+    el.appendChild(new TextNode(content));
+
+    return new DOM(fragment);
+  }
+
+  /**
    * Parent of this element.
    */
   parent(): DOM | null {
@@ -303,7 +330,7 @@ export default class DOM {
 
       // Text
       if (type === '#text' || type === '#cdata') {
-        buffer.push(node.value);
+        buffer.push(node.value.toString());
       }
 
       // Element

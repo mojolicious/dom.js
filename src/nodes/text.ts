@@ -1,3 +1,4 @@
+import {SafeString} from '../util.js';
 import {xmlEscape} from '../util.js';
 import {ChildNode} from './child.js';
 
@@ -12,9 +13,9 @@ export class TextNode extends ChildNode {
   /**
    * Text value.
    */
-  value: string;
+  value: string | SafeString;
 
-  constructor(value: string) {
+  constructor(value: string | SafeString) {
     super();
     this.value = value;
   }
@@ -23,6 +24,7 @@ export class TextNode extends ChildNode {
    * Render node to string.
    */
   toString(): string {
-    return xmlEscape(this.value);
+    const value = this.value;
+    return value instanceof SafeString ? value.toString() : xmlEscape(value);
   }
 }

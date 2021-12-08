@@ -129,6 +129,11 @@ const dom = new DOM('<div class="greeting">Hello World!</div>');
 
 // Render `DOM` object to HTML
 const html = dom.toString();
+
+// Create a new `DOM` object with one HTML tag
+const div = DOM.newTag('div');
+const div = DOM.newTag('div', {class: 'greeting'});
+const div = DOM.newTag('div', {class: 'greeting'}, 'Hello World!');
 ```
 
 Navigate the DOM tree with and without CSS selectors.
