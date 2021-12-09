@@ -185,18 +185,23 @@ export default class DOM {
    */
   static newTag(
     name: string,
-    attrs: Record<string, string> | string | SafeString = {},
+    attrs: Record<string, string | Record<string, string>> | string | SafeString = {},
     content: string | SafeString = ''
   ): DOM {
     if (typeof attrs === 'string' || attrs instanceof SafeString) [content, attrs] = [attrs, {}];
 
-    const attrArray: Attribute[] = [];
+    const flatAttrs: Attribute[] = [];
     for (const [name, value] of Object.entries(attrs)) {
-      attrArray.push({name, value});
+      if (typeof value !== 'string') {
+        if (name !== 'data') continue;
+        Object.entries(value).forEach(([name, value]) => flatAttrs.push({name: `data-${name}`, value}));
+      } else {
+        flatAttrs.push({name, value});
+      }
     }
 
     const fragment = new FragmentNode();
-    const el = new ElementNode(name, '', attrArray);
+    const el = new ElementNode(name, '', flatAttrs);
     fragment.appendChild(el);
     el.appendChild(new TextNode(content));
 

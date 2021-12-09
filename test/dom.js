@@ -1419,6 +1419,27 @@ t.test('DOM', t => {
     t.equal(DOM.newTag('base').toString({xml: true}), '<base></base>');
     t.equal(DOM.newTag('link').toString({xml: true}), '<link></link>');
 
+    t.equal(
+      DOM.newTag('div', {data: {'f-o-o': 'bar', baz: 'yada'}}).toString(),
+      '<div data-f-o-o="bar" data-baz="yada"></div>'
+    );
+    t.equal(
+      DOM.newTag('div', {data: {foo: 'bar', baz: 'yada'}, class: 'test'}, 'Hello World!').toString(),
+      '<div data-foo="bar" data-baz="yada" class="test">Hello World!</div>'
+    );
+    t.equal(
+      DOM.newTag('div', {data: 'test'}, 'Hello World!').toString({xml: true}),
+      '<div data="test">Hello World!</div>'
+    );
+    t.equal(
+      DOM.newTag('div', {'data-one': 'One', 'data-two': 'Two'}, 'Hello World!').toString({xml: true}),
+      '<div data-one="One" data-two="Two">Hello World!</div>'
+    );
+    t.equal(
+      DOM.newTag('div', {'data-one': 'One', data: {two: 'Two'}}, 'Hello World!').toString({xml: true}),
+      '<div data-one="One" data-two="Two">Hello World!</div>'
+    );
+
     t.end();
   });
 
