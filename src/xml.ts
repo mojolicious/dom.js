@@ -68,7 +68,7 @@ export class XMLParser {
 
         // Start
         if (tagMatch[1] === undefined) {
-          const attrs = [];
+          const attrs: Record<string, string> = {};
           const unparsed = tagMatch[3];
           let close = false;
           if (unparsed !== undefined) {
@@ -81,7 +81,7 @@ export class XMLParser {
               if (name === '/') {
                 close = true;
               } else {
-                attrs.push({name: name, value: xmlUnescape(attrMatch[3] ?? attrMatch[4] ?? '')});
+                attrs[name] = xmlUnescape(attrMatch[3] ?? attrMatch[4] ?? '');
               }
             }
           }

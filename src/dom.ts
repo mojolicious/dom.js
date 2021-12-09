@@ -1,4 +1,4 @@
-import type {Attribute, Child, Parent} from './types.js';
+import type {Child, Parent} from './types.js';
 import {Selector} from './css.js';
 import {HTMLParser} from './html.js';
 import {ElementNode} from './nodes/element.js';
@@ -7,8 +7,6 @@ import {TextNode} from './nodes/text.js';
 import {SafeString} from './util.js';
 import {XMLParser} from './xml.js';
 export * from './util.js';
-
-type AttributeProxy = Record<string, string | null>;
 
 type FormValue = string | string[] | null | FormValue[];
 
@@ -20,7 +18,6 @@ export default class DOM {
    * Current node in the DOM tree.
    */
   currentNode: Parent;
-  _attr: AttributeProxy | undefined;
   _xml: boolean;
 
   constructor(input: string | Parent, options: {fragment?: boolean; xml?: boolean} = {}) {
@@ -78,28 +75,9 @@ export default class DOM {
   /**
    * This element's attributes.
    */
-  get attr(): AttributeProxy {
-    if (this._attr === undefined) {
-      this._attr = new Proxy(this.currentNode, {
-        deleteProperty: function (target: Parent, name: string): boolean {
-          return target.nodeType === '#element' ? target.deleteAttribute(name) : false;
-        },
-        get: function (target: Parent, name: string): string | null {
-          return target.nodeType === '#element' ? target.getAttributeValue(name) : null;
-        },
-        getOwnPropertyDescriptor: function (): Record<string, boolean> {
-          return {enumerable: true, configurable: true};
-        },
-        ownKeys: function (target: Parent): string[] {
-          return target.nodeType === '#element' ? target.getAttributeNames() : [];
-        },
-        set: function (target: Parent, name: string, value: string): boolean {
-          return target.nodeType === '#element' ? target.setAttributeValue(name, value) : false;
-        }
-      }) as any as AttributeProxy;
-    }
-
-    return this._attr;
+  get attr(): Record<string, string> {
+    const current = this.currentNode;
+    return current.nodeType === '#element' ? current.attributes : {};
   }
 
   /**
@@ -147,15 +125,17 @@ export default class DOM {
     const nsMatch = current.tagName.match(/^(.*?):/);
     const namespace = nsMatch?.[1] ?? null;
     for (const node of [current, ...current.ancestors()]) {
+      const attrs = node.attributes;
+
       // Namespace for prefix
       if (namespace !== null) {
-        const value = node.getAttributeValue(`xmlns:${namespace}`);
-        if (value !== null) return value;
+        const value = attrs[`xmlns:${namespace}`];
+        if (value !== undefined) return value;
       }
 
       // Namespace attribute
-      else if (node.hasAttribute('xmlns')) {
-        return node.getAttributeValue('xmlns');
+      else if (attrs.xmlns !== undefined) {
+        return attrs.xmlns;
       }
     }
 
@@ -190,18 +170,18 @@ export default class DOM {
   ): DOM {
     if (typeof attrs === 'string' || attrs instanceof SafeString) [content, attrs] = [attrs, {}];
 
-    const flatAttrs: Attribute[] = [];
+    const processedAttrs: Record<string, string> = {};
     for (const [name, value] of Object.entries(attrs)) {
       if (typeof value !== 'string') {
         if (name !== 'data') continue;
-        Object.entries(value).forEach(([name, value]) => flatAttrs.push({name: `data-${name}`, value}));
+        Object.entries(value).forEach(([name, value]) => (processedAttrs[`data-${name}`] = value));
       } else {
-        flatAttrs.push({name, value});
+        processedAttrs[name] = value;
       }
     }
 
     const fragment = new FragmentNode();
-    const el = new ElementNode(name, '', flatAttrs);
+    const el = new ElementNode(name, '', processedAttrs);
     fragment.appendChild(el);
     el.appendChild(new TextNode(content));
 
@@ -379,7 +359,7 @@ export default class DOM {
     const values = this.find('option:checked:not([disabled])')
       .filter(el => el.ancestors('optgroup[disabled]').length === 0)
       .map(el => el.val());
-    return attr.multiple !== null ? (values.length > 0 ? values : null) : values[values.length - 1];
+    return attr.multiple !== undefined ? (values.length > 0 ? values : null) : values[values.length - 1];
   }
 
   /**

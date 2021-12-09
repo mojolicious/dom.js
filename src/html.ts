@@ -1,5 +1,5 @@
 import type {DoctypeNode} from './nodes/doctype.js';
-import type {Attribute, Child, Parent} from './types.js';
+import type {Child, Parent} from './types.js';
 import {CommentNode} from './nodes/comment.js';
 import {DocumentNode} from './nodes/document.js';
 import {ElementNode} from './nodes/element.js';
@@ -31,7 +31,9 @@ class TreeAdapter {
     return new FragmentNode();
   }
 
-  createElement(tagName: string, namespaceUri: string, attrs: Attribute[]): ElementNode {
+  createElement(tagName: string, namespaceUri: string, attrsArray: Array<{name: string; value: string}>): ElementNode {
+    const attrs: Record<string, string> = {};
+    attrsArray.forEach(attr => (attrs[attr.name] = attr.value));
     return new ElementNode(tagName, namespaceUri, attrs);
   }
 
@@ -83,7 +85,7 @@ class TreeAdapter {
     parentNode.insertTextBefore(text, referenceNode);
   }
 
-  adoptAttributes(recipient: ElementNode, attrs: Attribute[]): void {
+  adoptAttributes(recipient: ElementNode, attrs: Array<{name: string; value: string}>): void {
     recipient.adoptAttributes(attrs);
   }
 
@@ -99,8 +101,12 @@ class TreeAdapter {
     return node.parentNode;
   }
 
-  getAttrList(element: ElementNode): Attribute[] {
-    return element.attrs;
+  getAttrList(element: ElementNode): Array<{name: string; value: string}> {
+    const attrs = [];
+    for (const [name, value] of Object.entries(element.attributes)) {
+      attrs.push({name, value});
+    }
+    return attrs;
   }
 
   getTagName(element: ElementNode): string {

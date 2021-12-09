@@ -289,12 +289,12 @@ function matchAncestor(
 }
 
 function matchAttribute(selector: Attribute, current: ElementNode): boolean {
-  const name = selector.name;
-  const value = selector.value;
+  const nameRegex = selector.name;
+  const valueRegex = selector.value;
 
-  for (const attr of current.attrs) {
-    if (name.test(attr.name) === false) continue;
-    if (value === null || value.test(attr.value) === true) return true;
+  for (const [name, value] of Object.entries(current.attributes)) {
+    if (nameRegex.test(name) === false) continue;
+    if (valueRegex === null || valueRegex.test(value) === true) return true;
   }
 
   return false;
@@ -365,7 +365,8 @@ function matchPseudoClass(simple: PseudoClass, current: ElementNode, tree: Paren
 
   // ":checked"
   else if (name === 'checked') {
-    if (current.hasAttribute('checked') === true || current.hasAttribute('selected') === true) return true;
+    const attrs = current.attributes;
+    if (attrs.checked !== undefined || attrs.selected !== undefined) return true;
   }
 
   // ":text"
@@ -379,7 +380,7 @@ function matchPseudoClass(simple: PseudoClass, current: ElementNode, tree: Paren
   // ":any-link", ":link", ":visited"
   else if (name === 'any-link' || name === 'link' || name === 'visited') {
     const tag = current.tagName;
-    if ((tag === 'a' || tag === 'area' || tag === 'link') && current.hasAttribute('href') === true) return true;
+    if ((tag === 'a' || tag === 'area' || tag === 'link') && current.attributes.href !== undefined) return true;
   }
 
   // ":only-*"

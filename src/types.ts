@@ -7,12 +7,5 @@ import type {FragmentNode} from './nodes/fragment.js';
 import type {PINode} from './nodes/pi.js';
 import type {TextNode} from './nodes/text.js';
 
-export interface Attribute {
-  name: string;
-  namespace?: string | undefined;
-  prefix?: string | undefined;
-  value: string;
-}
-
 export type Child = CommentNode | CDATANode | DoctypeNode | ElementNode | FragmentNode | PINode | TextNode;
 export type Parent = DocumentNode | ElementNode | FragmentNode;

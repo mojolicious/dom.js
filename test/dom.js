@@ -20,9 +20,7 @@ t.test('DOM', t => {
     t.equal(dom.currentNode.childNodes[1].childNodes[1].tagName, 'body');
     t.ok(dom.currentNode.childNodes[1].childNodes[1].childNodes[0] instanceof ElementNode);
     t.equal(dom.currentNode.childNodes[1].childNodes[1].childNodes[0].tagName, 'p');
-    t.equal(dom.currentNode.childNodes[1].childNodes[1].childNodes[0].attrs[0].name, 'class');
-    t.equal(dom.currentNode.childNodes[1].childNodes[1].childNodes[0].attrs[0].value, 'foo');
-    t.same(dom.currentNode.childNodes[1].childNodes[1].childNodes[0].attrs[1], undefined);
+    t.equal(dom.currentNode.childNodes[1].childNodes[1].childNodes[0].attributes.class, 'foo');
     t.same(dom.currentNode.childNodes[1].childNodes[1].childNodes[1], undefined);
     t.ok(dom.currentNode.childNodes[1].childNodes[1].childNodes[0].childNodes[0] instanceof TextNode);
     t.equal(dom.currentNode.childNodes[1].childNodes[1].childNodes[0].childNodes[0].value, 'Mojo');
@@ -38,9 +36,7 @@ t.test('DOM', t => {
     t.ok(dom.currentNode instanceof FragmentNode);
     t.ok(dom.currentNode.childNodes[0] instanceof ElementNode);
     t.equal(dom.currentNode.childNodes[0].tagName, 'p');
-    t.equal(dom.currentNode.childNodes[0].attrs[0].name, 'class');
-    t.equal(dom.currentNode.childNodes[0].attrs[0].value, 'foo');
-    t.same(dom.currentNode.childNodes[0].attrs[1], undefined);
+    t.equal(dom.currentNode.childNodes[0].attributes.class, 'foo');
     t.ok(dom.currentNode.childNodes[0].childNodes[0] instanceof TextNode);
     t.equal(dom.currentNode.childNodes[0].childNodes[0].value, 'Mojo');
     t.ok(dom.currentNode.childNodes[1] instanceof CommentNode);
@@ -66,12 +62,12 @@ t.test('DOM', t => {
 
   t.test('Entities', t => {
     const dom = new DOM('<p class="&lt;foo&gt;">&lt;Mojo&gt;</p>', {fragment: true});
-    t.equal(dom.currentNode.childNodes[0].attrs[0].value, '<foo>');
+    t.equal(dom.currentNode.childNodes[0].attributes.class, '<foo>');
     t.equal(dom.currentNode.childNodes[0].childNodes[0].value, '<Mojo>');
     t.equal(dom.toString(), '<p class="&lt;foo&gt;">&lt;Mojo&gt;</p>');
 
     const dom2 = new DOM('<link class="&lt;foo&gt;">&lt;Mojo&gt;</link>', {xml: true});
-    t.equal(dom2.currentNode.childNodes[0].attrs[0].value, '<foo>');
+    t.equal(dom2.currentNode.childNodes[0].attributes.class, '<foo>');
     t.equal(dom2.currentNode.childNodes[0].childNodes[0].value, '<Mojo>');
     t.equal(dom2.toString(), '<link class="&lt;foo&gt;">&lt;Mojo&gt;</link>');
     t.end();
