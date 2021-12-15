@@ -453,6 +453,18 @@ t.test('DOM', t => {
       <div>D</div>workslalala`
     );
 
+    dom.at('div').appendContent(dom.at('p')).append(dom.at('ul ~ div'));
+    t.equal(
+      dom.toString(),
+      `lalala
+      <ul>
+        24<div>A-1<p>A2</p></div><div>D</div>works25<li>A4A3<p>A2</p>A</li>22<p>A1</p>23
+        <p>B</p>
+        <li>C<p>C2</p>C3 C4C5</li>
+      </ul>
+      <div>D</div>workslalala`
+    );
+
     t.end();
   });
 
