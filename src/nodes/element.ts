@@ -54,6 +54,22 @@ export class ElementNode extends ParentNode {
   }
 
   /**
+   * Clone this node.
+   */
+  clone(): ElementNode {
+    const attrs: Record<string, string> = {};
+    for (const [name, value] of Object.entries(this.attributes)) {
+      attrs[name] = value;
+    }
+
+    const el = new ElementNode(this.tagName, this.namespaceUri, attrs);
+    const content = this.content;
+    el.content = content === null ? null : content.clone();
+    this.childNodes.map(node => node.clone()).forEach(node => el.appendChild(node));
+    return el;
+  }
+
+  /**
    * Copy attributes to this element. Only attributes that are not yet present in this element are copied.
    */
   adoptAttributes(attrs: Array<{name: string; value: string}>): void {
@@ -79,19 +95,23 @@ export class ElementNode extends ParentNode {
       }
     }
 
-    const children = this.childNodes;
     if (xml === true) {
-      if (children.length > 0) {
-        result.push('>', children.map(node => node.toString(options)).join(''), '</', name, '>');
+      if (this.childNodes.length > 0) {
+        result.push('>', this._content(options), '</', name, '>');
       } else {
         result.push(' />');
       }
     } else if (EMPTY_HTML_TAGS[name] !== true) {
-      result.push('>', children.map(node => node.toString(options)).join(''), '</', name, '>');
+      result.push('>', this._content(options), '</', name, '>');
     } else {
       result.push('>');
     }
 
     return result.join('');
+  }
+
+  _content(options: {xml: boolean}): string {
+    const content = this.content;
+    return content === null ? this.childNodes.map(node => node.toString(options)).join('') : content.toString(options);
   }
 }

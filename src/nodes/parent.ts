@@ -20,6 +20,13 @@ export class ParentNode extends ChildNode {
   }
 
   /**
+   * Clone this node.
+   */
+  clone(): ParentNode {
+    return new ParentNode();
+  }
+
+  /**
    * Insert a child node to this parent node after the given reference node.
    */
   insertAfter(node: Child, referenceNode: Child): void {

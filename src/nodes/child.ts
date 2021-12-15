@@ -35,6 +35,13 @@ export class ChildNode {
   }
 
   /**
+   * Clone this node.
+   */
+  clone(): ChildNode {
+    return new ChildNode();
+  }
+
+  /**
    * Remove this node from its parent node.
    */
   detach(): void {

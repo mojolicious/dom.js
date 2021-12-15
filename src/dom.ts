@@ -53,14 +53,14 @@ export default class DOM {
   /**
    * Append HTML/XML fragment to this element.
    */
-  append(content: string): this {
+  append(content: string | DOM): this {
     return this._addSibling(this._ensureNode(content), false);
   }
 
   /**
    * Append HTML/XML fragment to this element's content.
    */
-  appendContent(content: string): this {
+  appendContent(content: string | DOM): this {
     return this._addChild(content, false);
   }
 
@@ -209,14 +209,14 @@ export default class DOM {
   /**
    * Prepend HTML/XML fragment to this element.
    */
-  prepend(content: string): this {
+  prepend(content: string | DOM): this {
     return this._addSibling(this._ensureNode(content), true);
   }
 
   /**
    * Prepend HTML/XML fragment to this element's content.
    */
-  prependContent(content: string): this {
+  prependContent(content: string | DOM): this {
     return this._addChild(content, true);
   }
 
@@ -239,7 +239,7 @@ export default class DOM {
   /**
    * Replace this element with HTML/XML fragment.
    */
-  replace(content: string): void {
+  replace(content: string | DOM): void {
     this.prepend(content).remove();
   }
 
@@ -365,18 +365,18 @@ export default class DOM {
   /**
    * Wrap HTML/XML fragment around this element.
    */
-  wrap(content: string): void {
+  wrap(content: string | DOM): void {
     this._wrap(content, true);
   }
 
   /**
    * Wrap HTML/XML fragment around the content of this element.
    */
-  wrapContent(content: string): void {
+  wrapContent(content: string | DOM): void {
     this._wrap(content, false);
   }
 
-  _addChild(content: string, before: boolean): this {
+  _addChild(content: string | DOM, before: boolean): this {
     const contentNode = this._ensureNode(content);
     const current = this.currentNode;
     const nodes: Child[] = this._extractNodes(contentNode);
@@ -406,7 +406,8 @@ export default class DOM {
     return this;
   }
 
-  _ensureNode(content: string): Parent {
+  _ensureNode(content: string | DOM): Parent {
+    if (content instanceof DOM) return content.currentNode.clone();
     const xml = this._xml;
     return new DOM(content, xml === true ? {xml} : {fragment: true}).currentNode;
   }
@@ -429,7 +430,7 @@ export default class DOM {
     return new DOM(node, {xml: this._xml});
   }
 
-  _wrap(content: string, outer: boolean): void {
+  _wrap(content: string | DOM, outer: boolean): void {
     const current = this.currentNode;
 
     const contentNode = this._ensureNode(content);

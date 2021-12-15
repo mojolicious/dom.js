@@ -21,6 +21,13 @@ export class TextNode extends ChildNode {
   }
 
   /**
+   * Clone this node.
+   */
+  clone(): TextNode {
+    return new TextNode(this.value);
+  }
+
+  /**
    * Render node to string.
    */
   toString(): string {

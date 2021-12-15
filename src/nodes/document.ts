@@ -12,6 +12,16 @@ export class DocumentNode extends ParentNode {
   readonly nodeType = '#document';
 
   /**
+   * Clone this node.
+   */
+  clone(): DocumentNode {
+    const doc = new DocumentNode();
+    doc.mode = this.mode;
+    this.childNodes.map(node => node.clone()).forEach(node => doc.appendChild(node));
+    return doc;
+  }
+
+  /**
    * Sets the document type.
    */
   setDocumentType(name: string, publicId: string, systemId: string): void {

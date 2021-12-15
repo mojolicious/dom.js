@@ -19,6 +19,13 @@ export class CDATANode extends ChildNode {
   }
 
   /**
+   * Clone this node.
+   */
+  clone(): CDATANode {
+    return new CDATANode(this.value);
+  }
+
+  /**
    * Render node to string.
    */
   toString(): string {

@@ -19,6 +19,13 @@ export class PINode extends ChildNode {
   }
 
   /**
+   * Clone this node.
+   */
+  clone(): PINode {
+    return new PINode(this.value);
+  }
+
+  /**
    * Render node to string.
    */
   toString(): string {

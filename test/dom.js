@@ -10,6 +10,7 @@ import t from 'tap';
 t.test('DOM', t => {
   t.test('HTML document', t => {
     const dom = new DOM('<!DOCTYPE html><p class="foo">Mojo</p>');
+
     t.ok(dom.currentNode instanceof DocumentNode);
     t.ok(dom.currentNode.childNodes[0] instanceof DoctypeNode);
     t.ok(dom.currentNode.childNodes[1] instanceof ElementNode);
@@ -27,12 +28,19 @@ t.test('DOM', t => {
     t.same(dom.currentNode.childNodes[1].childNodes[1].childNodes[0].childNodes[1], undefined);
     t.same(dom.currentNode.childNodes[1].childNodes[2], undefined);
     t.same(dom.currentNode.childNodes[2], undefined);
+
     t.equal(dom.toString(), '<!DOCTYPE html><html><head></head><body><p class="foo">Mojo</p></body></html>');
+    t.equal(
+      new DOM(dom.currentNode.clone()).toString(),
+      '<!DOCTYPE html><html><head></head><body><p class="foo">Mojo</p></body></html>'
+    );
+
     t.end();
   });
 
   t.test('HTML fragment', t => {
     const dom = new DOM('<p class="foo">Mojo</p><!-- Test -->', {fragment: true});
+
     t.ok(dom.currentNode instanceof FragmentNode);
     t.ok(dom.currentNode.childNodes[0] instanceof ElementNode);
     t.equal(dom.currentNode.childNodes[0].tagName, 'p');
@@ -42,12 +50,38 @@ t.test('DOM', t => {
     t.ok(dom.currentNode.childNodes[1] instanceof CommentNode);
     t.equal(dom.currentNode.childNodes[1].value, ' Test ');
     t.same(dom.currentNode.childNodes[2], undefined);
+
     t.equal(dom.toString(), '<p class="foo">Mojo</p><!-- Test -->');
+    t.equal(new DOM(dom.currentNode.clone()).toString(), '<p class="foo">Mojo</p><!-- Test -->');
+
+    t.end();
+  });
+
+  t.test('HTML fragment (<template>)', t => {
+    const dom = new DOM('<p>Mojo</p><template><div>Hello</div></template>', {fragment: true});
+
+    t.ok(dom.currentNode instanceof FragmentNode);
+    t.ok(dom.currentNode.childNodes[0] instanceof ElementNode);
+    t.equal(dom.currentNode.childNodes[0].tagName, 'p');
+    t.ok(dom.currentNode.childNodes[0].childNodes[0] instanceof TextNode);
+    t.equal(dom.currentNode.childNodes[0].childNodes[0].value, 'Mojo');
+    t.ok(dom.currentNode.childNodes[1] instanceof ElementNode);
+    t.ok(dom.currentNode.childNodes[1].content instanceof FragmentNode);
+    t.ok(dom.currentNode.childNodes[1].content.childNodes[0] instanceof ElementNode);
+    t.equal(dom.currentNode.childNodes[1].content.childNodes[0].tagName, 'div');
+    t.ok(dom.currentNode.childNodes[1].content.childNodes[0].childNodes[0] instanceof TextNode);
+    t.equal(dom.currentNode.childNodes[1].content.childNodes[0].childNodes[0].value, 'Hello');
+    t.same(dom.currentNode.childNodes[2], undefined);
+
+    t.equal(dom.toString(), '<p>Mojo</p><template><div>Hello</div></template>');
+    t.equal(new DOM(dom.currentNode.clone()).toString(), '<p>Mojo</p><template><div>Hello</div></template>');
+
     t.end();
   });
 
   t.test('XML document', t => {
     const dom = new DOM('<link>http://mojolicious.org</link>', {xml: true});
+
     t.ok(dom.currentNode instanceof DocumentNode);
     t.ok(dom.currentNode.childNodes[0] instanceof ElementNode);
     t.equal(dom.currentNode.childNodes[0].tagName, 'link');
@@ -55,8 +89,11 @@ t.test('DOM', t => {
     t.equal(dom.currentNode.childNodes[0].childNodes[0].value, 'http://mojolicious.org');
     t.same(dom.currentNode.childNodes[0].childNodes[1], undefined);
     t.same(dom.currentNode.childNodes[1], undefined);
+
     t.equal(dom.toString(), '<link>http://mojolicious.org</link>');
+    t.equal(new DOM(dom.currentNode.clone(), {xml: true}).toString(), '<link>http://mojolicious.org</link>');
     t.equal(dom.toString({xml: false}), '<link>');
+
     t.end();
   });
 
@@ -70,6 +107,7 @@ t.test('DOM', t => {
     t.equal(dom2.currentNode.childNodes[0].attributes.class, '<foo>');
     t.equal(dom2.currentNode.childNodes[0].childNodes[0].value, '<Mojo>');
     t.equal(dom2.toString(), '<link class="&lt;foo&gt;">&lt;Mojo&gt;</link>');
+
     t.end();
   });
 
@@ -90,6 +128,7 @@ t.test('DOM', t => {
     dom.at('.foo').tag = 'div';
     t.equal(dom.at('.foo').tag, 'div');
     t.equal(dom.toString(), '<div class="foo">Foo</div><div>Bar</div>');
+
     t.end();
   });
 
@@ -111,6 +150,7 @@ t.test('DOM', t => {
     t.equal(dom2.toString(), '<p class="foobar" id="baz">Foo</p>');
     delete dom2.at('p').attr.class;
     t.equal(dom2.toString(), '<p id="baz">Foo</p>');
+
     t.end();
   });
 
@@ -160,6 +200,7 @@ t.test('DOM', t => {
     t.same(dom.find('#buttons ~ div')[2], null);
     t.equal(dom.find('#buttons + div')[0].text(), 'Baz');
     t.same(dom.find('#buttons + div')[1], null);
+
     t.end();
   });
 
@@ -313,7 +354,10 @@ t.test('DOM', t => {
       {fragment: true}
     );
 
-    dom.at('li').append('<p>A1</p>23').append('22');
+    dom
+      .at('li')
+      .append('<p>A1</p>23')
+      .append(new DOM('22', {fragment: true}));
     t.equal(
       dom.toString(),
       `
@@ -325,7 +369,10 @@ t.test('DOM', t => {
       <div>D</div>`
     );
 
-    dom.at('li').prepend('24').prepend('<div>A-1</div>25');
+    dom
+      .at('li')
+      .prepend('24')
+      .prepend(new DOM('<div>A-1</div>25', {fragment: true}));
     t.equal(
       dom.toString(),
       `
@@ -351,7 +398,10 @@ t.test('DOM', t => {
       <div>D</div>`
     );
 
-    dom.appendContent('la').appendContent('lal').appendContent('a');
+    dom
+      .appendContent('la')
+      .appendContent(new DOM('lal', {fragment: true}))
+      .appendContent('a');
     t.equal(
       dom.toString(),
       `lalala
@@ -375,7 +425,10 @@ t.test('DOM', t => {
       <div>D</div>workslalala`
     );
 
-    dom.at('li').prependContent('A3<p>A2</p>').prependContent('A4');
+    dom
+      .at('li')
+      .prependContent('A3<p>A2</p>')
+      .prependContent(new DOM('A4', {fragment: true}));
     t.equal(dom.at('li').text(), 'A4A3A');
     t.equal(
       dom.toString(),
@@ -1084,6 +1137,9 @@ t.test('DOM', t => {
     dom.at('a').wrap('C<c><d>D</d><e>E</e></c>F');
     t.equal(dom.toString(), '<b>C<c><d>D<a>Test</a></d><e>E</e></c>F</b>');
 
+    dom.at('b').wrap(DOM.newTag('i'));
+    t.equal(dom.toString(), '<i><b>C<c><d>D<a>Test</a></d><e>E</e></c>F</b></i>');
+
     t.end();
   });
 
@@ -1097,6 +1153,9 @@ t.test('DOM', t => {
     t.equal(dom.toString(), '<b><a>1<e c="d">Test</e></a></b>');
     dom.at('a').wrapContent('C<c><d>D</d><e>E</e></c>F');
     t.equal(dom.toString(), '<b><a>C<c><d>1<e c="d">Test</e>D</d><e>E</e></c>F</a></b>');
+
+    dom.at('b').wrapContent(DOM.newTag('i'));
+    t.equal(dom.toString(), '<b><i><a>C<c><d>1<e c="d">Test</e>D</d><e>E</e></c>F</a></i></b>');
 
     t.end();
   });

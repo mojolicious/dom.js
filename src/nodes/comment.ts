@@ -19,6 +19,13 @@ export class CommentNode extends ChildNode {
   }
 
   /**
+   * Clone this node.
+   */
+  clone(): CommentNode {
+    return new CommentNode(this.value);
+  }
+
+  /**
    * Render node to string.
    */
   toString(): string {

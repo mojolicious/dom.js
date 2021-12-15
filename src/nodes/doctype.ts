@@ -29,6 +29,13 @@ export class DoctypeNode extends ChildNode {
   }
 
   /**
+   * Clone this node.
+   */
+  clone(): DoctypeNode {
+    return new DoctypeNode(this.name, this.publicId, this.systemId);
+  }
+
+  /**
    * Render node to string.
    */
   toString(): string {
