@@ -1,10 +1,14 @@
-import DOM, {SafeString} from '../lib/dom.js';
-import {CommentNode} from '../lib/nodes/comment.js';
-import {DoctypeNode} from '../lib/nodes/doctype.js';
-import {DocumentNode} from '../lib/nodes/document.js';
-import {ElementNode} from '../lib/nodes/element.js';
-import {FragmentNode} from '../lib/nodes/fragment.js';
-import {TextNode} from '../lib/nodes/text.js';
+import DOM, {
+  CDATANode,
+  CommentNode,
+  DoctypeNode,
+  DocumentNode,
+  ElementNode,
+  FragmentNode,
+  PINode,
+  SafeString,
+  TextNode
+} from '../lib/dom.js';
 import t from 'tap';
 
 t.test('DOM', t => {
@@ -80,18 +84,25 @@ t.test('DOM', t => {
   });
 
   t.test('XML document', t => {
-    const dom = new DOM('<link>http://mojolicious.org</link>', {xml: true});
+    const dom = new DOM('<link>http://mojolicious.org<?just a test?><![CDATA[another test]]></link>', {xml: true});
 
     t.ok(dom.currentNode instanceof DocumentNode);
     t.ok(dom.currentNode.childNodes[0] instanceof ElementNode);
     t.equal(dom.currentNode.childNodes[0].tagName, 'link');
     t.ok(dom.currentNode.childNodes[0].childNodes[0] instanceof TextNode);
     t.equal(dom.currentNode.childNodes[0].childNodes[0].value, 'http://mojolicious.org');
-    t.same(dom.currentNode.childNodes[0].childNodes[1], undefined);
+    t.ok(dom.currentNode.childNodes[0].childNodes[1] instanceof PINode);
+    t.equal(dom.currentNode.childNodes[0].childNodes[1].value, 'just a test');
+    t.ok(dom.currentNode.childNodes[0].childNodes[2] instanceof CDATANode);
+    t.equal(dom.currentNode.childNodes[0].childNodes[2].value, 'another test');
+    t.same(dom.currentNode.childNodes[0].childNodes[3], undefined);
     t.same(dom.currentNode.childNodes[1], undefined);
 
-    t.equal(dom.toString(), '<link>http://mojolicious.org</link>');
-    t.equal(new DOM(dom.currentNode.clone(), {xml: true}).toString(), '<link>http://mojolicious.org</link>');
+    t.equal(dom.toString(), '<link>http://mojolicious.org<?just a test?><![CDATA[another test]]></link>');
+    t.equal(
+      new DOM(dom.currentNode.clone(), {xml: true}).toString(),
+      '<link>http://mojolicious.org<?just a test?><![CDATA[another test]]></link>'
+    );
     t.equal(dom.toString({xml: false}), '<link>');
 
     t.end();
