@@ -1,12 +1,19 @@
 import type {Child, Parent} from './types.js';
 import {Selector} from './css.js';
 import {HTMLParser} from './html.js';
+import {CDATANode} from './nodes/cdata.js';
+import {CommentNode} from './nodes/comment.js';
+import {DoctypeNode} from './nodes/doctype.js';
+import {DocumentNode} from './nodes/document.js';
 import {ElementNode} from './nodes/element.js';
 import {FragmentNode} from './nodes/fragment.js';
+import {PINode} from './nodes/pi.js';
 import {TextNode} from './nodes/text.js';
 import {SafeString} from './util.js';
 import {XMLParser} from './xml.js';
+
 export * from './util.js';
+export {CDATANode, CommentNode, DoctypeNode, DocumentNode, ElementNode, FragmentNode, PINode, TextNode};
 
 type FormValue = string | string[] | null | FormValue[];
 
