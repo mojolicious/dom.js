@@ -131,8 +131,6 @@ const dom = new DOM('<div class="greeting">Hello World!</div>');
 const html = dom.toString();
 
 // Create a new `DOM` object with one HTML tag
-const div = DOM.newTag('div');
-const div = DOM.newTag('div', {class: 'greeting'});
 const div = DOM.newTag('div', {class: 'greeting'}, 'Hello World!');
 ```
 
