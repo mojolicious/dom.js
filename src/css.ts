@@ -54,6 +54,8 @@ interface CompoundSelector {
 type ComplexSelector = Array<Combinator | CompoundSelector>;
 type SelectorList = ComplexSelector[];
 
+const DEBUG = process.env.MOJO_DOM_CSS_DEBUG === '1';
+
 const ESCAPE_RE = '\\\\[^0-9a-fA-F]|\\\\[0-9a-fA-F]{1,6}';
 const SEPARATOR_RE = new RegExp(`\\s*,\\s*`, 'y');
 const COMBINATOR_RE = new RegExp(`\\s*([ >+~])\\s*`, 'y');
@@ -265,7 +267,7 @@ function compileSelector(selector: string): SelectorList {
     throw new Error(`Unknown CSS selector: ${selector}`);
   }
 
-  if (process.env.MOJO_DOM_CSS_DEBUG === '1') console.log(inspect(group, {depth: 10}));
+  if (DEBUG === true) console.log(inspect(group, {depth: 10}));
   return group;
 }
 
