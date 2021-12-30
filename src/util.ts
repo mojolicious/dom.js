@@ -51,7 +51,7 @@ export function stickyMatch(
 
 export function xmlEscape(value: string | SafeString): string {
   if (value instanceof SafeString) return value.toString();
-  return value.replace(/[&<>'"]/g, xmlEscapeReplace);
+  return ('' + value).replace(/[&<>'"]/g, xmlEscapeReplace);
 }
 
 function xmlEscapeReplace(char: string): string {
