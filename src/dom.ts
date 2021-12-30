@@ -1,3 +1,8 @@
+/*!
+ * dom.js
+ * Copyright (C) 2021 Sebastian Riedel
+ * MIT Licensed
+ */
 import type {Child, Parent} from './types.js';
 import {Selector} from './css.js';
 import {HTMLParser} from './html.js';
