@@ -267,7 +267,7 @@ function compileSelector(selector: string): SelectorList {
     throw new Error(`Unknown CSS selector: ${selector}`);
   }
 
-  if (DEBUG === true) console.log(inspect(group, {depth: 10}));
+  if (DEBUG === true) process.stderr.write(inspect(group, {depth: 10}));
   return group;
 }
 
