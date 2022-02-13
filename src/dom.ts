@@ -14,8 +14,8 @@ import {ElementNode} from './nodes/element.js';
 import {FragmentNode} from './nodes/fragment.js';
 import {PINode} from './nodes/pi.js';
 import {TextNode} from './nodes/text.js';
-import {SafeString} from './util.js';
 import {XMLParser} from './xml.js';
+import {SafeString} from '@mojojs/template';
 
 export * from './util.js';
 export {CDATANode, CommentNode, DoctypeNode, DocumentNode, ElementNode, FragmentNode, PINode, TextNode};

@@ -6,9 +6,9 @@ import DOM, {
   ElementNode,
   FragmentNode,
   PINode,
-  SafeString,
   TextNode
 } from '../lib/dom.js';
+import {SafeString} from '@mojojs/template';
 import t from 'tap';
 
 t.test('DOM', t => {

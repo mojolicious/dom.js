@@ -1,11 +1,3 @@
-const XML_ESCAPE: Record<string, string> = {
-  '&': '&amp;',
-  '<': '&lt;',
-  '>': '&gt;',
-  '"': '&quot;',
-  "'": '&#39;'
-};
-
 const XML_UNESCAPE: Record<string, string> = {
   amp: '&',
   lt: '<',
@@ -14,18 +6,6 @@ const XML_UNESCAPE: Record<string, string> = {
   apos: "'",
   '#39': "'"
 };
-
-export class SafeString {
-  _safe: string;
-
-  constructor(safe: string) {
-    this._safe = safe;
-  }
-
-  toString(): string {
-    return this._safe;
-  }
-}
 
 export function cssUnescape(value: string): string {
   return value.replaceAll('\\n', '').replace(/\\([0-9a-fA-F]{1,6})\s?/g, cssUnescapeReplace);
@@ -47,15 +27,6 @@ export function stickyMatch(
   const match = stickyRegex.exec(stringWithOffset.value);
   if (match !== null) stringWithOffset.offset = stickyRegex.lastIndex;
   return match;
-}
-
-export function xmlEscape(value: string | SafeString): string {
-  if (value instanceof SafeString) return value.toString();
-  return ('' + value).replace(/[&<>'"]/g, xmlEscapeReplace);
-}
-
-function xmlEscapeReplace(char: string): string {
-  return XML_ESCAPE[char];
 }
 
 export function xmlUnescape(value: string): string {

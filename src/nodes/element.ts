@@ -1,6 +1,6 @@
 import type {FragmentNode} from './fragment.js';
-import {xmlEscape} from '../util.js';
 import {ParentNode} from './parent.js';
+import {xmlEscape} from '@mojojs/template';
 
 const EMPTY_HTML_TAGS: Record<string, boolean> = {
   area: true,

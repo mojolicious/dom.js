@@ -62,6 +62,7 @@
     "node": ">= 16"
   },
   "dependencies": {
+    "@mojojs/template": "^1.4.0",
     "parse5": "^6.0.0"
   }
 }
