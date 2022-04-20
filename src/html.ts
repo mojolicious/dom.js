@@ -5,18 +5,18 @@ import {DocumentNode} from './nodes/document.js';
 import {ElementNode} from './nodes/element.js';
 import {FragmentNode} from './nodes/fragment.js';
 import {TextNode} from './nodes/text.js';
-import parse5 from 'parse5';
+import {parse, parseFragment} from 'parse5';
 
 export class HTMLParser {
   _adapter = new TreeAdapter();
 
   parse(html: string): DocumentNode {
-    const document: DocumentNode = parse5.parse(html, {treeAdapter: this._adapter}) as any;
+    const document: DocumentNode = parse(html, {treeAdapter: this._adapter as any}) as any;
     return document;
   }
 
   parseFragment(html: string): FragmentNode {
-    const document: FragmentNode = parse5.parseFragment(html, {treeAdapter: this._adapter}) as any;
+    const document: FragmentNode = parseFragment(html, {treeAdapter: this._adapter as any}) as any;
     return document;
   }
 }
