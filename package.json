@@ -63,6 +63,6 @@
   },
   "dependencies": {
     "@mojojs/template": "^1.6.0",
-    "parse5": "^6.0.0"
+    "parse5": "^7.0.0"
   }
 }
