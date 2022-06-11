@@ -512,6 +512,10 @@ t.test('DOM', t => {
       .forEach(el => el.strip());
     t.equal(dom6.toString(), '<div>ABC</div>');
 
+    const dom7 = new DOM('<div><b>♥</b></div>', {fragment: true});
+    dom7.at('div').replaceContent('<i>☃</i>');
+    t.equal(dom7.toString(), '<div><i>☃</i></div>');
+
     t.end();
   });
 

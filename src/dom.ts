@@ -256,6 +256,14 @@ export default class DOM {
   }
 
   /**
+   * Replace this element's content with HTML/XML fragment.
+   */
+  replaceContent(content: string | DOM): void {
+    this.currentNode.childNodes.forEach(node => node.detach());
+    this.appendContent(content);
+  }
+
+  /**
    * Root node.
    */
   root(): DOM | null {

@@ -228,6 +228,9 @@ dom.strip();
 // Replace element and its children
 dom.replace('<p>Hello World!</p>');
 
+// Replace this element's content
+dom.replaceContent('<p>Hello World!</p>');
+
 // Append HTML/XML fragment after this element
 dom.append('<p>Hello World!</p>');
 
