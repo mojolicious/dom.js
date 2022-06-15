@@ -1,13 +1,13 @@
 
 # Changelog
 
-## v1.3.0 (2021-06-11)
+## v1.3.0 (2022-06-11)
 
 ### Features
 
   * Added `replaceContent` method to `DOM` class.
 
-## v1.2.0 (2021-02-13)
+## v1.2.0 (2022-02-13)
 
 ### Features
 
