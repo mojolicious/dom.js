@@ -27,8 +27,7 @@
     "build:test": "npm run build && npm test",
     "build:watch": "npm run build -- --watch",
     "clean": "rm -rf tsconfig.tsbuildinfo lib",
-    "coverage": "tap --node-arg='--no-warnings' --node-arg='--experimental-loader' --node-arg='@istanbuljs/esm-loader-hook' test/*.js",
-    "coverage:ci": "npm run coverage -- --no-check-coverage && tap --no-check-coverage --coverage-report=text-lcov > .lcov.info",
+    "coverage": "c8 tap --no-coverage test/*.js",
     "lint": "eslint \"test/*.js\" \"src/**/*.ts\" \"src/*.ts\"",
     "lint:fix": "npm run lint -- --fix",
     "prepublishOnly": "npm run build",
@@ -44,10 +43,10 @@
     "lib/"
   ],
   "devDependencies": {
-    "@istanbuljs/esm-loader-hook": "^=0.1.2",
     "@types/node": "^17.0.0",
     "@types/tap": "^15.0.3",
     "@typescript-eslint/eslint-plugin": "^5.1.0",
+    "c8": "^7.11.3",
     "eslint": "^8.1.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-import": "^2.23.4",
