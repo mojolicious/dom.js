@@ -8,6 +8,7 @@
 </p>
 
 [![](https://github.com/mojolicious/dom.js/workflows/test/badge.svg)](https://github.com/mojolicious/dom.js/actions)
+[![Coverage Status](https://coveralls.io/repos/github/mojolicious/dom.js/badge.svg?branch=main)](https://coveralls.io/github/mojolicious/dom.js?branch=main)
 [![npm](https://img.shields.io/npm/v/@mojojs/dom.svg)](https://www.npmjs.com/package/@mojojs/dom)
 
 A fast and minimalistic HTML/XML DOM parser with CSS selectors. Written in TypeScript.
