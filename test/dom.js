@@ -8,7 +8,7 @@ import DOM, {
   PINode,
   TextNode
 } from '../lib/dom.js';
-import {SafeString} from '@mojojs/template';
+import {SafeString} from '@mojojs/util';
 import t from 'tap';
 
 t.test('DOM', t => {

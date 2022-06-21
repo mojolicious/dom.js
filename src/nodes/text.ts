@@ -1,5 +1,5 @@
 import {ChildNode} from './child.js';
-import {SafeString, xmlEscape} from '@mojojs/template';
+import {SafeString, xmlEscape} from '@mojojs/util';
 
 /**
  * Text node class.

@@ -15,9 +15,9 @@ import {FragmentNode} from './nodes/fragment.js';
 import {PINode} from './nodes/pi.js';
 import {TextNode} from './nodes/text.js';
 import {XMLParser} from './xml.js';
-import {SafeString} from '@mojojs/template';
+import {SafeString} from '@mojojs/util';
 
-export * from './util.js';
+export * from '@mojojs/util';
 export {CDATANode, CommentNode, DoctypeNode, DocumentNode, ElementNode, FragmentNode, PINode, TextNode};
 
 type FormValue = string | string[] | null | FormValue[];

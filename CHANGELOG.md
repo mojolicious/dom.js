@@ -1,6 +1,12 @@
 
 # Changelog
 
+## v1.4.0 (2022-06-21)
+
+### Features
+
+  * Switched to [@mojojs/util](https://www.npmjs.com/package/@mojojs/util) for utility functions.
+
 ## v1.3.0 (2022-06-11)
 
 ### Features

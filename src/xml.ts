@@ -5,7 +5,7 @@ import {DoctypeNode} from './nodes/doctype.js';
 import {DocumentNode} from './nodes/document.js';
 import {ElementNode} from './nodes/element.js';
 import {PINode} from './nodes/pi.js';
-import {stickyMatch, xmlUnescape} from './util.js';
+import {stickyMatch, xmlUnescape} from '@mojojs/util';
 
 const ATTR_RE = new RegExp(`([^<>=\\s/]+|/)(?:\\s*=\\s*(?:(?<quote>["'])(.*?)\\k<quote>|([^>\\s]*)))?\\s*`, 'ys');
 const TEXT_RE = new RegExp(`([^<]+)`, 'ys');

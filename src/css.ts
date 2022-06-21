@@ -1,7 +1,7 @@
 import type {ElementNode} from './nodes/element.js';
 import type {Parent} from './types.js';
 import {inspect} from 'util';
-import {cssUnescape, escapeRegExp, stickyMatch} from './util.js';
+import {cssUnescape, escapeRegExp, stickyMatch} from '@mojojs/util';
 
 interface Attribute {
   name: RegExp;
