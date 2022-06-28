@@ -3,6 +3,7 @@
   "version": "1.4.0",
   "description": "A fast and minimalistic HTML/XML DOM parser with CSS selectors",
   "keywords": [
+    "mojojs",
     "dom",
     "html",
     "xml",
