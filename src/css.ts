@@ -1,6 +1,6 @@
 import type {ElementNode} from './nodes/element.js';
 import type {Parent} from './types.js';
-import {inspect} from 'util';
+import {inspect} from 'node:util';
 import {cssUnescape, escapeRegExp, stickyMatch} from '@mojojs/util';
 
 interface Attribute {
