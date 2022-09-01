@@ -1,6 +1,12 @@
 
 # Changelog
 
+## v1.5.0 (2022-09-01)
+
+### Features
+
+  * Reduced dependencies so this package can also be used in browsers in the future.
+
 ## v1.4.0 (2022-06-21)
 
 ### Features
