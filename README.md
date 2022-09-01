@@ -11,7 +11,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/mojolicious/dom.js/badge.svg?branch=main)](https://coveralls.io/github/mojolicious/dom.js?branch=main)
 [![npm](https://img.shields.io/npm/v/@mojojs/dom.svg)](https://www.npmjs.com/package/@mojojs/dom)
 
-A fast and minimalistic HTML/XML DOM parser with CSS selectors. Written in TypeScript.
+A fast and minimalistic HTML/XML DOM parser with CSS selectors for Node.js and browsers. Written in TypeScript.
 
 ```js
 import DOM from '@mojojs/dom';
