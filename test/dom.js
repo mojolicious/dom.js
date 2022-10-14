@@ -1481,6 +1481,14 @@ t.test('DOM', t => {
       '<div id="f&amp;oo"><i>I ♥ Mojo&amp;!</i></div>'
     );
 
+    t.equal(DOM.newTag('input', {type: 'checkbox', checked: ''}).toString(), '<input type="checkbox" checked>');
+    t.equal(DOM.newTag('input', {type: 'checkbox', checked: true}).toString(), '<input type="checkbox" checked>');
+    t.equal(DOM.newTag('input', {type: 'checkbox', checked: false}).toString(), '<input type="checkbox">');
+    t.equal(
+      DOM.newTag('input', {type: 'checkbox', checked: 'checked'}).toString(),
+      '<input type="checkbox" checked="checked">'
+    );
+
     t.equal(DOM.newTag('area').toString(), '<area>');
     t.equal(DOM.newTag('base').toString(), '<base>');
     t.equal(DOM.newTag('br').toString(), '<br>');

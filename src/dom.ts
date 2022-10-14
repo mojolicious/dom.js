@@ -177,14 +177,16 @@ export default class DOM {
    */
   static newTag(
     name: string,
-    attrs: Record<string, string | Record<string, string>> | string | SafeString = {},
+    attrs: Record<string, string | boolean | Record<string, string>> | string | SafeString = {},
     content: string | SafeString = ''
   ): DOM {
     if (typeof attrs === 'string' || attrs instanceof SafeString) [content, attrs] = [attrs, {}];
 
     const processedAttrs: Record<string, string> = {};
     for (const [name, value] of Object.entries(attrs)) {
-      if (typeof value !== 'string') {
+      if (typeof value === 'boolean') {
+        if (value === true) processedAttrs[name] = '';
+      } else if (typeof value !== 'string') {
         if (name !== 'data') continue;
         Object.entries(value).forEach(([name, value]) => (processedAttrs[`data-${name}`] = value));
       } else {

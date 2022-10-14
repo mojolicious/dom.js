@@ -1,6 +1,12 @@
 
 # Changelog
 
+## v1.6.0 (2022-10-14)
+
+### Features
+
+  * Added boolean attribute support to `newTag` method (can be used like `DOM.newTag('input', {checked: true})`).
+
 ## v1.5.0 (2022-09-01)
 
 ### Features
