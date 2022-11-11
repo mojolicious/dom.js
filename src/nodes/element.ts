@@ -1,25 +1,7 @@
 import type {FragmentNode} from './fragment.js';
+import {EMPTY} from '../constants.js';
 import {ParentNode} from './parent.js';
 import {xmlEscape} from '@mojojs/util';
-
-const EMPTY_HTML_TAGS: Record<string, boolean> = {
-  area: true,
-  base: true,
-  br: true,
-  col: true,
-  embed: true,
-  hr: true,
-  img: true,
-  input: true,
-  keygen: true,
-  link: true,
-  menuitem: true,
-  meta: true,
-  param: true,
-  source: true,
-  track: true,
-  wbr: true
-};
 
 /**
  * Element node class.
@@ -101,7 +83,7 @@ export class ElementNode extends ParentNode {
       } else {
         result.push(' />');
       }
-    } else if (EMPTY_HTML_TAGS[name] !== true) {
+    } else if (EMPTY.has(name) !== true) {
       result.push('>', this._content(options), '</', name, '>');
     } else {
       result.push('>');

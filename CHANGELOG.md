@@ -3,6 +3,18 @@
 
 This package strictly follows [Semantic Versioning](https://semver.org).
 
+## v2.0.0 (NOT YET RELEASED)
+
+### Breaking Changes
+
+  * Switched from [parse5](https://www.npmjs.com/package/parse5) to a custom parser as default for HTML. This reduces
+    the bundle size significantly for browser use. More spec compliant parsers are still supported with the new custom
+    parser API.
+
+### Features
+
+  * Added support for custom parsers.
+
 ## v1.6.0 (2022-10-14)
 
 ### Features

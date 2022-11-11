@@ -1,47 +1,8 @@
-import DOM, {
-  CDATANode,
-  CommentNode,
-  DoctypeNode,
-  DocumentNode,
-  ElementNode,
-  FragmentNode,
-  PINode,
-  TextNode
-} from '../lib/dom.js';
+import DOM, {CDATANode, CommentNode, ElementNode, FragmentNode, PINode, TextNode} from '../lib/dom.js';
 import {SafeString} from '@mojojs/util';
 import t from 'tap';
 
 t.test('DOM', t => {
-  t.test('HTML document', t => {
-    const dom = new DOM('<!DOCTYPE html><p class="foo">Mojo</p>');
-
-    t.ok(dom.currentNode instanceof DocumentNode);
-    t.ok(dom.currentNode.childNodes[0] instanceof DoctypeNode);
-    t.ok(dom.currentNode.childNodes[1] instanceof ElementNode);
-    t.equal(dom.currentNode.childNodes[1].tagName, 'html');
-    t.ok(dom.currentNode.childNodes[1].childNodes[0] instanceof ElementNode);
-    t.equal(dom.currentNode.childNodes[1].childNodes[0].tagName, 'head');
-    t.ok(dom.currentNode.childNodes[1].childNodes[1] instanceof ElementNode);
-    t.equal(dom.currentNode.childNodes[1].childNodes[1].tagName, 'body');
-    t.ok(dom.currentNode.childNodes[1].childNodes[1].childNodes[0] instanceof ElementNode);
-    t.equal(dom.currentNode.childNodes[1].childNodes[1].childNodes[0].tagName, 'p');
-    t.equal(dom.currentNode.childNodes[1].childNodes[1].childNodes[0].attributes.class, 'foo');
-    t.same(dom.currentNode.childNodes[1].childNodes[1].childNodes[1], undefined);
-    t.ok(dom.currentNode.childNodes[1].childNodes[1].childNodes[0].childNodes[0] instanceof TextNode);
-    t.equal(dom.currentNode.childNodes[1].childNodes[1].childNodes[0].childNodes[0].value, 'Mojo');
-    t.same(dom.currentNode.childNodes[1].childNodes[1].childNodes[0].childNodes[1], undefined);
-    t.same(dom.currentNode.childNodes[1].childNodes[2], undefined);
-    t.same(dom.currentNode.childNodes[2], undefined);
-
-    t.equal(dom.toString(), '<!DOCTYPE html><html><head></head><body><p class="foo">Mojo</p></body></html>');
-    t.equal(
-      new DOM(dom.currentNode.clone()).toString(),
-      '<!DOCTYPE html><html><head></head><body><p class="foo">Mojo</p></body></html>'
-    );
-
-    t.end();
-  });
-
   t.test('HTML fragment', t => {
     const dom = new DOM('<p class="foo">Mojo</p><!-- Test -->', {fragment: true});
 
@@ -62,7 +23,7 @@ t.test('DOM', t => {
   });
 
   t.test('HTML fragment (<template>)', t => {
-    const dom = new DOM('<p>Mojo</p><template><div>Hello</div></template>', {fragment: true});
+    const dom = new DOM('<p>Mojo</p><template><div>Hello</div></template>');
 
     t.ok(dom.currentNode instanceof FragmentNode);
     t.ok(dom.currentNode.childNodes[0] instanceof ElementNode);
@@ -86,7 +47,7 @@ t.test('DOM', t => {
   t.test('XML document', t => {
     const dom = new DOM('<link>http://mojolicious.org<?just a test?><![CDATA[another test]]></link>', {xml: true});
 
-    t.ok(dom.currentNode instanceof DocumentNode);
+    t.ok(dom.currentNode instanceof FragmentNode);
     t.ok(dom.currentNode.childNodes[0] instanceof ElementNode);
     t.equal(dom.currentNode.childNodes[0].tagName, 'link');
     t.ok(dom.currentNode.childNodes[0].childNodes[0] instanceof TextNode);
@@ -109,7 +70,7 @@ t.test('DOM', t => {
   });
 
   t.test('Entities', t => {
-    const dom = new DOM('<p class="&lt;foo&gt;">&lt;Mojo&gt;</p>', {fragment: true});
+    const dom = new DOM('<p class="&lt;foo&gt;">&lt;Mojo&gt;</p>');
     t.equal(dom.currentNode.childNodes[0].attributes.class, '<foo>');
     t.equal(dom.currentNode.childNodes[0].childNodes[0].value, '<Mojo>');
     t.equal(dom.toString(), '<p class="&lt;foo&gt;">&lt;Mojo&gt;</p>');
@@ -123,7 +84,7 @@ t.test('DOM', t => {
   });
 
   t.test('Tag', t => {
-    const dom = new DOM('<p class="foo">Foo</p><div>Bar</div>', {fragment: true});
+    const dom = new DOM('<p class="foo">Foo</p><div>Bar</div>');
     t.equal(dom.tag, '');
     t.same(dom.matches('*'), false);
     t.equal(dom.at('p').tag, 'p');
@@ -144,7 +105,7 @@ t.test('DOM', t => {
   });
 
   t.test('Attribute', t => {
-    const dom = new DOM('<p class="foo">Foo</p><div id="bar">Bar</div>', {fragment: true});
+    const dom = new DOM('<p class="foo">Foo</p><div id="bar">Bar</div>');
     t.same(dom.attr.class, null);
     t.same(Object.keys(dom.attr), []);
     t.equal(dom.at('p').attr.class, 'foo');
@@ -155,7 +116,7 @@ t.test('DOM', t => {
     t.same(dom.at('[id]').attr.class, null);
     t.same(Object.keys(dom.at('[id]').attr), ['id']);
 
-    const dom2 = new DOM('<p class="foo">Foo</p>', {fragment: true});
+    const dom2 = new DOM('<p class="foo">Foo</p>');
     dom2.at('p').attr.class += 'bar';
     dom2.at('p').attr.id = 'baz';
     t.equal(dom2.toString(), '<p class="foobar" id="baz">Foo</p>');
@@ -166,7 +127,7 @@ t.test('DOM', t => {
   });
 
   t.test('Text', t => {
-    const dom = new DOM('<p>Hello Mojo<b>!</b></p>', {fragment: true});
+    const dom = new DOM('<p>Hello Mojo<b>!</b></p>');
     t.equal(dom.text(), '');
     t.equal(dom.text({recursive: true}), 'Hello Mojo!');
     t.equal(dom.at('p').text(), 'Hello Mojo');
@@ -216,7 +177,7 @@ t.test('DOM', t => {
   });
 
   t.test('HTML to XML', t => {
-    const dom = new DOM('<p data-test data-two="data-two">Hello<br>Mojo!</p>', {fragment: true});
+    const dom = new DOM('<p data-test data-two="data-two">Hello<br>Mojo!</p>');
     t.equal(dom.at('p').text(), 'HelloMojo!');
     t.equal(dom.toString({xml: true}), '<p data-test="data-test" data-two="data-two">Hello<br />Mojo!</p>');
     t.equal(dom.toString(), '<p data-test data-two="data-two">Hello<br>Mojo!</p>');
@@ -342,7 +303,7 @@ t.test('DOM', t => {
   });
 
   t.test('Remove elements', t => {
-    const dom = new DOM('<div>foo<p>lalala</p><br><i>bar</i></div>', {fragment: true});
+    const dom = new DOM('<div>foo<p>lalala</p><br><i>bar</i></div>');
     dom.remove();
     dom.strip();
     t.equal(dom.toString(), '<div>foo<p>lalala</p><br><i>bar</i></div>');
@@ -365,10 +326,7 @@ t.test('DOM', t => {
       {fragment: true}
     );
 
-    dom
-      .at('li')
-      .append('<p>A1</p>23')
-      .append(new DOM('22', {fragment: true}));
+    dom.at('li').append('<p>A1</p>23').append(new DOM('22'));
     t.equal(
       dom.toString(),
       `
@@ -380,10 +338,7 @@ t.test('DOM', t => {
       <div>D</div>`
     );
 
-    dom
-      .at('li')
-      .prepend('24')
-      .prepend(new DOM('<div>A-1</div>25', {fragment: true}));
+    dom.at('li').prepend('24').prepend(new DOM('<div>A-1</div>25'));
     t.equal(
       dom.toString(),
       `
@@ -409,10 +364,7 @@ t.test('DOM', t => {
       <div>D</div>`
     );
 
-    dom
-      .appendContent('la')
-      .appendContent(new DOM('lal', {fragment: true}))
-      .appendContent('a');
+    dom.appendContent('la').appendContent(new DOM('lal')).appendContent('a');
     t.equal(
       dom.toString(),
       `lalala
@@ -436,10 +388,7 @@ t.test('DOM', t => {
       <div>D</div>workslalala`
     );
 
-    dom
-      .at('li')
-      .prependContent('A3<p>A2</p>')
-      .prependContent(new DOM('A4', {fragment: true}));
+    dom.at('li').prependContent('A3<p>A2</p>').prependContent(new DOM('A4'));
     t.equal(dom.at('li').text(), 'A4A3A');
     t.equal(
       dom.toString(),
@@ -480,31 +429,31 @@ t.test('DOM', t => {
   });
 
   t.test('Replace elements', t => {
-    const dom = new DOM('<div>foo<p>lalala</p>bar</div>', {fragment: true});
+    const dom = new DOM('<div>foo<p>lalala</p>bar</div>');
     dom.at('p').replace('<foo>bar</foo>');
     t.equal(dom.toString(), '<div>foo<foo>bar</foo>bar</div>');
-    dom.at('foo').replace(new DOM('text', {fragment: true}));
+    dom.at('foo').replace(new DOM('text'));
     t.equal(dom.toString(), '<div>footextbar</div>');
 
-    const dom2 = new DOM('<div>foo</div><div>bar</div>', {fragment: true});
+    const dom2 = new DOM('<div>foo</div><div>bar</div>');
     dom2.find('div').forEach(el => el.replace('<p>test</p>'));
     t.equal(dom2.toString(), '<p>test</p><p>test</p>');
 
-    const dom3 = new DOM('<div>foo<p>lalala</p>bar</div>', {fragment: true});
+    const dom3 = new DOM('<div>foo<p>lalala</p>bar</div>');
     t.equal(dom3.at('div').content(), 'foo<p>lalala</p>bar');
     dom3.at('p').replace('♥');
     t.equal(dom3.toString(), '<div>foo♥bar</div>');
     t.equal(dom3.at('div').content(), 'foo♥bar');
 
-    const dom4 = new DOM('<div>foo<p>lalala</p>bar</div>', {fragment: true});
+    const dom4 = new DOM('<div>foo<p>lalala</p>bar</div>');
     dom4.at('p').replace('');
     t.equal(dom4.toString(), '<div>foobar</div>');
 
-    const dom5 = new DOM('A<div>B<p>C<b>D<i><u>E</u></i>F</b>G</p><div>H</div></div>I', {fragment: true});
+    const dom5 = new DOM('A<div>B<p>C<b>D<i><u>E</u></i>F</b>G</p><div>H</div></div>I');
     dom5.find(':not(div):not(i):not(u)').forEach(el => el.strip());
     t.equal(dom5.toString(), 'A<div>BCG<div>H</div></div>I');
 
-    const dom6 = new DOM('<div><div>A</div><div>B</div>C</div>', {fragment: true});
+    const dom6 = new DOM('<div><div>A</div><div>B</div>C</div>');
     t.equal(dom6.at('div').at('div').text(), 'A');
     dom6
       .at('div')
@@ -512,7 +461,7 @@ t.test('DOM', t => {
       .forEach(el => el.strip());
     t.equal(dom6.toString(), '<div>ABC</div>');
 
-    const dom7 = new DOM('<div><b>♥</b></div>', {fragment: true});
+    const dom7 = new DOM('<div><b>♥</b></div>');
     dom7.at('div').replaceContent('<i>☃</i>');
     t.equal(dom7.toString(), '<div><i>☃</i></div>');
 
@@ -1097,7 +1046,7 @@ t.test('DOM', t => {
   });
 
   t.test('Unusual order', t => {
-    const dom = new DOM('<a href="http://example.com" id="foo" class="bar">Ok!</a>', {fragment: true});
+    const dom = new DOM('<a href="http://example.com" id="foo" class="bar">Ok!</a>');
     t.equal(dom.at('a:not([href$=foo])[href^=h]').text(), 'Ok!');
     t.same(dom.at('a:not([href$=example.com])[href^=h]'), null);
     t.equal(dom.at('a[href^=h]#foo.bar').text(), 'Ok!');
@@ -1208,11 +1157,11 @@ t.test('DOM', t => {
     t.equal(dom.at('[id^="☃"]').text(), 'Snowman');
     t.equal(dom.at('div[id^="☃"]').text(), 'Snowman');
     t.equal(dom.at('html div[id^="☃"]').text(), 'Snowman');
-    t.equal(dom.at('html > body > div[id^="☃"]').text(), 'Snowman');
+    t.equal(dom.at('html > div[id^="☃"]').text(), 'Snowman');
     t.equal(dom.at('[id^=☃]').text(), 'Snowman');
     t.equal(dom.at('div[id^=☃]').text(), 'Snowman');
     t.equal(dom.at('html div[id^=☃]').text(), 'Snowman');
-    t.equal(dom.at('html > body > div[id^=☃]').text(), 'Snowman');
+    t.equal(dom.at('html > div[id^=☃]').text(), 'Snowman');
     t.equal(dom.at('.\\n\\002665').text(), 'Heart');
     t.equal(dom.at('.\\2665').text(), 'Heart');
     t.equal(dom.at('html .\\n\\002665').text(), 'Heart');
@@ -1230,27 +1179,27 @@ t.test('DOM', t => {
     t.equal(dom.at('[class$="♥"]').text(), 'Heart');
     t.equal(dom.at('div[class$="♥"]').text(), 'Heart');
     t.equal(dom.at('html div[class$="♥"]').text(), 'Heart');
-    t.equal(dom.at('html > body > div[class$="♥"]').text(), 'Heart');
+    t.equal(dom.at('html > div[class$="♥"]').text(), 'Heart');
     t.equal(dom.at('[class$=♥]').text(), 'Heart');
     t.equal(dom.at('div[class$=♥]').text(), 'Heart');
     t.equal(dom.at('html div[class$=♥]').text(), 'Heart');
-    t.equal(dom.at('html > body > div[class$=♥]').text(), 'Heart');
+    t.equal(dom.at('html > div[class$=♥]').text(), 'Heart');
     t.equal(dom.at('[class~="♥"]').text(), 'Heart');
     t.equal(dom.at('div[class~="♥"]').text(), 'Heart');
     t.equal(dom.at('html div[class~="♥"]').text(), 'Heart');
-    t.equal(dom.at('html > body > div[class~="♥"]').text(), 'Heart');
+    t.equal(dom.at('html > div[class~="♥"]').text(), 'Heart');
     t.equal(dom.at('[class~=♥]').text(), 'Heart');
     t.equal(dom.at('div[class~=♥]').text(), 'Heart');
     t.equal(dom.at('html div[class~=♥]').text(), 'Heart');
-    t.equal(dom.at('html > body > div[class~=♥]').text(), 'Heart');
+    t.equal(dom.at('html > div[class~=♥]').text(), 'Heart');
     t.equal(dom.at('[class~="x"]').text(), 'Heart');
     t.equal(dom.at('div[class~="x"]').text(), 'Heart');
     t.equal(dom.at('html div[class~="x"]').text(), 'Heart');
-    t.equal(dom.at('html > body > div[class~="x"]').text(), 'Heart');
+    t.equal(dom.at('html > div[class~="x"]').text(), 'Heart');
     t.equal(dom.at('[class~=x]').text(), 'Heart');
     t.equal(dom.at('div[class~=x]').text(), 'Heart');
     t.equal(dom.at('html div[class~=x]').text(), 'Heart');
-    t.equal(dom.at('html > body > div[class~=x]').text(), 'Heart');
+    t.equal(dom.at('html > div[class~=x]').text(), 'Heart');
 
     t.end();
   });
@@ -1529,6 +1478,708 @@ t.test('DOM', t => {
       DOM.newTag('div', {'data-one': 'One', data: {two: 'Two'}}, 'Hello World!').toString({xml: true}),
       '<div data-one="One" data-two="Two">Hello World!</div>'
     );
+
+    t.end();
+  });
+
+  t.test('Script tag', t => {
+    const dom = new DOM(`<script charset="utf-8">alert('lalala');</script>`);
+    t.equal(dom.at('script').text(), `alert('lalala');`);
+    t.equal(dom.toString(), `<script charset="utf-8">alert('lalala');</script>`);
+
+    t.end();
+  });
+
+  t.test('HTML5 (unquoted values)', t => {
+    const dom = new DOM('<div id = test foo ="bar" class=tset bar=/baz/ value baz=//>works</div>');
+    t.equal(dom.at('#test').text(), 'works');
+    t.equal(dom.toString(), '<div id="test" foo="bar" class="tset" bar="/baz/" value baz="//">works</div>');
+
+    t.end();
+  });
+
+  t.test('HTML1 (single quotes, uppercase tags and whitespace in attributes)', t => {
+    const dom = new DOM(`<DIV id = 'test' foo ='bar' class= "tset">works</DIV>`);
+    t.equal(dom.at('#test').text(), 'works');
+    t.equal(dom.toString(), '<div id="test" foo="bar" class="tset">works</div>');
+
+    t.end();
+  });
+
+  t.test('Looks remotely like HTML', t => {
+    const dom = new DOM('<!DOCTYPE H "-/W/D HT 4/E">☃<title class=test>♥</title>☃');
+    t.equal(dom.at('title').text(), '♥');
+    t.equal(dom.toString(), '<!DOCTYPE H "-/W/D HT 4/E">☃<title class="test">♥</title>☃');
+
+    t.end();
+  });
+
+  t.test('Markup characters in attribute values', t => {
+    const dom = new DOM(`<div id="<a>" \n test='='>Test<div id='><' /></div>`);
+    t.equal(dom.at('[id="<a>"]').text(), 'Test');
+    t.equal(dom.toString(), '<div id="&lt;a&gt;" test="=">Test<div id="&gt;&lt;"></div></div>');
+
+    t.end();
+  });
+
+  t.test('Empty attributes', t => {
+    const dom = new DOM(`<div test="" test2='' />`);
+    t.equal(dom.at('div').attr.test, '');
+    t.equal(dom.at('div').attr.test2, '');
+    t.equal(dom.toString(), '<div test test2></div>');
+
+    t.end();
+  });
+
+  t.test('Multi-line attribute', t => {
+    const dom = new DOM('<div class="line1\nline2" />');
+    t.equal(dom.at('.line1').tag, 'div');
+    t.equal(dom.toString(), '<div class="line1\nline2"></div>');
+
+    t.end();
+  });
+
+  t.test('Entities in attributese', t => {
+    const dom = new DOM('<a href="/?foo&lt=bar"></a>');
+    t.equal(dom.at('a').attr.href, '/?foo&lt=bar');
+    t.equal(dom.toString(), '<a href="/?foo&amp;lt=bar"></a>');
+
+    t.end();
+  });
+
+  t.test('Whitespaces before closing bracket', t => {
+    const dom = new DOM('<div >content</div>');
+    t.equal(dom.at('div').text(), 'content');
+    t.equal(dom.toString(), '<div>content</div>');
+
+    t.end();
+  });
+
+  t.test('Whitespaces before closing bracket', t => {
+    const dom = new DOM(`
+    <html>
+      <head>
+        <title>foo</title>
+      <body>bar`);
+    t.equal(dom.at('html > head > title').text(), 'foo');
+    t.equal(dom.at('html > body').text(), 'bar');
+
+    t.end();
+  });
+
+  t.test('Auto-close tag', t => {
+    const dom = new DOM('<p><div />');
+    t.equal(dom.toString(), '<p></p><div></div>');
+
+    t.end();
+  });
+
+  t.test('No auto-close in scope', t => {
+    const dom = new DOM('<p><svg><div /></svg>');
+    t.equal(dom.toString(), '<p><svg><div></div></svg></p>');
+
+    const dom2 = new DOM('<p><math><div /></math>');
+    t.equal(dom2.toString(), '<p><math><div></div></math></p>');
+
+    t.end();
+  });
+
+  t.test('Auto-close scope', t => {
+    const dom = new DOM('<p><svg></p>');
+    t.equal(dom.toString(), '<p><svg></svg></p>');
+
+    const dom2 = new DOM('<p><math>');
+    t.equal(dom2.toString(), '<p><math></math></p>');
+
+    t.end();
+  });
+
+  t.test('image', t => {
+    const dom = new DOM('<image src="foo.png">test');
+    t.equal(dom.at('img').attr.src, 'foo.png');
+    t.equal(dom.toString(), '<img src="foo.png">test');
+
+    t.end();
+  });
+
+  t.test('title', t => {
+    const dom = new DOM('<title> <p>test&lt;</title>');
+    t.equal(dom.at('title').text(), ' <p>test<');
+    t.equal(dom.toString(), '<title> <p>test<</title>');
+
+    t.end();
+  });
+
+  t.test('textarea', t => {
+    const dom = new DOM('<textarea id="a"> <p>test&lt;</textarea>');
+    t.equal(dom.at('textarea').text(), ' <p>test<');
+    t.equal(dom.toString(), '<textarea id="a"> <p>test<</textarea>');
+
+    t.end();
+  });
+
+  t.test('Optional "li" tags', t => {
+    const dom = new DOM(`
+    <ul>
+      <li>
+        <ol>
+          <li>F
+          <li>G
+        </ol>
+      <li>A</li>
+      <LI>B
+      <li>C</li>
+      <li>D
+      <li>E
+    </ul>`);
+
+    t.equal(dom.find('ul > li > ol > li')[0].text(), 'F\n          ');
+    t.equal(dom.find('ul > li > ol > li')[1].text(), 'G\n        ');
+    t.equal(dom.find('ul > li')[1].text(), 'A');
+    t.equal(dom.find('ul > li')[2].text(), 'B\n      ');
+    t.equal(dom.find('ul > li')[3].text(), 'C');
+    t.equal(dom.find('ul > li')[4].text(), 'D\n      ');
+    t.equal(dom.find('ul > li')[5].text(), 'E\n    ');
+
+    t.end();
+  });
+
+  t.test('Optional "p" tag', t => {
+    const dom = new DOM(`
+    <div>
+      <p>A</p>
+      <P>B
+      <p>C</p>
+      <p>D<div>X</div>
+      <p>E<img src="foo.png">
+      <p>F<br>G
+      <p>H
+    </div>`);
+
+    t.equal(dom.find('div > p')[0].text(), 'A');
+    t.equal(dom.find('div > p')[1].text(), 'B\n      ');
+    t.equal(dom.find('div > p')[2].text(), 'C');
+    t.equal(dom.find('div > p')[3].text(), 'D');
+    t.equal(dom.find('div > p')[4].text(), 'E\n      ');
+    t.equal(dom.find('div > p')[5].text(), 'FG\n      ');
+    t.equal(dom.find('div > p')[6].text(), 'H\n    ');
+    t.equal(dom.find('div > p > p').length, 0);
+    t.equal(dom.at('div > p > img').attr.src, 'foo.png');
+    t.equal(dom.at('div > div').text(), 'X');
+
+    t.end();
+  });
+
+  t.test('Optional "dt" and "dd" tags', t => {
+    const dom = new DOM(`
+    <dl>
+      <dt>A</dt>
+      <DD>B
+      <dt>C</dt>
+      <dd>D
+      <dt>E
+      <dd>F
+    </dl>`);
+    t.equal(dom.find('dl > dt')[0].text(), 'A');
+    t.equal(dom.find('dl > dd')[0].text(), 'B\n      ');
+    t.equal(dom.find('dl > dt')[1].text(), 'C');
+    t.equal(dom.find('dl > dd')[1].text(), 'D\n      ');
+    t.equal(dom.find('dl > dt')[2].text(), 'E\n      ');
+    t.equal(dom.find('dl > dd')[2].text(), 'F\n    ');
+
+    t.end();
+  });
+
+  t.test('Optional "rp" and "rt" tags', t => {
+    const dom = new DOM(`
+    <ruby>
+      <rp>A</rp>
+      <RT>B
+      <rp>C</rp>
+      <rt>D
+      <rp>E
+      <rt>F
+    </ruby>`);
+
+    t.equal(dom.find('ruby > rp')[0].text(), 'A');
+    t.equal(dom.find('ruby > rt')[0].text(), 'B\n      ');
+    t.equal(dom.find('ruby > rp')[1].text(), 'C');
+    t.equal(dom.find('ruby > rt')[1].text(), 'D\n      ');
+    t.equal(dom.find('ruby > rp')[2].text(), 'E\n      ');
+    t.equal(dom.find('ruby > rt')[2].text(), 'F\n    ');
+
+    t.end();
+  });
+
+  t.test('Optional "optgroup" and "option" tags', t => {
+    const dom = new DOM(`
+    <div>
+      <optgroup>A
+        <option id="foo">B
+        <option>C</option>
+        <option>D
+      <OPTGROUP>E
+        <option>F
+      <optgroup>G
+        <option>H
+    </div>`);
+
+    t.equal(dom.find('div > optgroup')[0].text(), 'A\n        \n        ');
+    t.equal(dom.find('div > optgroup > #foo')[0].text(), 'B\n        ');
+    t.equal(dom.find('div > optgroup > option')[1].text(), 'C');
+    t.equal(dom.find('div > optgroup > option')[2].text(), 'D\n      ');
+    t.equal(dom.find('div > optgroup')[1].text(), 'E\n        ');
+    t.equal(dom.find('div > optgroup > option')[3].text(), 'F\n      ');
+    t.equal(dom.find('div > optgroup')[2].text(), 'G\n        ');
+    t.equal(dom.find('div > optgroup > option')[4].text(), 'H\n    ');
+
+    t.end();
+  });
+
+  t.test('Optional "colgroup" tag', t => {
+    const dom = new DOM(`
+    <table>
+      <col id=morefail>
+      <col id=fail>
+      <colgroup>
+        <col id=foo>
+        <col class=foo>
+      <colgroup>
+        <col id=bar>
+    </table>`);
+
+    t.equal(dom.find('table > col')[0].attr.id, 'morefail');
+    t.equal(dom.find('table > col')[1].attr.id, 'fail');
+    t.equal(dom.find('table > colgroup > col')[0].attr.id, 'foo');
+    t.equal(dom.find('table > colgroup > col')[1].attr.class, 'foo');
+    t.equal(dom.find('table > colgroup > col')[2].attr.id, 'bar');
+
+    t.end();
+  });
+
+  t.test('Optional "thead", "tbody", "tfoot", "tr", "th" and "td" tags', t => {
+    const dom = new DOM(`
+    <table>
+      <thead>
+        <tr>
+          <th>A</th>
+          <th>D
+      <tfoot>
+        <tr>
+          <td>C
+      <tbody>
+        <tr>
+          <td>B
+    </table>`);
+
+    t.equal(dom.at('table > thead > tr > th').text(), 'A');
+    t.equal(dom.find('table > thead > tr > th')[1].text(), 'D\n      ');
+    t.equal(dom.at('table > tbody > tr > td').text(), 'B\n    ');
+    t.equal(dom.at('table > tfoot > tr > td').text(), 'C\n      ');
+
+    t.end();
+  });
+
+  t.test('Optional "thead", "tbody", "tfoot", "tr", "th" and "td" tags', t => {
+    const dom = new DOM(`
+    <table>
+      <col id=morefail>
+      <col id=fail>
+      <colgroup>
+        <col id=foo />
+        <col class=foo>
+      <colgroup>
+        <col id=bar>
+      </colgroup>
+      <thead>
+        <tr>
+          <th>A</th>
+          <th>D
+      <tbody>
+        <tr>
+          <td>B
+      <tbody>
+        <tr>
+          <td>E
+    </table>`);
+
+    t.equal(dom.find('table > col')[0].attr.id, 'morefail');
+    t.equal(dom.find('table > col')[1].attr.id, 'fail');
+    t.equal(dom.find('table > colgroup > col')[0].attr.id, 'foo');
+    t.equal(dom.find('table > colgroup > col')[1].attr.class, 'foo');
+    t.equal(dom.find('table > colgroup > col')[2].attr.id, 'bar');
+    t.equal(dom.at('table > thead > tr > th').text(), 'A');
+    t.equal(dom.find('table > thead > tr > th')[1].text(), 'D\n      ');
+    t.equal(dom.at('table > tbody > tr > td').text(), 'B\n      ');
+    t.equal(
+      dom
+        .find('table > tbody > tr > td')
+        .map(el => el.text())
+        .join('\n'),
+      'B\n      \nE\n    '
+    );
+
+    t.end();
+  });
+
+  t.test('Optional "thead", "tbody", "tfoot", "tr", "th" and "td" tags', t => {
+    const dom = new DOM(`
+    <table>
+      <colgroup>
+        <col id=foo />
+        <col class=foo>
+      <colgroup>
+        <col id=bar>
+      </colgroup>
+      <tbody>
+        <tr>
+          <td>B
+    </table>`);
+
+    t.equal(dom.find('table > colgroup > col')[0].attr.id, 'foo');
+    t.equal(dom.find('table > colgroup > col')[1].attr.class, 'foo');
+    t.equal(dom.find('table > colgroup > col')[2].attr.id, 'bar');
+    t.equal(dom.at('table > tbody > tr > td').text(), 'B\n    ');
+
+    t.end();
+  });
+
+  t.test('Optional "tr" and "td" tags', t => {
+    const dom = new DOM(`
+    <table>
+      <tr>
+        <td>A
+        <td>B</td>
+      <tr>
+        <td>C
+      </tr>
+      <tr>
+        <td>D
+    </table>`);
+
+    t.equal(dom.find('table > tr > td')[0].text(), 'A\n        ');
+    t.equal(dom.find('table > tr > td')[1].text(), 'B');
+    t.equal(dom.find('table > tr > td')[2].text(), 'C\n      ');
+    t.equal(dom.find('table > tr > td')[3].text(), 'D\n    ');
+
+    t.end();
+  });
+
+  t.test('Real world table', t => {
+    const dom = new DOM(`
+    <html>
+    <head>
+      <title>Real World!</title>
+    <body>
+      <p>Just a test
+      <table class=RealWorld>
+        <thead>
+          <tr>
+            <th class=one>One
+            <th class=two>Two
+            <th class=three>Three
+            <th class=four>Four
+        <tbody>
+          <tr>
+            <td class=alpha>Alpha
+            <td class=beta>Beta
+            <td class=gamma><a href="#gamma">Gamma</a>
+            <td class=delta>Delta
+          <tr>
+            <td class=alpha>Alpha Two
+            <td class=beta>Beta Two
+            <td class=gamma><a href="#gamma-two">Gamma Two</a>
+            <td class=delta>Delta Two
+      </table>`);
+
+    t.equal(dom.find('html > head > title')[0].text(), 'Real World!');
+    t.equal(dom.find('html > body > p')[0].text(), 'Just a test\n      ');
+    t.equal(dom.find('p')[0].text(), 'Just a test\n      ');
+    t.equal(dom.find('thead > tr > .three')[0].text(), 'Three\n            ');
+    t.equal(dom.find('thead > tr > .four')[0].text(), 'Four\n        ');
+    t.equal(dom.find('tbody > tr > .beta')[0].text(), 'Beta\n            ');
+    t.equal(dom.find('tbody > tr > .gamma')[0].text(), '\n            ');
+    t.equal(dom.find('tbody > tr > .gamma > a')[0].text(), 'Gamma');
+    t.equal(dom.find('tbody > tr > .alpha')[1].text(), 'Alpha Two\n            ');
+    t.equal(dom.find('tbody > tr > .gamma > a')[1].text(), 'Gamma Two');
+
+    t.end();
+  });
+
+  t.test('Real world list', t => {
+    const dom = new DOM(`
+    <html>
+    <head>
+      <title>Real World!</title>
+    <body>
+      <ul>
+        <li>
+          Test
+          <br>
+          123
+          <p>
+  
+        <li>
+          Test
+          <br>
+          321
+          <p>
+        <li>
+          Test
+          3
+          2
+          1
+          <p>
+      </ul>`);
+
+    t.equal(dom.find('html > head > title')[0].text(), 'Real World!');
+    t.equal(dom.find('body > ul > li')[0].text(), '\n          Test\n          \n          123\n          ');
+    t.equal(dom.find('body > ul > li > p')[0].text(), '\n  \n        ');
+    t.equal(dom.find('body > ul > li')[1].text(), '\n          Test\n          \n          321\n          ');
+    t.equal(dom.find('body > ul > li > p')[1].text(), '\n        ');
+    t.equal(
+      dom.find('body > ul > li')[1].text({recursive: true}),
+      '\n          Test\n          \n          321\n          \n        '
+    );
+    t.equal(dom.find('body > ul > li > p')[1].text({recursive: true}), '\n        ');
+    t.equal(
+      dom.find('body > ul > li')[2].text(),
+      '\n          Test\n          3\n          2\n          1\n          '
+    );
+    t.equal(dom.find('body > ul > li > p')[2].text(), '\n      ');
+    t.equal(
+      dom.find('body > ul > li')[2].text({recursive: true}),
+      '\n          Test\n          3\n          2\n          1\n          \n      '
+    );
+    t.equal(dom.find('body > ul > li > p')[2].text({recursive: true}), '\n      ');
+
+    t.end();
+  });
+
+  t.test('Real world JavaScript and CSS', t => {
+    const dom = new DOM(`
+    <html>
+      <head>
+        <style test=works>#style { foo: style('<test>'); }</style>
+        <script>
+          if (a < b) {
+            alert('<123>');
+          }
+        </script>
+        < sCriPt two="23" >if (b > c) { alert('&<ohoh>') }< / scRiPt >
+      <body>Foo!</body>`);
+
+    t.equal(dom.find('html > body')[0].text(), 'Foo!');
+    t.equal(dom.find('html > head > style')[0].text(), "#style { foo: style('<test>'); }");
+    t.equal(
+      dom.find('html > head > script')[0].text(),
+      "\n          if (a < b) {\n            alert('<123>');\n          }\n        "
+    );
+    t.equal(dom.find('html > head > script')[1].text(), "if (b > c) { alert('&<ohoh>') }");
+
+    t.end();
+  });
+
+  t.test('More real world JavaScript', t => {
+    const dom = new DOM(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>Foo</title>
+        <script src="/js/one.js"></script>
+        <script src="/js/two.js"></script>
+        <script src="/js/three.js"></script>
+      </head>
+      <body>Bar</body>
+    </html>`);
+
+    t.equal(dom.at('title').text(), 'Foo');
+    t.equal(dom.find('html > head > script')[0].attr.src, '/js/one.js');
+    t.equal(dom.find('html > head > script')[1].attr.src, '/js/two.js');
+    t.equal(dom.find('html > head > script')[2].attr.src, '/js/three.js');
+    t.equal(dom.find('html > head > script')[2].text(), '');
+    t.equal(dom.at('html > body').text(), 'Bar');
+
+    t.end();
+  });
+
+  t.test('Even more real world JavaScript', t => {
+    const dom = new DOM(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>Foo</title>
+        <script src="/js/one.js"></script>
+        <script src="/js/two.js"></script>
+        <script src="/js/three.js">
+      </head>
+      <body>Bar</body>
+    </html>`);
+
+    t.equal(dom.at('title').text(), 'Foo');
+    t.equal(dom.find('html > head > script')[0].attr.src, '/js/one.js');
+    t.equal(dom.find('html > head > script')[1].attr.src, '/js/two.js');
+    t.equal(dom.find('html > head > script')[2].attr.src, '/js/three.js');
+    t.equal(dom.find('html > head > script')[2].text(), '\n      ');
+    t.equal(dom.at('html > body').text(), 'Bar');
+
+    t.end();
+  });
+
+  t.test('Broken "font" block and useless end tags', t => {
+    const dom = new DOM(`
+    <html>
+      <head><title>Test</title></head>
+      <body>
+        <table>
+          <tr><td><font>test</td></font></tr>
+          </tr>
+        </table>
+      </body>
+    </html>`);
+
+    t.equal(dom.at('html > head > title').text(), 'Test');
+    t.equal(dom.at('html body table tr td > font').text(), 'test');
+
+    t.end();
+  });
+
+  t.test('Different broken "font" block', t => {
+    const dom = new DOM(`
+    <html>
+      <head><title>Test</title></head>
+      <body>
+        <font>
+        <table>
+          <tr>
+            <td>test1<br></td></font>
+            <td>test2<br>
+        </table>
+      </body>
+    </html>`);
+
+    t.equal(dom.at('html > head > title').text(), 'Test');
+    t.equal(dom.find('html > body > font > table > tr > td')[0].text(), 'test1');
+    t.equal(dom.find('html > body > font > table > tr > td')[1].text(), 'test2\n        ');
+
+    t.end();
+  });
+
+  t.test('Broken "font" and "div" blocks', t => {
+    const dom = new DOM(`
+    <html>
+      <head><title>Test</title></head>
+      <body>
+        <font>
+        <div>test1<br>
+          <div>test2<br></font>
+        </div>
+      </body>
+    </html>`);
+
+    t.equal(dom.at('html head title').text(), 'Test');
+    t.equal(dom.at('html body font > div').text(), 'test1\n          \n      ');
+    t.equal(dom.at('html body font > div > div').text(), 'test2\n        ');
+
+    t.end();
+  });
+
+  t.test('Broken "div" blocks', t => {
+    const dom = new DOM(`
+    <html>
+      <head><title>Test</title></head>
+      <body>
+        <div>
+        <table>
+          <tr><td><div>test</td></div></tr>
+          </div>
+        </table>
+      </body>
+    </html>`);
+
+    t.equal(dom.at('html head title').text(), 'Test');
+    t.equal(dom.at('html body div table tr td > div').text(), 'test');
+
+    t.end();
+  });
+
+  t.test('And another broken "font" block', t => {
+    const dom = new DOM(`
+    <html>
+      <head><title>Test</title></head>
+      <body>
+        <table>
+          <tr>
+            <td><font><br>te<br>st<br>1</td></font>
+            <td>x1<td><img>tes<br>t2</td>
+            <td>x2<td><font>t<br>est3</font></td>
+          </tr>
+        </table>
+      </body>
+    </html>`);
+
+    t.equal(dom.at('html > head > title').text(), 'Test');
+    t.equal(dom.find('html body table tr > td > font')[0].text(), 'test1');
+    t.equal(dom.find('html body table tr > td')[1].text(), 'x1');
+    t.equal(dom.find('html body table tr > td')[2].text(), 'test2');
+    t.equal(dom.find('html body table tr > td')[3].text(), 'x2');
+    t.equal(dom.find('html body table tr > td')[5], undefined);
+    t.equal(dom.find('html body table tr > td').length, 5);
+    t.equal(dom.find('html body table tr > td > font')[1].text(), 'test3');
+    t.equal(dom.find('html body table tr > td > font')[2], undefined);
+    t.equal(dom.find('html body table tr > td > font').length, 2);
+
+    t.equal(
+      dom.toString(),
+      `
+    <html>
+      <head><title>Test</title></head>
+      <body>
+        <table>
+          <tr>
+            <td><font><br>te<br>st<br>1</font></td>
+            <td>x1</td><td><img>tes<br>t2</td>
+            <td>x2</td><td><font>t<br>est3</font></td>
+          </tr>
+        </table>
+      </body>
+    </html>`
+    );
+
+    t.end();
+  });
+
+  t.test('A collection of wonderful screwups', t => {
+    const dom = new DOM(`
+    <!DOCTYPE html>
+    <html lang="en">
+      <head><title>Wonderful Screwups</title></head>
+      <body id="screw-up">
+        <div>
+          <div class="ewww">
+            <a href="/test" target='_blank'><img src="/test.png"></a>
+            <a href='/real bad' screwup: http://localhost/bad' target='_blank'>
+              <img src="/test2.png">
+          </div>
+          </mt:If>
+        </div>
+        <b>>la<>la<<>>la<</b>
+      </body>
+    </html>`);
+
+    t.equal(dom.at('#screw-up > b').text(), '>la<>la<<>>la<');
+    t.equal(dom.at('#screw-up .ewww > a > img').attr.src, '/test.png');
+    t.equal(dom.find('#screw-up .ewww > a > img')[1].attr.src, '/test2.png');
+    t.equal(dom.find('#screw-up .ewww > a > img')[2], undefined);
+    t.equal(dom.find('#screw-up .ewww > a > img').length, 2);
+
+    t.end();
+  });
+
+  t.test('Broken "br" tag', t => {
+    const dom = new DOM('<br< abc abc abc abc abc abc abc abc<p>Test</p>');
+    t.equal(dom.at('p').text(), 'Test');
+    t.equal(dom.toString(), '&lt;br&lt; abc abc abc abc abc abc abc abc<p>Test</p>');
 
     t.end();
   });

@@ -11,7 +11,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/mojolicious/dom.js/badge.svg?branch=main)](https://coveralls.io/github/mojolicious/dom.js?branch=main)
 [![npm](https://img.shields.io/npm/v/@mojojs/dom.svg)](https://www.npmjs.com/package/@mojojs/dom)
 
-A fast and minimalistic HTML/XML DOM parser with CSS selectors for Node.js and browsers. Written in TypeScript.
+A fast and very small HTML/XML DOM parser with CSS selectors for Node.js and browsers. Written in TypeScript.
 
 ```js
 import DOM from '@mojojs/dom';
@@ -32,18 +32,15 @@ dom.find(':not(p)').forEach(el => el.strip());
 console.log(dom.toString());
 ```
 
-#### Formats
+#### HML and XML
 
-There are currently three input formats supported. For HTML documents and fragments we use
-[parse5](https://www.npmjs.com/package/parse5), and for XML a very relaxed custom parser that will try to make sense of
-whatever tag soup you hand it.
+There are currently two input formats supported, HTML and XML fragments. By default we use a very relaxed custom parser
+that will try to make sense of whatever tag soup you hand it. In HTML mode, all tags and attribute names are lowercased
+and selectors need to be lowercase as well.
 
 ```js
-// HTML document ("<head>", "<body>"... get added automatically)
+// HTML
 const dom = new DOM('<p>Hello World!</p>');
-
-// HTML fragment
-const dom = new DOM('<p>Hello World!</p>', {fragment: true});
 
 // XML
 const dom = new DOM('<rss><link>http://example.com</link></rss>', {xml: true});
@@ -65,7 +62,7 @@ There are currently eight different kinds of nodes, `#cdata`, `#comment`, `#doct
 `#fragment`,`#pi`, and `#text`.
 
 ```
-#document
+#fragment
 |- #doctype (html)
 +- #element (html)
    |- #element (head)
@@ -265,6 +262,20 @@ const text = dom.currentNode.parentNode.childNodes
   .filter(node => node.nodeType === '#text')
   .map(node => node.value)
   .join('');
+```
+
+#### Custom Parsers
+
+Additional input formats, such as fully spec compliant HTML5 documents can be supported with custom parsers. There is
+a [parse5](https://www.npmjs.com/package/parse5) based
+[example included in this distribution](https://github.com/mojolicious/dom.js/blob/main/test/support/parse5.js) that we
+use for testing.
+
+```js
+import {Parser} from './custom-parser.js';
+
+// Parse HTML with a custom parser
+const dom = new DOM('<p>Hello World!</p>', {parser: new Parser()});
 ```
 
 ## Installation

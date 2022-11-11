@@ -9,3 +9,8 @@ import type {TextNode} from './nodes/text.js';
 
 export type Child = CommentNode | CDATANode | DoctypeNode | ElementNode | FragmentNode | PINode | TextNode;
 export type Parent = DocumentNode | ElementNode | FragmentNode;
+
+export interface DOMParser {
+  parse(text: string, xml: boolean): Parent;
+  parseFragment(text: string, xml: boolean): Parent;
+}

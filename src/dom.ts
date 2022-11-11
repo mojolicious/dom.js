@@ -3,9 +3,8 @@
  * Copyright (C) 2021-2022 Sebastian Riedel
  * MIT Licensed
  */
-import type {Child, Parent} from './types.js';
+import type {Child, DOMParser, Parent} from './types.js';
 import {Selector} from './css.js';
-import {HTMLParser} from './html.js';
 import {CDATANode} from './nodes/cdata.js';
 import {CommentNode} from './nodes/comment.js';
 import {DoctypeNode} from './nodes/doctype.js';
@@ -14,7 +13,7 @@ import {ElementNode} from './nodes/element.js';
 import {FragmentNode} from './nodes/fragment.js';
 import {PINode} from './nodes/pi.js';
 import {TextNode} from './nodes/text.js';
-import {XMLParser} from './xml.js';
+import {Parser} from './parser.js';
 import {SafeString} from '@mojojs/util';
 
 export * from '@mojojs/util';
@@ -32,17 +31,16 @@ export default class DOM {
   currentNode: Parent;
   _xml: boolean;
 
-  constructor(input: string | Parent, options: {fragment?: boolean; xml?: boolean} = {}) {
+  constructor(input: string | Parent, options: {fragment?: boolean; parser?: DOMParser; xml?: boolean} = {}) {
     const xml = (this._xml = options.xml ?? false);
 
     // Parse
     if (typeof input === 'string') {
-      if (xml === true) {
-        this.currentNode = new XMLParser().parse(input);
-      } else if (options.fragment === true) {
-        this.currentNode = new HTMLParser().parseFragment(input);
+      const parser = options.parser ?? new Parser();
+      if (options.fragment === true) {
+        this.currentNode = parser.parseFragment(input, xml);
       } else {
-        this.currentNode = new HTMLParser().parse(input);
+        this.currentNode = parser.parse(input, xml);
       }
     }
 
