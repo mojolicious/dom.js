@@ -272,7 +272,18 @@ a [parse5](https://www.npmjs.com/package/parse5) based
 use for testing.
 
 ```js
-import {Parser} from './custom-parser.js';
+import DOM, {DocumentNode, FragmentNode} from '@mojojs/dom';
+
+// Minimal custom HTML/XML parser that only creates the document/fragment objects
+class Parser {
+  parse(text, xml) {
+    return new DocumentNode();
+  }
+
+  parseFragment(text, xml) {
+    return new FragmentNode();
+  }
+}
 
 // Parse HTML with a custom parser
 const dom = new DOM('<p>Hello World!</p>', {parser: new Parser()});
