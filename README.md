@@ -276,11 +276,11 @@ import DOM, {DocumentNode, FragmentNode} from '@mojojs/dom';
 
 // Minimal custom HTML/XML parser that only creates the document/fragment objects
 class Parser {
-  parse(text, xml) {
+  parse(text) {
     return new DocumentNode();
   }
 
-  parseFragment(text, xml) {
+  parseFragment(text) {
     return new FragmentNode();
   }
 }
