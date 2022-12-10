@@ -2284,6 +2284,16 @@ t.test('DOM', t => {
     t.match(dom2.at('p').text(), /console\.log.+this is not a script/s);
     t.equal(dom2.at('span').text(), ':-)');
 
+    const dom3 = new DOM(`
+    <!DOCTYPE html>
+    <h1>Welcome to HTML</h1>
+    <div>
+      <script> console.log('</scriptxyz is safe'); </script>
+    </div>
+  `);
+    t.match(dom3.at('script').text(), /console\.log.+scriptxyz is safe/s);
+    t.match(dom3.at('div').text(), /^\s+$/s);
+
     t.end();
   });
 
