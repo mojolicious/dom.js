@@ -21,7 +21,7 @@ import {PINode} from './nodes/pi.js';
 import {TextNode} from './nodes/text.js';
 import {SafeString, escapeRegExp, stickyMatch, xmlUnescape} from '@mojojs/util';
 
-const NAME_RE = new RegExp(`[${NAME_START_CHAR}][${NAME_CHAR}]*`);
+const NAME_RE = new RegExp(`[${NAME_START_CHAR}][${NAME_CHAR}]*`, 'u');
 
 const ATTR_RE = new RegExp(
   `(${NAME_RE.source}|/)(?:\\s*=\\s*(?:(?<quote>["'])(.*?)\\k<quote>|([^>\\s]*)))?\\s*`,

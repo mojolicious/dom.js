@@ -2252,6 +2252,11 @@ t.test('DOM', t => {
     t.equal(dom7.at('こんにちは').attr['こんにちは'], 'こんにちは');
     t.equal(dom7.toString(), '<こんにちは こんにちは="こんにちは">foo</こんにちは>');
 
+    const dom8 = new DOM('<😄 😄="😄">foo</😄>', {xml: true});
+    t.equal(dom8.at('😄').text(), 'foo');
+    t.equal(dom8.at('😄').attr['😄'], '😄');
+    t.equal(dom8.toString(), '<😄 😄="😄">foo</😄>');
+
     t.end();
   });
 
