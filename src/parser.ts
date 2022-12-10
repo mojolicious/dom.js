@@ -120,7 +120,7 @@ export class Parser {
 
           // Raw text elements
           if (xml === true || (RAW.has(tag) === false && RCDATA.has(tag) === false)) continue;
-          const rawMatch = stickyMatch(sticky, new RegExp(`(.*?)<\\s*/\\s*${escapeRegExp(tag)}\\s*>`, 'ysi'));
+          const rawMatch = stickyMatch(sticky, new RegExp(`(.*?)</${escapeRegExp(tag)}\\s*>?`, 'ysi'));
           if (rawMatch === null) continue;
           const text = RCDATA.has(tag) === true ? xmlUnescape(rawMatch[1]) : rawMatch[1];
           current.appendChild(new TextNode(new SafeString(text)));

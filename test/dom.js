@@ -1966,7 +1966,7 @@ t.test('DOM', t => {
             alert('<123>');
           }
         </script>
-        < sCriPt two="23" >if (b > c) { alert('&<ohoh>') }< / scRiPt >
+        < sCriPt two="23" >if (b > c) { alert('&<ohoh>') }</scRiPt  >
       <body>Foo!</body>`);
 
     t.equal(dom.find('html > body')[0].text(), 'Foo!');
@@ -2256,6 +2256,33 @@ t.test('DOM', t => {
     t.equal(dom8.at('😄').text(), 'foo');
     t.equal(dom8.at('😄').attr['😄'], '😄');
     t.equal(dom8.toString(), '<😄 😄="😄">foo</😄>');
+
+    t.end();
+  });
+
+  t.test('Runaway "<"', t => {
+    const dom = new DOM(`
+      <!DOCTYPE html>
+      <h1>Welcome to HTML</h1>
+      <script>
+          console.log('< /script> is safe');
+          /* <div>XXX this is not a div element</div> */
+      </script>
+    `);
+    t.match(dom.at('script').text(), /console\.log.+< \/script>.+this is not a div element/s);
+
+    const dom2 = new DOM(`
+    <!DOCTYPE html>
+    <h1>Welcome to HTML</h1>
+    <script>
+        console.log('this is a script element and should be executed');
+    // </script asdf> <p>
+        console.log('this is not a script');
+        // <span data-wtf="</script>">:-)</span>
+  `);
+    t.match(dom2.at('script').text(), /console\.log.+executed.+\/\//s);
+    t.match(dom2.at('p').text(), /console\.log.+this is not a script/s);
+    t.equal(dom2.at('span').text(), ':-)');
 
     t.end();
   });
