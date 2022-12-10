@@ -2194,13 +2194,30 @@ t.test('DOM', t => {
           Test  12-34-5 test  >= 75% and < 85%  test<br />
           Test  12-34-5  -test foo >= 5% and < 30% test<br />
           Test  12-23-4 n/a >=13% and = 1% and < 5% test tset<br />
-          Test  12-34-5  test >= 1% and < 5%   foo, bar, baz<br />
+          Test  12-34-5  test >= 1% and < 1%   foo, bar, baz<br />
           Test foo, bar, baz  123-456-78  test < 1%  foo, bar, baz yada, foo, bar and baz, yada
         </td>
       </tr>
     </table>
     `);
     t.equal(dom.at('.test').text(), 'works');
+
+    const dom2 = new DOM(`
+    <table>
+      <tr>
+        <td>
+          <div class="test" data-id="123" data-score="3">too</div>
+          TEST 123<br />
+          Test  12-34-5 test  >= 75% and < 85%  test<br />
+          Test  12-34-5  -test foo >= 5% and < 30% test<br />
+          Test  12-23-4 n/a >=13% and = 1% and < 5% test tset<br />
+          Test  12-34-5  test >= 1% and < 1%   foo, bar, baz<br />
+          Test foo, bar, baz  123-456-78  test < a%  foo, bar, baz yada, foo, bar and baz, yada
+        </td>
+      </tr>
+    </table>
+    `);
+    t.equal(dom2.at('.test').text(), 'too');
 
     t.end();
   });
@@ -2229,6 +2246,11 @@ t.test('DOM', t => {
     const dom6 = new DOM('<Foo><a .b -c 1>foo</a></Foo>', {xml: true});
     t.equal(dom6.at('Foo').text(), '<a .b -c 1>foo');
     t.equal(dom6.toString(), '<Foo>&lt;a .b -c 1&gt;foo</Foo>');
+
+    const dom7 = new DOM('<こんにちは こんにちは="こんにちは">foo</こんにちは>', {xml: true});
+    t.equal(dom7.at('こんにちは').text(), 'foo');
+    t.equal(dom7.at('こんにちは').attr['こんにちは'], 'こんにちは');
+    t.equal(dom7.toString(), '<こんにちは こんにちは="こんにちは">foo</こんにちは>');
 
     t.end();
   });

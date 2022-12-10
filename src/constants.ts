@@ -1,3 +1,9 @@
+// XML name character ranges
+export const NAME_START_CHAR =
+  ':A-Z_a-z\\u00c0-\\u00d6\\u00d8-\\u00f6\\u00f8-\\u02ff\\u0370-\\u037d\\u037f-\\u1fff' +
+  '\\u200c-\\u200d\\u2070-\\u218f\\u2c00-\\u2fef\\u3001-\\ud7ff\\uf900-\\ufdcf\\ufdf0-\\ufffd';
+export const NAME_CHAR = NAME_START_CHAR + '\\-0-9\\u00B7\\u0300-\\u036F\\u203F\\u2040';
+
 // HTML elements that only contain raw text
 export const RAW = new Set(['script', 'style']);
 

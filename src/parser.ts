@@ -1,5 +1,17 @@
 import type {Parent} from './types.js';
-import {BLOCK, CLOSE, EMPTY, END, NO_MORE_CONTENT, PHRASING, RAW, RCDATA, SCOPE} from './constants.js';
+import {
+  BLOCK,
+  CLOSE,
+  EMPTY,
+  END,
+  NAME_START_CHAR,
+  NAME_CHAR,
+  NO_MORE_CONTENT,
+  PHRASING,
+  RAW,
+  RCDATA,
+  SCOPE
+} from './constants.js';
 import {CDATANode} from './nodes/cdata.js';
 import {CommentNode} from './nodes/comment.js';
 import {DoctypeNode} from './nodes/doctype.js';
@@ -9,9 +21,11 @@ import {PINode} from './nodes/pi.js';
 import {TextNode} from './nodes/text.js';
 import {SafeString, escapeRegExp, stickyMatch, xmlUnescape} from '@mojojs/util';
 
+const NAME_RE = new RegExp(`[${NAME_START_CHAR}][${NAME_CHAR}]*`);
+
 const ATTR_RE = new RegExp(
-  `([^<>=\\s/0-9.\\-][^<>=\\s/]*|/)(?:\\s*=\\s*(?:(?<quote>["'])(.*?)\\k<quote>|([^>\\s]*)))?\\s*`,
-  'ys'
+  `(${NAME_RE.source}|/)(?:\\s*=\\s*(?:(?<quote>["'])(.*?)\\k<quote>|([^>\\s]*)))?\\s*`,
+  'ysu'
 );
 const TEXT_RE = new RegExp(`([^<]+)`, 'ys');
 const DOCTYPE_RE = new RegExp(
@@ -21,7 +35,7 @@ const DOCTYPE_RE = new RegExp(
 const COMMENT_RE = new RegExp(`<!--(.*?)--\\s*>`, 'ys');
 const CDATA_RE = new RegExp(`<!\\[CDATA\\[(.*?)\\]\\]>`, 'ysi');
 const PI_RE = new RegExp(`<\\?(.*?)\\?>`, 'ys');
-const TAG_RE = new RegExp(`<\\s*(\\/)?\\s*([^<>\\s/0-9.\\-][^<>\\s/]*)\\s*((?:${ATTR_RE.source})*?)>`, 'ys');
+const TAG_RE = new RegExp(`<\\s*(\\/)?\\s*(${NAME_RE.source})\\s*((?:${ATTR_RE.source})*?)>`, 'ysu');
 const RUNAWAY_RE = new RegExp(`<`, 'y');
 
 export class Parser {

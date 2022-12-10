@@ -3,6 +3,10 @@
 
 This package strictly follows [Semantic Versioning](https://semver.org).
 
+## v2.0.2 (2022-12-11)
+
+  * Fixed a few more HTML edge cases that were parsed much too slowly.
+
 ## v2.0.1 (2022-12-10)
 
   * Fixed a few broken HTML edge cases that could result in the parser running very very slowly.
