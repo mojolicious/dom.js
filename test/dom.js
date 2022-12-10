@@ -2226,6 +2226,10 @@ t.test('DOM', t => {
     t.equal(dom5.at('Foo').text(), '<.>foo</.>');
     t.equal(dom5.toString(), '<Foo>&lt;.&gt;foo&lt;/.&gt;</Foo>');
 
+    const dom6 = new DOM('<Foo><a .b -c 1>foo</a></Foo>', {xml: true});
+    t.equal(dom6.at('Foo').text(), '<a .b -c 1>foo');
+    t.equal(dom6.toString(), '<Foo>&lt;a .b -c 1&gt;foo</Foo>');
+
     t.end();
   });
 
