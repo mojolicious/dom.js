@@ -9,7 +9,10 @@ import {PINode} from './nodes/pi.js';
 import {TextNode} from './nodes/text.js';
 import {SafeString, escapeRegExp, stickyMatch, xmlUnescape} from '@mojojs/util';
 
-const ATTR_RE = new RegExp(`([^<>=\\s/]+|/)(?:\\s*=\\s*(?:(?<quote>["'])(.*?)\\k<quote>|([^>\\s]*)))?\\s*`, 'ys');
+const ATTR_RE = new RegExp(
+  `([^<>=\\s/0-9.\\-][^<>=\\s/]*|/)(?:\\s*=\\s*(?:(?<quote>["'])(.*?)\\k<quote>|([^>\\s]*)))?\\s*`,
+  'ys'
+);
 const TEXT_RE = new RegExp(`([^<]+)`, 'ys');
 const DOCTYPE_RE = new RegExp(
   `<!DOCTYPE\\s*(\\w+(?:(?:\\s+\\w+)?(?:\\s+(?:"[^"]*"|'[^']*'))+)?(?:\\s+\\[.+?\\])?\\s*)>`,
@@ -18,7 +21,7 @@ const DOCTYPE_RE = new RegExp(
 const COMMENT_RE = new RegExp(`<!--(.*?)--\\s*>`, 'ys');
 const CDATA_RE = new RegExp(`<!\\[CDATA\\[(.*?)\\]\\]>`, 'ysi');
 const PI_RE = new RegExp(`<\\?(.*?)\\?>`, 'ys');
-const TAG_RE = new RegExp(`<\\s*(\\/)?\\s*([^<>\\s]+)\\s*((?:${ATTR_RE.source})*)>`, 'ys');
+const TAG_RE = new RegExp(`<\\s*(\\/)?\\s*([^<>\\s0-9.\\-][^<>\\s]*)\\s*((?:${ATTR_RE.source})*?)>`, 'ys');
 const RUNAWAY_RE = new RegExp(`<`, 'y');
 
 export class Parser {

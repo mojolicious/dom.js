@@ -2184,5 +2184,26 @@ t.test('DOM', t => {
     t.end();
   });
 
+  t.test('Runaway "<"', t => {
+    const dom = new DOM(`
+    <table>
+      <tr>
+        <td>
+          <div class="test" data-id="123" data-score="3">works</div>
+          TEST 123<br />
+          Test  12-34-5 test  >= 75% and < 85%  test<br />
+          Test  12-34-5  -test foo >= 5% and < 30% test<br />
+          Test  12-23-4 n/a >=13% and = 1% and < 5% test tset<br />
+          Test  12-34-5  test >= 1% and < 5%   foo, bar, baz<br />
+          Test foo, bar, baz  123-456-78  test < 1%  foo, bar, baz yada, foo, bar and baz, yada
+        </td>
+      </tr>
+    </table>
+    `);
+    t.equal(dom.at('.test').text(), 'works');
+
+    t.end();
+  });
+
   t.end();
 });
