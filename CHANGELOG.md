@@ -6,6 +6,7 @@ This package strictly follows [Semantic Versioning](https://semver.org).
 ## v2.0.1 (2022-12-10)
 
   * Fixed a few broken HTML edge cases that could result in the parser running very very slowly.
+  * Fixed a bug where strings like "<.>" were considered valid tags by the parser.
 
 ## v2.0.0 (2022-11-19)
 

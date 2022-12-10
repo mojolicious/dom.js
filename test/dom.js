@@ -2205,5 +2205,29 @@ t.test('DOM', t => {
     t.end();
   });
 
+  t.test('XML name characters', t => {
+    const dom = new DOM('<Foo><1a>foo</1a></Foo>', {xml: true});
+    t.equal(dom.at('Foo').text(), '<1a>foo</1a>');
+    t.equal(dom.toString(), '<Foo>&lt;1a&gt;foo&lt;/1a&gt;</Foo>');
+
+    const dom2 = new DOM('<Foo><.a>foo</.a></Foo>', {xml: true});
+    t.equal(dom2.at('Foo').text(), '<.a>foo</.a>');
+    t.equal(dom2.toString(), '<Foo>&lt;.a&gt;foo&lt;/.a&gt;</Foo>');
+
+    const dom3 = new DOM('<Foo><-a>foo</-a></Foo>', {xml: true});
+    t.equal(dom3.at('Foo').text(), '<-a>foo</-a>');
+    t.equal(dom3.toString(), '<Foo>&lt;-a&gt;foo&lt;/-a&gt;</Foo>');
+
+    const dom4 = new DOM('<Foo><a1>foo</a1></Foo>', {xml: true});
+    t.equal(dom4.at('Foo a1').text(), 'foo');
+    t.equal(dom4.toString(), '<Foo><a1>foo</a1></Foo>');
+
+    const dom5 = new DOM('<Foo><.>foo</.></Foo>', {xml: true});
+    t.equal(dom5.at('Foo').text(), '<.>foo</.>');
+    t.equal(dom5.toString(), '<Foo>&lt;.&gt;foo&lt;/.&gt;</Foo>');
+
+    t.end();
+  });
+
   t.end();
 });

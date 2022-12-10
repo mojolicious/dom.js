@@ -21,7 +21,7 @@ const DOCTYPE_RE = new RegExp(
 const COMMENT_RE = new RegExp(`<!--(.*?)--\\s*>`, 'ys');
 const CDATA_RE = new RegExp(`<!\\[CDATA\\[(.*?)\\]\\]>`, 'ysi');
 const PI_RE = new RegExp(`<\\?(.*?)\\?>`, 'ys');
-const TAG_RE = new RegExp(`<\\s*(\\/)?\\s*([^<>\\s0-9.\\-][^<>\\s]*)\\s*((?:${ATTR_RE.source})*?)>`, 'ys');
+const TAG_RE = new RegExp(`<\\s*(\\/)?\\s*([^<>\\s/0-9.\\-][^<>\\s/]*)\\s*((?:${ATTR_RE.source})*?)>`, 'ys');
 const RUNAWAY_RE = new RegExp(`<`, 'y');
 
 export class Parser {
