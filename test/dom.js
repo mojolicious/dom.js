@@ -2304,7 +2304,7 @@ t.test('DOM', t => {
         <head>
           <title>Test</title>
           <meta property="og:description" content="it's NOT it's easy I'm  there's mix I'll
-            https://excample.com test 'test test test test test test test test test test test'
+            https://example.com/test test 'test test test test test test test test test test test'test
             test test test test test test test test test test testtest test test test test test test test test test tes
             "test" test test test test test test test test test test testtest test test test test test test test test t
             test test test test test test test test test test testtest test test test test test test test test test te
