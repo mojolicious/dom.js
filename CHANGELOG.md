@@ -5,14 +5,20 @@ This package strictly follows [Semantic Versioning](https://semver.org).
 
 ## v2.0.3 (2022-12-31)
 
+### Bug Fixes
+
   * Fixed another broken HTML edge case that could result in the parser running very very slowly.
 
 ## v2.0.2 (2022-12-11)
+
+### Bug Fixes
 
   * Fixed multiple `<script>` parsing issues.
   * Fixed a few more HTML edge cases that were parsed much too slowly.
 
 ## v2.0.1 (2022-12-10)
+
+### Bug Fixes
 
   * Fixed a few broken HTML edge cases that could result in the parser running very very slowly.
   * Fixed a bug where strings like "<.>" were considered valid tags by the parser.
