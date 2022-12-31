@@ -23,10 +23,7 @@ import {SafeString, escapeRegExp, stickyMatch, xmlUnescape} from '@mojojs/util';
 
 const NAME_RE = new RegExp(`[${NAME_START_CHAR}][${NAME_CHAR}]*`, 'u');
 
-const ATTR_RE = new RegExp(
-  `(${NAME_RE.source}|/)(?:\\s*=\\s*(?:(?<quote>["'])(.*?)\\k<quote>|([^>\\s]*)))?\\s*`,
-  'ysu'
-);
+const ATTR_RE = new RegExp(`(${NAME_RE.source}|/)(?:\\s*=\\s*(?:(?:"([^"]*)")|(?:'([^']*)')|([^>\\s]*)))?\\s*`, 'ysu');
 const TEXT_RE = new RegExp(`([^<]+)`, 'ys');
 const DOCTYPE_RE = new RegExp(
   `<!DOCTYPE\\s*(\\w+(?:(?:\\s+\\w+)?(?:\\s+(?:"[^"]*"|'[^']*'))+)?(?:\\s+\\[.+?\\])?\\s*)>`,
@@ -104,7 +101,7 @@ export class Parser {
               if (name === '/') {
                 close = true;
               } else {
-                attrs[name] = xmlUnescape(attrMatch[3] ?? attrMatch[4] ?? '');
+                attrs[name] = xmlUnescape(attrMatch[2] ?? attrMatch[3] ?? attrMatch[4] ?? '');
               }
             }
           }

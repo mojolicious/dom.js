@@ -62,6 +62,7 @@
     "node": ">= 16"
   },
   "dependencies": {
+    "@mojojs/path": "^1.5.3",
     "@mojojs/util": "^1.4.0"
   }
 }

@@ -2169,9 +2169,9 @@ t.test('DOM', t => {
 
     t.equal(dom.at('#screw-up > b').text(), '>la<>la<<>>la<');
     t.equal(dom.at('#screw-up .ewww > a > img').attr.src, '/test.png');
-    t.equal(dom.find('#screw-up .ewww > a > img')[1].attr.src, '/test2.png');
-    t.equal(dom.find('#screw-up .ewww > a > img')[2], undefined);
-    t.equal(dom.find('#screw-up .ewww > a > img').length, 2);
+    t.equal(dom.find('#screw-up .ewww > img')[0].attr.src, '/test2.png');
+    t.equal(dom.find('#screw-up .ewww > img')[1], undefined);
+    t.equal(dom.find('#screw-up .ewww > img').length, 1);
 
     t.end();
   });
@@ -2297,5 +2297,31 @@ t.test('DOM', t => {
     t.end();
   });
 
+  t.test('Very broken long attribute value', t => {
+    const dom = new DOM(`
+      <!DOCTYPE html>
+      <html lang="en">
+        <head>
+          <title>Test</title>
+          <meta property="og:description" content="it's NOT it's easy I'm  there's mix I'll
+            https://excample.com test 'test test test test test test test test test test test'
+            test test test test test test test test test test testtest test test test test test test test test test tes
+            "test" test test test test test test test test test test testtest test test test test test test test test t
+            test test test test test test test test test test testtest test test test test test test test test test te
+            test test test test test test test test test test testtest test test test test test test test test test te
+            test test test test test test test test test test test'test test test test test test test test test test t'
+            test test test test test test test test test test testtest test test test test test test test test test te
+            test test test test test test test test test test testtest test test test test test test test test test tt
+            test test test test test test test test test test test'test test test test test test test test test test st
+            test test test test test test test test test test testtest test test test test test test test test test tt
+            test test test test test test test test test test testtest test test test test test test test test test tt
+            test test test test test test test test test test test.." />
+        </head>
+      </html>
+    `);
+    t.equal(dom.at('title').text(), 'Test');
+
+    t.end();
+  });
   t.end();
 });
