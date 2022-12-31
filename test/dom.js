@@ -2319,9 +2319,10 @@ t.test('DOM', t => {
         </head>
       </html>
     `);
-    t.equal(dom.at('title').text(), 'Test');
+    t.equal(dom.at('html > head > title').text(), 'Test');
 
     t.end();
   });
+
   t.end();
 });
