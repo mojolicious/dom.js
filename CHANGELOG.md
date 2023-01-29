@@ -7,7 +7,12 @@ This package strictly follows [Semantic Versioning](https://semver.org).
 
 ### Features
 
-  * Rewrote tag tokenizer to be much more efficient and handle more broken HTML edge cases.
+  * Rewrote tag tokenizer to be more considerate of shortcomings in the V8 regex engine, increasing overall performance
+    significantly.
+
+### Bug Fixes
+
+  * Fixed a few more broken HTML edge cases that could result in the parser running very very slowly.
 
 ## v2.0.3 (2022-12-31)
 
