@@ -3,6 +3,12 @@
 
 This package strictly follows [Semantic Versioning](https://semver.org).
 
+## v2.1.0 (2023-01-29)
+
+### Features
+
+  * Rewrote tag tokenizer to be much more efficient and handle more broken HTML edge cases.
+
 ## v2.0.3 (2022-12-31)
 
 ### Bug Fixes
