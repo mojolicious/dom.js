@@ -1,5 +1,5 @@
-import type {Child, Parent} from '../types.js';
 import type {ElementNode} from './element.js';
+import type {Child, Parent} from '../types.js';
 
 interface Siblings {
   following: ElementNode[];

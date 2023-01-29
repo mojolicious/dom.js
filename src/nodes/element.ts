@@ -1,6 +1,6 @@
 import type {FragmentNode} from './fragment.js';
-import {EMPTY} from '../constants.js';
 import {ParentNode} from './parent.js';
+import {EMPTY} from '../constants.js';
 import {xmlEscape} from '@mojojs/util';
 
 /**
