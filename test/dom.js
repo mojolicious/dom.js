@@ -2324,5 +2324,29 @@ t.test('DOM', t => {
     t.end();
   });
 
+  t.test('Very broken long attribute value (alternative)', t => {
+    const dom = new DOM(`
+      <!DOCTYPE html>
+      <html lang="en">
+        <head>
+          <title>Test</title>
+          <meta property="og:description" content="test test test test test test test test test test test test test
+          test test test test test test test test test test test test test test test test testtest test test test test
+          test test test test test test test test test test test test test test 'test test test testtest test test test
+          test test test test test test test test test test test test test test test 'test test test testtest test test
+          test test test test test test test test test test test test test test test test test test test testtest test
+          test test test test test test test test test test "test test test test test test" test test test test
+          testtest test test test test test test test test test test test test test 'test test test test test test test
+          test testtest test test test test test test test test test test test test test test test test test test test
+          test test testtest test test test test test test test test test test test test test test test test test test
+          test test test testtest test test test test test test test test test" />
+        </head>
+      </html>
+    `);
+    t.equal(dom.at('html > head > title').text(), 'Test');
+
+    t.end();
+  });
+
   t.end();
 });
