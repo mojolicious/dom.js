@@ -3,6 +3,12 @@
 
 This package strictly follows [Semantic Versioning](https://semver.org).
 
+## v2.1.1 (2023-02-06)
+
+### Bug Fixes
+
+  * Fixed various CSS selector equation bugs.
+
 ## v2.1.0 (2023-01-29)
 
 ### Features

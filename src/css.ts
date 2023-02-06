@@ -119,7 +119,7 @@ function compileEquation(values: string | undefined): [number, number] {
   if (values === undefined) return [0, 0];
 
   // "even"
-  if (/^\s*even\s*$/i.test(values)) return [2, 2];
+  if (/^\s*even\s*$/i.test(values)) return [2, 0];
 
   // "odd"
   if (/^\s*odd\s*$/i.test(values)) return [2, 1];
@@ -172,12 +172,12 @@ function compilePseudoClass(name: string, args: string): PseudoClass {
 
   // ":last-child"
   else if (name === 'last-child') {
-    return {type: 'pc', class: 'nth-last-child', value: [-1, 1]};
+    return {type: 'pc', class: 'nth-last-child', value: [0, 1]};
   }
 
   // ":last-of-type"
   else if (name === 'last-of-type') {
-    return {type: 'pc', class: 'nth-last-of-type', value: [-1, 1]};
+    return {type: 'pc', class: 'nth-last-of-type', value: [0, 1]};
   }
 
   // ":checked", ":empty", ":only-child", ":only-of-type", ":root"
@@ -398,18 +398,21 @@ function matchPseudoClass(simple: PseudoClass, current: ElementNode, tree: Paren
       nodes = nodes.filter(el => (el as ElementNode).tagName === current.tagName);
     }
 
-    // ":*-last-*"
-    if (name === 'nth-last-child' || name === 'nth-last-of-type') nodes.reverse();
-
+    let index = 0;
     for (let i = 0; i < nodes.length; i++) {
-      const result = equation[0] * i + equation[1];
-      if (result < 1) continue;
-      const sibling = nodes[result - 1];
-      if (sibling === undefined) return false;
-      if (sibling === current) return true;
+      if (nodes[i] !== current) continue;
+      index = i;
+      break;
     }
+    if (name === 'nth-last-child' || name === 'nth-last-of-type') index = nodes.length - index - 1;
+    index++;
+
+    const delta = index - equation[1];
+    if (delta === 0) return true;
+    return equation[0] !== 0 && delta < 0 === equation[0] < 0 && delta % equation[0] === 0;
   }
 
+  // Everything else
   return false;
 }
 

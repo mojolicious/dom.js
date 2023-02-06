@@ -689,35 +689,35 @@ t.test('DOM', t => {
     );
     t.same(
       dom.find('li:nth-child(1n+0)').map(el => el.text()),
-      ['A', 'B', 'C', 'D', 'E', 'F', 'G']
+      ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
     );
     t.same(
       dom.find('li:nth-child(1n-0)').map(el => el.text()),
-      ['A', 'B', 'C', 'D', 'E', 'F', 'G']
+      ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
     );
     t.same(
       dom.find('li:nth-child(n+0)').map(el => el.text()),
-      ['A', 'B', 'C', 'D', 'E', 'F', 'G']
+      ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
     );
     t.same(
       dom.find('li:nth-child(n)').map(el => el.text()),
-      ['A', 'B', 'C', 'D', 'E', 'F', 'G']
+      ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
     );
     t.same(
       dom.find('li:nth-child(n)').map(el => el.text()),
-      ['A', 'B', 'C', 'D', 'E', 'F', 'G']
+      ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
     );
     t.same(
       dom.find('li:nth-child(n+0)').map(el => el.text()),
-      ['A', 'B', 'C', 'D', 'E', 'F', 'G']
+      ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
     );
     t.same(
       dom.find('li:nth-child(N+0)').map(el => el.text()),
-      ['A', 'B', 'C', 'D', 'E', 'F', 'G']
+      ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
     );
     t.same(
       dom.find('li:nth-child(N+0)').map(el => el.text()),
-      ['A', 'B', 'C', 'D', 'E', 'F', 'G']
+      ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
     );
 
     t.equal(dom.find('li:nth-child(0n+0)').length, 0);
@@ -896,6 +896,10 @@ t.test('DOM', t => {
     t.same(
       dom.find('div div:only-of-type').map(el => el.text()),
       ['J', 'K']
+    );
+    t.same(
+      dom.find('div :nth-child(-n+2)').map(el => el.text()),
+      ['J', 'Mojo!', 'K']
     );
 
     t.end();
