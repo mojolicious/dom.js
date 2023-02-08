@@ -1,6 +1,6 @@
 {
   "name": "@mojojs/dom",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "A fast and minimalistic HTML/XML DOM parser with CSS selectors",
   "keywords": [
     "mojojs",
