@@ -44,7 +44,7 @@
     "lib/"
   ],
   "devDependencies": {
-    "@types/node": "^20.0.0",
+    "@types/node": "^22.1.0",
     "@types/tap": "^15.0.3",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "c8": "^8.0.0",
