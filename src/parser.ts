@@ -28,7 +28,7 @@ const DOCTYPE_RE = new RegExp(
   `<!DOCTYPE\\s*(\\w+(?:(?:\\s+\\w+)?(?:\\s+(?:"[^"]*"|'[^']*'))+)?(?:\\s+\\[.+?\\])?\\s*)>`,
   'ysi'
 );
-const COMMENT_RE = new RegExp(`<!--(.*?)--\\s*>`, 'ys');
+const COMMENT_RE = new RegExp(`<!--(.*?)(?:--!?|(?<=<!--)-?(?=>))>`, 'ys');
 const CDATA_RE = new RegExp(`<!\\[CDATA\\[(.*?)\\]\\]>`, 'ysi');
 const PI_RE = new RegExp(`<\\?(.*?)\\?>`, 'ys');
 const TAG_ATTR_RE = new RegExp(
@@ -36,8 +36,57 @@ const TAG_ATTR_RE = new RegExp(
   'ysu'
 );
 const TAG_END_RE = new RegExp(`\\s*(/)?\\s*>`, 'ys');
-const TAG_START_RE = new RegExp(`<\\s*(\\/)?\\s*(${NAME_RE.source})`, 'ysu');
+const TAG_START_RE = new RegExp(`<(?:(\\/)\\s*)?(${NAME_RE.source})`, 'ysu');
 const RUNAWAY_RE = new RegExp(`<`, 'y');
+
+const SCRIPT_NO_LT_RE = new RegExp(`[^<]*`, 'ys');
+const SCRIPT_NO_LT_OR_DASH_RE = new RegExp(`[^<\\-]*`, 'ys');
+const SCRIPT_CLOSE_RE = new RegExp(`</script(?:\\s+|\\s*>)`, 'ysi');
+const SCRIPT_COMMENT_START_RE = new RegExp(`<!--`, 'ys');
+const SCRIPT_COMMENT_END_RE = new RegExp(`-->`, 'ys');
+const SCRIPT_OPEN_RE = new RegExp(`<script(?=[\\s/>])`, 'ysi');
+
+function scriptContent(sticky: {offset: number; value: string}): {content: string; foundEnd: boolean} {
+  const start = sticky.offset;
+  const length = sticky.value.length;
+  let state: 0 | 1 | 2 = 0;
+
+  while (length > sticky.offset) {
+    stickyMatch(sticky, state === 0 ? SCRIPT_NO_LT_RE : SCRIPT_NO_LT_OR_DASH_RE);
+    const pos = sticky.offset;
+    if (pos >= length) break;
+
+    // "</script>" (or end of nested script)
+    if (stickyMatch(sticky, SCRIPT_CLOSE_RE) !== null) {
+      if (state !== 2) return {content: sticky.value.slice(start, pos), foundEnd: true};
+      state = 1;
+      continue;
+    }
+
+    // "<!--" (only outside HTML comment)
+    if (state === 0) {
+      if (stickyMatch(sticky, SCRIPT_COMMENT_START_RE) !== null) state = 1;
+      else sticky.offset = pos + 1;
+      continue;
+    }
+
+    // "-->" (only inside HTML comment)
+    if (stickyMatch(sticky, SCRIPT_COMMENT_END_RE) !== null) {
+      state = 0;
+      continue;
+    }
+
+    // "<script>" (only inside HTML comment)
+    if (state === 1 && stickyMatch(sticky, SCRIPT_OPEN_RE) !== null) {
+      state = 2;
+      continue;
+    }
+
+    sticky.offset = pos + 1;
+  }
+
+  return {content: sticky.value.slice(start), foundEnd: false};
+}
 
 export class Parser {
   parse(text: string, xml: boolean): FragmentNode {
@@ -120,6 +169,15 @@ export class Parser {
 
             // Raw text elements
             if (xml === true || (RAW.has(tag) === false && RCDATA.has(tag) === false)) continue;
+
+            // "script" (allows nested tags inside HTML comments)
+            if (tag === 'script') {
+              const {content, foundEnd} = scriptContent(sticky);
+              if (content.length > 0) current.appendChild(new TextNode(new SafeString(content)));
+              if (foundEnd === true) current = this._end(current, xml, tag);
+              continue;
+            }
+
             const rawMatch = stickyMatch(sticky, new RegExp(`(.*?)</${escapeRegExp(tag)}(?:\\s+|\\s*>)`, 'ysi'));
             if (rawMatch === null) continue;
             const text = RCDATA.has(tag) === true ? xmlUnescape(rawMatch[1]) : rawMatch[1];

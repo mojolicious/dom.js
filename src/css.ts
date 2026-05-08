@@ -55,10 +55,11 @@ type SelectorList = ComplexSelector[];
 
 const ESCAPE_RE = '\\\\[^0-9a-fA-F]|\\\\[0-9a-fA-F]{1,6}';
 const SEPARATOR_RE = new RegExp(`\\s*,\\s*`, 'y');
-const COMBINATOR_RE = new RegExp(`\\s*([ >+~])\\s*`, 'y');
+const COMBINATOR_RE = new RegExp(`\\s*([>+~])\\s*`, 'y');
+const DESCENDANT_RE = new RegExp(`\\s+`, 'y');
 const PC_RE = new RegExp(`:([\\w\\-]+)(?:\\(((?:\\([^)]+\\)|[^)])+)\\))?`, 'y');
-const TAG_RE = new RegExp(`((?:${ESCAPE_RE}\\s|\\\\.|[^,.#:[ >~+])+)`, 'y');
-const CLASS_ID_RE = new RegExp(`([.#])((?:${ESCAPE_RE}\\s|\\\\.|[^,.#:[ >~+])+)`, 'y');
+const TAG_RE = new RegExp(`((?:${ESCAPE_RE}\\s|\\\\[\\s\\S]|[^,.#:[\\s>~+])+)`, 'y');
+const CLASS_ID_RE = new RegExp(`([.#])((?:${ESCAPE_RE}\\s?|[^,.#:[\\s>~+])+)`, 'y');
 const ATTR_RE = new RegExp(
   `\\[` +
     `((?:${ESCAPE_RE}|[\\w\\-])+)` +
@@ -87,8 +88,20 @@ export class Selector {
   }
 
   matches(tree: ElementNode): boolean {
-    return matchList(this._ast, tree, tree, tree);
+    return matchList(this._ast, tree, tree, tree.root() as Parent);
   }
+}
+
+function allTags(tree: Parent): ElementNode[] {
+  const tags: ElementNode[] = [];
+  const queue = [...tree.childNodes];
+  let current;
+  while ((current = queue.shift()) !== undefined) {
+    if (current.nodeType !== '#element') continue;
+    tags.push(current);
+    queue.unshift(...current.childNodes);
+  }
+  return tags;
 }
 
 function compileAttrValue(op: string, value: string | undefined, insensitive: boolean): RegExp | null {
@@ -201,8 +214,9 @@ function compilePseudoClass(name: string, args: string): PseudoClass {
 function compileSelector(selector: string): SelectorList {
   const group: SelectorList = [[]];
 
-  const sticky = {offset: 0, value: selector};
-  while (selector.length > sticky.offset) {
+  const trimmed = selector.trim();
+  const sticky = {offset: 0, value: trimmed};
+  while (trimmed.length > sticky.offset) {
     const complex = group[group.length - 1];
     if (complex.length === 0 || complex[complex.length - 1].type !== 'compound') {
       complex.push({type: 'compound', value: []});
@@ -220,6 +234,13 @@ function compileSelector(selector: string): SelectorList {
     const combinatorMatch = stickyMatch(sticky, COMBINATOR_RE);
     if (combinatorMatch !== null) {
       complex.push({type: 'combinator', value: combinatorMatch[1]});
+      continue;
+    }
+
+    // Descendant combinator
+    const descendantMatch = stickyMatch(sticky, DESCENDANT_RE);
+    if (descendantMatch !== null) {
+      complex.push({type: 'combinator', value: ' '});
       continue;
     }
 
@@ -261,29 +282,49 @@ function compileSelector(selector: string): SelectorList {
       continue;
     }
 
-    throw new Error(`Unknown CSS selector: ${selector}`);
+    throw new Error(`Unknown CSS selector: ${trimmed}`);
   }
 
   return group;
 }
 
-function matchAncestor(
-  complex: ComplexSelector,
-  current: ElementNode,
-  tree: Parent,
-  scope: Parent,
-  onlyOne: boolean,
-  pos: number
-): boolean {
-  let node = current.parentNode;
+function evaluate(group: SelectorList, tree: Parent, scope: Parent, pool: ElementNode[]): ElementNode[] {
+  const results: ElementNode[] = [];
+  const seen = new Set<ElementNode>();
+  for (const selector of group) {
+    for (const node of evaluateOne(selector, tree, scope, pool)) {
+      if (seen.has(node) === true) continue;
+      seen.add(node);
+      results.push(node);
+    }
+  }
+  return results;
+}
 
-  while (node?.nodeType === '#element') {
-    if (matchCombinator(complex, node, tree, scope, pos) === true) return true;
-    if (onlyOne === true) break;
-    node = node.parentNode;
+function evaluateOne(selector: ComplexSelector, tree: Parent, scope: Parent, pool: ElementNode[]): ElementNode[] {
+  const parts = [...selector];
+  const compound = parts.shift();
+  if (compound === undefined || compound.type !== 'compound') return [];
+  let candidates = pool.filter(node => matchSelector(compound, node, tree, scope) === true);
+
+  while (parts.length > 0) {
+    const combinator = parts.shift() as Combinator;
+    const next = parts.shift();
+    if (next === undefined || next.type !== 'compound') return [];
+
+    const seen = new Set<ElementNode>();
+    const newCandidates: ElementNode[] = [];
+    for (const node of candidates) {
+      for (const candidate of stepForward(combinator.value, node)) {
+        if (seen.has(candidate) === true) continue;
+        seen.add(candidate);
+        if (matchSelector(next, candidate, tree, scope) === true) newCandidates.push(candidate);
+      }
+    }
+    candidates = newCandidates;
   }
 
-  return false;
+  return candidates;
 }
 
 function matchAttribute(selector: Attribute, current: ElementNode): boolean {
@@ -298,42 +339,39 @@ function matchAttribute(selector: Attribute, current: ElementNode): boolean {
   return false;
 }
 
-function matchCombinator(
-  complex: ComplexSelector,
-  current: ElementNode,
-  tree: Parent,
-  scope: Parent,
-  pos: number
-): boolean {
-  let part = complex[pos];
-  if (part === undefined) return false;
-
-  // Selector
-  if (part.type === 'compound') {
-    if (matchSelector(part as CompoundSelector, current, tree, scope) === false) return false;
-    part = complex[++pos];
-    if (part === undefined) return true;
-  }
-
-  // ">" (parent only)
-  const combinator = part.value;
-  if (combinator === '>') return matchAncestor(complex, current, tree, scope, true, pos + 1);
-
-  // "~" (preceding siblings)
-  if (combinator === '~') return matchSibling(complex, current, tree, scope, false, pos + 1);
-
-  // "+" (immediately preceding siblings)
-  if (combinator === '+') return matchSibling(complex, current, tree, scope, true, pos + 1);
-
-  // " " (ancestor)
-  return matchAncestor(complex, current, tree, scope, false, pos + 1);
-}
-
 function matchList(group: SelectorList, current: ElementNode, tree: Parent, scope: Parent): boolean {
-  for (const complex of group) {
-    if (matchCombinator([...complex].reverse(), current, tree, scope, 0) === true) return true;
+  for (const selector of group) {
+    if (matchOne(selector, current, tree, scope) === true) return true;
   }
   return false;
+}
+
+function matchOne(selector: ComplexSelector, current: ElementNode, tree: Parent, scope: Parent): boolean {
+  const parts = [...selector].reverse();
+  const compound = parts.shift();
+  if (compound === undefined || compound.type !== 'compound') return false;
+  if (matchSelector(compound, current, tree, scope) === false) return false;
+
+  let candidates: ElementNode[] = [current];
+  while (parts.length > 0) {
+    const combinator = parts.shift() as Combinator;
+    const next = parts.shift();
+    if (next === undefined || next.type !== 'compound') return false;
+
+    const seen = new Set<ElementNode>();
+    const newCandidates: ElementNode[] = [];
+    for (const node of candidates) {
+      for (const candidate of stepBack(combinator.value, node, scope)) {
+        if (seen.has(candidate) === true) continue;
+        seen.add(candidate);
+        if (matchSelector(next, candidate, tree, scope) === true) newCandidates.push(candidate);
+      }
+    }
+    if (newCandidates.length === 0) return false;
+    candidates = newCandidates;
+  }
+
+  return true;
 }
 
 function matchPseudoClass(simple: PseudoClass, current: ElementNode, tree: Parent, scope: Parent): boolean {
@@ -445,49 +483,73 @@ function matchSelector(compound: CompoundSelector, current: ElementNode, tree: P
   return true;
 }
 
-function matchSibling(
-  complex: ComplexSelector,
-  current: ElementNode,
-  tree: Parent,
-  scope: Parent,
-  immediate: boolean,
-  pos: number
-): boolean {
-  const parent = current.parentNode;
-  if (parent === null) return false;
-
-  let found = false;
-  for (const node of parent.childNodes) {
-    if (node.nodeType !== '#element') continue;
-    if (node === current) return found;
-
-    // "+" (immediately preceding sibling)
-    if (immediate === true) {
-      found = matchCombinator(complex, node, tree, scope, pos);
-    }
-
-    // "~" (preceding sibling)
-    else {
-      if (matchCombinator(complex, node, tree, scope, pos) === true) return true;
-    }
-  }
-
-  return found;
-}
-
 function selectElements(one: boolean, scope: Parent, group: SelectorList): ElementNode[] {
+  const tags = allTags(scope);
+  const matches = new Set(evaluate(group, scope, scope, tags));
+
   const results: ElementNode[] = [];
-
-  const queue = [...scope.childNodes];
-  let current;
-  while ((current = queue.shift()) !== undefined) {
-    if (current.nodeType !== '#element') continue;
-
-    queue.unshift(...current.childNodes);
-    if (matchList(group, current, scope, scope) !== true) continue;
-    results.push(current);
-    if (one === true) break;
+  for (const node of tags) {
+    if (matches.has(node) === false) continue;
+    if (one === true) return [node];
+    results.push(node);
   }
 
   return results;
+}
+
+function stepBack(combinator: string, node: ElementNode, scope: Parent): ElementNode[] {
+  // " " (ancestors) and ">" (parent only)
+  if (combinator === ' ' || combinator === '>') {
+    const ancestors: ElementNode[] = [];
+    let current: Parent | null = node;
+    while (current !== scope && current.parentNode !== null) {
+      current = current.parentNode;
+      if (current.nodeType !== '#element') break;
+      ancestors.push(current);
+      if (combinator === '>' || current === scope) break;
+    }
+    return ancestors;
+  }
+
+  // "~" (preceding siblings) and "+" (immediately preceding)
+  const parent = node.parentNode;
+  if (parent === null) return [];
+
+  const preceding: ElementNode[] = [];
+  for (const child of parent.childNodes) {
+    if (child.nodeType !== '#element') continue;
+    if (child === node) break;
+    preceding.push(child);
+  }
+  if (combinator === '+') return preceding.length === 0 ? [] : [preceding[preceding.length - 1]];
+  return preceding;
+}
+
+function stepForward(combinator: string, node: ElementNode): ElementNode[] {
+  // " " (descendants)
+  if (combinator === ' ') return allTags(node);
+
+  // ">" (children only)
+  if (combinator === '>') {
+    const children: ElementNode[] = [];
+    for (const child of node.childNodes) {
+      if (child.nodeType !== '#element') continue;
+      children.push(child);
+    }
+    return children;
+  }
+
+  // "~" (following siblings) and "+" (immediately following)
+  const parent = node.parentNode;
+  if (parent === null) return [];
+
+  const following: ElementNode[] = [];
+  let found = false;
+  for (const child of parent.childNodes) {
+    if (child.nodeType !== '#element') continue;
+    if (found === true) following.push(child);
+    if (child === node) found = true;
+  }
+  if (combinator === '+') return following.length === 0 ? [] : [following[0]];
+  return following;
 }

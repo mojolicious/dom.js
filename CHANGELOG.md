@@ -3,6 +3,17 @@
 
 This package strictly follows [Semantic Versioning](https://semver.org).
 
+## v2.2.0 (2026-05-08)
+
+### Bug Fixes
+
+  * Fixed whitespace handling in descendant combinator to allow tabs, newlines, carriage returns and form feeds.
+  * Fixed `<script>` tag parsing to be spec compliant with nested script tags inside HTML comments.
+  * Fixed various comment parsing issues, including abrupt closures (`<!-->`, `<!--->`) and bang-terminated comments
+    (`<!-- --!>`). Comments are no longer terminated by `-- >`.
+  * Fixed tag opener parsing so that `<` followed by whitespace is no longer recognized as a tag.
+  * Fixed exponential slowdown in CSS selector matching for descendant combinator chains with non-matching selectors.
+
 ## v2.1.1 (2023-02-06)
 
 ### Bug Fixes

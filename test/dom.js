@@ -176,6 +176,30 @@ t.test('DOM', t => {
     t.end();
   });
 
+  t.test('Whitespace as descendant combinator', t => {
+    const dom = new DOM('<ul> <li>Ax1</li> </ul>');
+    t.equal(dom.at('ul li').text(), 'Ax1');
+    t.equal(dom.at('ul\tli').text(), 'Ax1');
+    t.equal(dom.at('ul \tli').text(), 'Ax1');
+    t.equal(dom.at('ul\t li').text(), 'Ax1');
+    t.equal(dom.at('ul\t\tli').text(), 'Ax1');
+    t.equal(dom.at('ul\nli').text(), 'Ax1');
+    t.equal(dom.at('ul\rli').text(), 'Ax1');
+    t.equal(dom.at('ul\fli').text(), 'Ax1');
+
+    const multi = new DOM('<ul><li>A</li><li>B</li></ul>');
+    t.same(
+      multi.find('ul\tli').map(el => el.text()),
+      ['A', 'B']
+    );
+
+    const child = new DOM('<ul><li>Ax1</li></ul>');
+    t.equal(child.at('ul\t>\tli').text(), 'Ax1');
+    t.equal(child.at('ul\n>\nli').text(), 'Ax1');
+
+    t.end();
+  });
+
   t.test('HTML to XML', t => {
     const dom = new DOM('<p data-test data-two="data-two">Hello<br>Mojo!</p>');
     t.equal(dom.at('p').text(), 'HelloMojo!');
@@ -1494,6 +1518,22 @@ t.test('DOM', t => {
     t.end();
   });
 
+  t.test('Script tag with HTML comment containing nested script tags', t => {
+    const dom = new DOM(`<script> console.log("<!--"); </script>`);
+    t.equal(dom.at('script').text(), ` console.log("<!--"); `);
+
+    const dom2 = new DOM(`<script> console.log("<!-- <script> -->"); </script>`);
+    t.equal(dom2.at('script').text(), ` console.log("<!-- <script> -->"); `);
+
+    const dom3 = new DOM(`<script> console.log("<!-- <script> </script>"); </script>`);
+    t.equal(dom3.at('script').text(), ` console.log("<!-- <script> </script>"); `);
+
+    const dom4 = new DOM(`<script> console.log("<!-- <script> </script> -->"); </script>`);
+    t.equal(dom4.at('script').text(), ` console.log("<!-- <script> </script> -->"); `);
+
+    t.end();
+  });
+
   t.test('HTML5 (unquoted values)', t => {
     const dom = new DOM('<div id = test foo ="bar" class=tset bar=/baz/ value baz=//>works</div>');
     t.equal(dom.at('#test').text(), 'works');
@@ -1970,7 +2010,6 @@ t.test('DOM', t => {
             alert('<123>');
           }
         </script>
-        < sCriPt two="23" >if (b > c) { alert('&<ohoh>') }</scRiPt  >
       <body>Foo!</body>`);
 
     t.equal(dom.find('html > body')[0].text(), 'Foo!');
@@ -1979,7 +2018,6 @@ t.test('DOM', t => {
       dom.find('html > head > script')[0].text(),
       "\n          if (a < b) {\n            alert('<123>');\n          }\n        "
     );
-    t.equal(dom.find('html > head > script')[1].text(), "if (b > c) { alert('&<ohoh>') }");
 
     t.end();
   });
@@ -2024,8 +2062,7 @@ t.test('DOM', t => {
     t.equal(dom.find('html > head > script')[0].attr.src, '/js/one.js');
     t.equal(dom.find('html > head > script')[1].attr.src, '/js/two.js');
     t.equal(dom.find('html > head > script')[2].attr.src, '/js/three.js');
-    t.equal(dom.find('html > head > script')[2].text(), '\n      ');
-    t.equal(dom.at('html > body').text(), 'Bar');
+    t.equal(dom.find('html > head > script')[2].text(), '\n      </head>\n      <body>Bar</body>\n    </html>');
 
     t.end();
   });
@@ -2348,6 +2385,70 @@ t.test('DOM', t => {
       </html>
     `);
     t.equal(dom.at('html > head > title').text(), 'Test');
+
+    t.end();
+  });
+
+  t.test('Descendant combinator chain with non-matching selector', t => {
+    const dom = new DOM('<div> '.repeat(100) + '</div> '.repeat(100));
+    t.same(
+      dom.find('#gobbledygook * * * *').map(el => el.toString()),
+      []
+    );
+    t.same(dom.at('#gobbledygook * * * *'), null);
+    t.same(
+      dom.find('* * * * #gobbledygook').map(el => el.toString()),
+      []
+    );
+    t.same(dom.at('* * * * #gobbledygook'), null);
+
+    const exists = new DOM('<div id="x"><a><b><c><d>ok</d></c></b></a></div>');
+    t.equal(exists.at('#x * * * *').text(), 'ok');
+
+    t.end();
+  });
+
+  t.test('Abrupt and bang-terminated comments', t => {
+    const dom = new DOM('<!DOCTYPE html>\n<!--> <p>OK</p> <!-- -->');
+    t.equal(dom.at('p').text(), 'OK');
+
+    const dom2 = new DOM('<!DOCTYPE html>\n<!---> <p>OK</p> <!-- -->');
+    t.equal(dom2.at('p').text(), 'OK');
+
+    const dom3 = new DOM('<!DOCTYPE html>\n<!-- --!> <p>OK</p> <!-- -->');
+    t.equal(dom3.at('p').text(), 'OK');
+
+    t.end();
+  });
+
+  t.test('Comment is not terminated by "-- >"', t => {
+    const dom = new DOM('<!-- a > -- > b <blink>c</blink> -->');
+    t.same(dom.at('blink'), null);
+    t.equal(dom.currentNode.childNodes[0].value, ' a > -- > b <blink>c</blink> ');
+
+    t.end();
+  });
+
+  t.test('"<" followed by space is not a tag opener', t => {
+    const dom = new DOM('if a < script then="<!--"> </script> <p>FAIL</p>-->');
+    t.same(
+      dom.find('script, p').map(el => el.toString()),
+      []
+    );
+
+    const dom2 = new DOM('a < b');
+    t.equal(dom2.toString(), 'a &lt; b');
+    t.same(
+      dom2.find('*').map(el => el.tag),
+      []
+    );
+
+    const dom3 = new DOM('a < b <p>ok</p>');
+    t.same(
+      dom3.find('*').map(el => el.tag),
+      ['p']
+    );
+    t.equal(dom3.at('p').text(), 'ok');
 
     t.end();
   });
