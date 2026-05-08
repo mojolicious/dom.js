@@ -173,6 +173,14 @@ t.test('DOM', t => {
     t.equal(dom.find('#buttons + div')[0].text(), 'Baz');
     t.same(dom.find('#buttons + div')[1], null);
 
+    t.same(dom.at('#baz').matches('#buttons + div'), true);
+    t.same(dom.at('#yada').matches('#buttons + div'), false);
+    t.same(dom.at('#buttons').matches('#buttons + div'), false);
+    t.same(dom.at('#yada').matches('#buttons ~ div'), true);
+    t.same(dom.at('#baz').matches('#buttons ~ div'), true);
+    t.same(dom.at('#logo').matches('#buttons ~ div'), false);
+    t.same(dom.matches('#buttons + div'), false);
+
     t.end();
   });
 
@@ -1530,6 +1538,16 @@ t.test('DOM', t => {
 
     const dom4 = new DOM(`<script> console.log("<!-- <script> </script> -->"); </script>`);
     t.equal(dom4.at('script').text(), ` console.log("<!-- <script> </script> -->"); `);
+
+    t.end();
+  });
+
+  t.test('Script tag with HTML comment containing stray characters', t => {
+    const dom = new DOM('<script>/* <!-- <foo --> */</script>');
+    t.equal(dom.at('script').text(), '/* <!-- <foo --> */');
+
+    const dom2 = new DOM('<script>/* <!-- a-b --> */</script>');
+    t.equal(dom2.at('script').text(), '/* <!-- a-b --> */');
 
     t.end();
   });
