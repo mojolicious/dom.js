@@ -291,7 +291,7 @@ const dom = new DOM('<p>Hello World!</p>', {parser: new Parser()});
 
 ## Installation
 
-All you need is Node.js 16.0.0 (or newer).
+All you need is Node.js 20.0.0 (or newer).
 
 ```
 $ npm install @mojojs/dom

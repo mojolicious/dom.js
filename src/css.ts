@@ -317,16 +317,16 @@ function matchCombinator(
 
   // ">" (parent only)
   const combinator = part.value;
-  if (combinator === '>') return matchAncestor(complex, current, tree, scope, true, ++pos);
+  if (combinator === '>') return matchAncestor(complex, current, tree, scope, true, pos + 1);
 
   // "~" (preceding siblings)
-  if (combinator === '~') return matchSibling(complex, current, tree, scope, false, ++pos);
+  if (combinator === '~') return matchSibling(complex, current, tree, scope, false, pos + 1);
 
   // "+" (immediately preceding siblings)
-  if (combinator === '+') return matchSibling(complex, current, tree, scope, true, ++pos);
+  if (combinator === '+') return matchSibling(complex, current, tree, scope, true, pos + 1);
 
   // " " (ancestor)
-  return matchAncestor(complex, current, tree, scope, false, ++pos);
+  return matchAncestor(complex, current, tree, scope, false, pos + 1);
 }
 
 function matchList(group: SelectorList, current: ElementNode, tree: Parent, scope: Parent): boolean {
