@@ -3,6 +3,30 @@
 
 This package strictly follows [Semantic Versioning](https://semver.org).
 
+## v3.0.0 (unreleased)
+
+### Breaking Changes
+
+  * Recursive text extraction with `dom.text({recursive: true})` now excludes `<script>` and `<style>` elements in HTML
+    documents.
+  * Attribute selectors like `[id]` and `#id` no longer match namespaced attributes like `foo:id`, use `[foo\:id]`
+    instead.
+
+### Features
+
+  * Added support for `:has` and `:scope` pseudo-classes, as well as relative selectors like `dom.find('> p')`.
+  * Added support for namespace selectors like `svg|rect` to `at`, `find` and `matches` methods (can be used like
+    `dom.find('svg|rect', {svg: 'http://www.w3.org/2000/svg'})`).
+
+### Bug Fixes
+
+  * Fixed a security issue where the content of `<title>` and `<textarea>` elements was not escaped during rendering,
+    allowing escaped end tags to break out and turn sanitized HTML into live markup.
+  * Fixed CDATA sections, processing instructions and DOCTYPE declarations to end at the first `>` in HTML documents.
+  * Fixed the content of `<style>` and `<script>` elements in `<svg>` and `<math>` blocks not being parsed as markup.
+  * Fixed end tags like `</script/>` not ending `<style>` and `<script>` elements.
+  * Fixed raw text moved out of `<style>` and `<script>` elements, for example with `strip`, not being escaped.
+
 ## v2.2.0 (2026-05-08)
 
 ### Bug Fixes

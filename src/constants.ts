@@ -71,6 +71,9 @@ export const END: Record<string, string> = {
 // Container HTML elements that create their own scope
 export const SCOPE = new Set(['math', 'svg']);
 
+// SVG and MathML elements that are HTML integration points
+export const INTEGRATION = new Set(['desc', 'foreignobject', 'mi', 'mn', 'mo', 'ms', 'mtext', 'title']);
+
 // HTML table elements with optional end tags
 const TABLE = new Set(['colgroup', 'tbody', 'td', 'tfoot', 'th', 'thead', 'tr']);
 

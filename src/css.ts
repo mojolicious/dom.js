@@ -3,18 +3,19 @@ import type {Parent} from './types.js';
 import {cssUnescape, escapeRegExp, stickyMatch} from '@mojojs/util';
 
 interface Attribute {
-  name: RegExp;
+  name: string;
   type: 'attr';
   value: RegExp | null;
 }
 
 interface Tag {
   name: RegExp | null;
+  namespace: string | null;
   type: 'tag';
 }
 
 interface PseudoClassIsNot {
-  class: 'is' | 'not';
+  class: 'has' | 'is' | 'not';
   type: 'pc';
   value: SelectorList;
 }
@@ -26,7 +27,7 @@ interface PseudoClassNth {
 }
 
 interface PseudoClassPlain {
-  class: 'any-link' | 'checked' | 'empty' | 'link' | 'only-child' | 'only-of-type' | 'root' | 'visited';
+  class: 'any-link' | 'checked' | 'empty' | 'link' | 'only-child' | 'only-of-type' | 'root' | 'scope' | 'visited';
   type: 'pc';
 }
 
@@ -75,8 +76,8 @@ const ATTR_RE = new RegExp(
 export class Selector {
   _ast: SelectorList;
 
-  constructor(selector: string) {
-    this._ast = compileSelector(selector);
+  constructor(selector: string, namespaces: Record<string, string> = {}) {
+    this._ast = compileSelector(selector, namespaces);
   }
 
   all(tree: Parent): ElementNode[] {
@@ -90,6 +91,13 @@ export class Selector {
   matches(tree: ElementNode): boolean {
     return matchList(this._ast, tree, tree, tree.root() as Parent);
   }
+}
+
+function absolutize(group: SelectorList): SelectorList {
+  return group.map(selector => {
+    if (isScoped(selector) === true) return selector;
+    return [{type: 'compound', value: [{type: 'pc', class: 'scope'}]}, {type: 'combinator', value: ' '}, ...selector];
+  });
 }
 
 function allTags(tree: Parent): ElementNode[] {
@@ -154,7 +162,7 @@ function compileName(value: string): RegExp {
   return new RegExp('(?:^|\\:)' + escapeRegExp(cssUnescape(value)) + '$');
 }
 
-function compilePseudoClass(name: string, args: string): PseudoClass {
+function compilePseudoClass(name: string, args: string, namespaces: Record<string, string>): PseudoClass {
   // ":text"
   if (name === 'text') {
     const textMatch = args.match(/^\/(.+)\/(i)?$/);
@@ -163,9 +171,9 @@ function compilePseudoClass(name: string, args: string): PseudoClass {
     return {type: 'pc', class: 'text', value: regex};
   }
 
-  // ":is" and ":not" (contains more selectors)
-  if (name === 'not' || name === 'is') {
-    return {type: 'pc', class: name, value: compileSelector(args)};
+  // ":has", ":is" and ":not" (contains more selectors)
+  if (name === 'has' || name === 'not' || name === 'is') {
+    return {type: 'pc', class: name, value: compileSelector(args, namespaces)};
   }
 
   // ":nth-*" (with An+B notation)
@@ -193,7 +201,7 @@ function compilePseudoClass(name: string, args: string): PseudoClass {
     return {type: 'pc', class: 'nth-last-of-type', value: [0, 1]};
   }
 
-  // ":checked", ":empty", ":only-child", ":only-of-type", ":root"
+  // ":checked", ":empty", ":only-child", ":only-of-type", ":root", ":scope"
   else if (
     name === 'any-link' ||
     name === 'checked' ||
@@ -202,6 +210,7 @@ function compilePseudoClass(name: string, args: string): PseudoClass {
     name === 'only-child' ||
     name === 'only-of-type' ||
     name === 'root' ||
+    name === 'scope' ||
     name === 'visited'
   ) {
     return {type: 'pc', class: name};
@@ -211,7 +220,7 @@ function compilePseudoClass(name: string, args: string): PseudoClass {
   return {type: 'pc', class: 'nth-child', value: [0, 0]};
 }
 
-function compileSelector(selector: string): SelectorList {
+function compileSelector(selector: string, namespaces: Record<string, string>): SelectorList {
   const group: SelectorList = [[]];
 
   const trimmed = selector.trim();
@@ -233,6 +242,7 @@ function compileSelector(selector: string): SelectorList {
     // Combinator
     const combinatorMatch = stickyMatch(sticky, COMBINATOR_RE);
     if (combinatorMatch !== null) {
+      if (last.length === 0) last.push({type: 'pc', class: 'scope'});
       complex.push({type: 'combinator', value: combinatorMatch[1]});
       continue;
     }
@@ -240,6 +250,7 @@ function compileSelector(selector: string): SelectorList {
     // Descendant combinator
     const descendantMatch = stickyMatch(sticky, DESCENDANT_RE);
     if (descendantMatch !== null) {
+      if (last.length === 0) last.push({type: 'pc', class: 'scope'});
       complex.push({type: 'combinator', value: ' '});
       continue;
     }
@@ -248,9 +259,9 @@ function compileSelector(selector: string): SelectorList {
     const classMatch = stickyMatch(sticky, CLASS_ID_RE);
     if (classMatch !== null) {
       if (classMatch[1] === '#') {
-        last.push({type: 'attr', name: compileName('id'), value: compileAttrValue('', classMatch[2], false)});
+        last.push({type: 'attr', name: 'id', value: compileAttrValue('', classMatch[2], false)});
       } else {
-        last.push({type: 'attr', name: compileName('class'), value: compileAttrValue('~', classMatch[2], false)});
+        last.push({type: 'attr', name: 'class', value: compileAttrValue('~', classMatch[2], false)});
       }
       continue;
     }
@@ -261,7 +272,8 @@ function compileSelector(selector: string): SelectorList {
       const insensitive = attrMatch[6] === undefined ? false : true;
       last.push({
         type: 'attr',
-        name: compileName(attrMatch[1]),
+        // shortcut: cssUnescape from @mojojs/util keeps backslashes, remove once it matches upstream _unescape
+        name: cssUnescape(attrMatch[1]).replaceAll('\\', ''),
         value: compileAttrValue(attrMatch[2] ?? '', attrMatch[3] ?? attrMatch[4] ?? attrMatch[5], insensitive)
       });
       continue;
@@ -270,15 +282,31 @@ function compileSelector(selector: string): SelectorList {
     // Pseudo-class
     const pcMatch = stickyMatch(sticky, PC_RE);
     if (pcMatch !== null) {
-      last.push(compilePseudoClass(pcMatch[1], pcMatch[2]));
+      last.push(compilePseudoClass(pcMatch[1], pcMatch[2], namespaces));
       continue;
     }
 
     // Tag
     const tagMatch = stickyMatch(sticky, TAG_RE);
     if (tagMatch !== null) {
-      const tag = tagMatch[0];
-      last.push({type: 'tag', name: tag === '*' ? null : compileName(tag)});
+      let tag = tagMatch[0];
+
+      // "A|E" (namespace alias, "*|E" for any namespace and "|E" for no namespace)
+      let namespace: string | null = null;
+      const nsMatch = tag.match(/^([^|]*)\|/);
+      if (nsMatch !== null) {
+        tag = tag.slice(nsMatch[0].length);
+        const alias = nsMatch[1];
+        if (alias === '') {
+          namespace = '';
+        } else if (alias !== '*') {
+          const value = namespaces[alias];
+          if (value === undefined) return [];
+          namespace = value;
+        }
+      }
+
+      last.push({type: 'tag', name: tag === '*' ? null : compileName(tag), namespace});
       continue;
     }
 
@@ -288,9 +316,9 @@ function compileSelector(selector: string): SelectorList {
   return group;
 }
 
-function evaluate(group: SelectorList, tree: Parent, scope: Parent, pool: ElementNode[]): ElementNode[] {
-  const results: ElementNode[] = [];
-  const seen = new Set<ElementNode>();
+function evaluate(group: SelectorList, tree: Parent, scope: Parent, pool: Parent[]): Parent[] {
+  const results: Parent[] = [];
+  const seen = new Set<Parent>();
   for (const selector of group) {
     for (const node of evaluateOne(selector, tree, scope, pool)) {
       if (seen.has(node) === true) continue;
@@ -301,7 +329,7 @@ function evaluate(group: SelectorList, tree: Parent, scope: Parent, pool: Elemen
   return results;
 }
 
-function evaluateOne(selector: ComplexSelector, tree: Parent, scope: Parent, pool: ElementNode[]): ElementNode[] {
+function evaluateOne(selector: ComplexSelector, tree: Parent, scope: Parent, pool: Parent[]): Parent[] {
   const parts = [...selector];
   const compound = parts.shift();
   if (compound === undefined || compound.type !== 'compound') return [];
@@ -312,8 +340,8 @@ function evaluateOne(selector: ComplexSelector, tree: Parent, scope: Parent, poo
     const next = parts.shift();
     if (next === undefined || next.type !== 'compound') return [];
 
-    const seen = new Set<ElementNode>();
-    const newCandidates: ElementNode[] = [];
+    const seen = new Set<Parent>();
+    const newCandidates: Parent[] = [];
     for (const node of candidates) {
       for (const candidate of stepForward(combinator.value, node)) {
         if (seen.has(candidate) === true) continue;
@@ -327,16 +355,32 @@ function evaluateOne(selector: ComplexSelector, tree: Parent, scope: Parent, poo
   return candidates;
 }
 
-function matchAttribute(selector: Attribute, current: ElementNode): boolean {
-  const nameRegex = selector.name;
-  const valueRegex = selector.value;
+function isScoped(selector: ComplexSelector): boolean {
+  for (const compound of selector) {
+    if (compound.type !== 'compound') continue;
 
-  for (const [name, value] of Object.entries(current.attributes)) {
-    if (nameRegex.test(name) === false) continue;
-    if (valueRegex === null || valueRegex.test(value) === true) return true;
+    for (const simple of compound.value) {
+      if (simple.type !== 'pc') continue;
+
+      // Selector with ":scope"
+      const name = simple.class;
+      if (name === 'scope') return true;
+
+      // Argument of functional pseudo-class with ":scope"
+      if ((name === 'has' || name === 'is' || name === 'not') && simple.value.some(isScoped) === true) return true;
+    }
   }
 
   return false;
+}
+
+function matchAttribute(selector: Attribute, current: ElementNode): boolean {
+  const attrs = current.attributes;
+  const name = selector.name;
+  if (Object.hasOwn(attrs, name) === false) return false;
+
+  const valueRegex = selector.value;
+  return valueRegex === null || valueRegex.test(attrs[name]) === true;
 }
 
 function matchList(group: SelectorList, current: ElementNode, tree: Parent, scope: Parent): boolean {
@@ -352,14 +396,14 @@ function matchOne(selector: ComplexSelector, current: ElementNode, tree: Parent,
   if (compound === undefined || compound.type !== 'compound') return false;
   if (matchSelector(compound, current, tree, scope) === false) return false;
 
-  let candidates: ElementNode[] = [current];
+  let candidates: Parent[] = [current];
   while (parts.length > 0) {
     const combinator = parts.shift() as Combinator;
     const next = parts.shift();
     if (next === undefined || next.type !== 'compound') return false;
 
-    const seen = new Set<ElementNode>();
-    const newCandidates: ElementNode[] = [];
+    const seen = new Set<Parent>();
+    const newCandidates: Parent[] = [];
     for (const node of candidates) {
       for (const candidate of stepBack(combinator.value, node, scope)) {
         if (seen.has(candidate) === true) continue;
@@ -374,17 +418,42 @@ function matchOne(selector: ComplexSelector, current: ElementNode, tree: Parent,
   return true;
 }
 
+function matchNamespace(namespace: string, current: ElementNode): boolean {
+  const nsMatch = current.tagName.match(/^([^:]+):/);
+  const attr = nsMatch === null ? 'xmlns' : `xmlns:${nsMatch[1]}`;
+
+  let node: Parent | null = current;
+  while (node !== null && node.nodeType === '#element') {
+    const value = node.attributes[attr];
+    if (value !== undefined) return value === namespace;
+    node = node.parentNode;
+  }
+
+  // Failing to match yields true if searching for no namespace, false otherwise
+  return namespace === '';
+}
+
 function matchPseudoClass(simple: PseudoClass, current: ElementNode, tree: Parent, scope: Parent): boolean {
   const name = simple.class;
 
+  // ":scope"
+  if (name === 'scope') {
+    if (current === scope) return true;
+  }
+
   // ":not"
-  if (name === 'not') {
+  else if (name === 'not') {
     if (matchList(simple.value, current, tree, scope) === false) return true;
   }
 
   // ":is"
   else if (name === 'is') {
     if (matchList(simple.value, current, tree, scope) === true) return true;
+  }
+
+  // ":has"
+  else if (name === 'has') {
+    if (selectElements(true, current, simple.value).length > 0) return true;
   }
 
   // ":root"
@@ -454,7 +523,12 @@ function matchPseudoClass(simple: PseudoClass, current: ElementNode, tree: Paren
   return false;
 }
 
-function matchSelector(compound: CompoundSelector, current: ElementNode, tree: Parent, scope: Parent): boolean {
+function matchSelector(compound: CompoundSelector, current: Parent, tree: Parent, scope: Parent): boolean {
+  // The root might be the scope
+  if (current.nodeType !== '#element') {
+    return current === scope && compound.value.every(selector => selector.type === 'pc' && selector.class === 'scope');
+  }
+
   for (const selector of compound.value) {
     const type = selector.type;
 
@@ -462,6 +536,8 @@ function matchSelector(compound: CompoundSelector, current: ElementNode, tree: P
     if (type === 'tag') {
       const name = selector.name;
       if (name !== null && name.test(current.tagName) === false) return false;
+      const namespace = selector.namespace;
+      if (namespace !== null && matchNamespace(namespace, current) === false) return false;
     }
 
     // Attribute
@@ -484,8 +560,16 @@ function matchSelector(compound: CompoundSelector, current: ElementNode, tree: P
 }
 
 function selectElements(one: boolean, scope: Parent, group: SelectorList): ElementNode[] {
-  const tags = allTags(scope);
-  const matches = new Set(evaluate(group, scope, scope, tags));
+  // Scoped selectors require the whole tree to be searched
+  let tree = scope;
+  if (group.some(isScoped) === true) {
+    group = absolutize(group);
+    tree = scope.root() as Parent;
+  }
+
+  // Pool includes tree so ":scope" can match it, but results exclude it
+  const tags = allTags(tree);
+  const matches = new Set(evaluate(group, tree, scope, [tree, ...tags]));
 
   const results: ElementNode[] = [];
   for (const node of tags) {
@@ -497,14 +581,13 @@ function selectElements(one: boolean, scope: Parent, group: SelectorList): Eleme
   return results;
 }
 
-function stepBack(combinator: string, node: ElementNode, scope: Parent): ElementNode[] {
+function stepBack(combinator: string, node: Parent, scope: Parent): Parent[] {
   // " " (ancestors) and ">" (parent only)
   if (combinator === ' ' || combinator === '>') {
-    const ancestors: ElementNode[] = [];
-    let current: Parent | null = node;
-    while (current !== scope && current.parentNode !== null) {
+    const ancestors: Parent[] = [];
+    let current: Parent = node;
+    while (current !== scope && current.nodeType === '#element' && current.parentNode !== null) {
       current = current.parentNode;
-      if (current.nodeType !== '#element') break;
       ancestors.push(current);
       if (combinator === '>' || current === scope) break;
     }
@@ -525,7 +608,7 @@ function stepBack(combinator: string, node: ElementNode, scope: Parent): Element
   return preceding;
 }
 
-function stepForward(combinator: string, node: ElementNode): ElementNode[] {
+function stepForward(combinator: string, node: Parent): ElementNode[] {
   // " " (descendants)
   if (combinator === ' ') return allTags(node);
 

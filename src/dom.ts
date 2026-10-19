@@ -4,6 +4,7 @@
  * MIT Licensed
  */
 import type {Child, DOMParser, Parent} from './types.js';
+import {RAW} from './constants.js';
 import {Selector} from './css.js';
 import {CDATANode} from './nodes/cdata.js';
 import {CommentNode} from './nodes/comment.js';
@@ -77,8 +78,8 @@ export default class DOM {
   /**
    * Find first descendant element of this element matching the CSS selector.
    */
-  at(selector: string): DOM | null {
-    const first = new Selector(selector).first(this.currentNode);
+  at(selector: string, namespaces?: Record<string, string>): DOM | null {
+    const first = new Selector(selector, namespaces).first(this.currentNode);
     return first === null ? null : this._newDOM(first);
   }
 
@@ -110,8 +111,8 @@ export default class DOM {
   /**
    * Find all descendant elements of this element matching the CSS selector.
    */
-  find(selector: string): DOM[] {
-    return new Selector(selector).all(this.currentNode).map(node => this._newDOM(node));
+  find(selector: string, namespaces?: Record<string, string>): DOM[] {
+    return new Selector(selector, namespaces).all(this.currentNode).map(node => this._newDOM(node));
   }
 
   /**
@@ -155,10 +156,10 @@ export default class DOM {
   /**
    * Check if this element matches the CSS selector.
    */
-  matches(selector: string): boolean {
+  matches(selector: string, namespaces?: Record<string, string>): boolean {
     const current = this.currentNode;
     if (current.nodeType !== '#element') return false;
-    return new Selector(selector).matches(current);
+    return new Selector(selector, namespaces).matches(current);
   }
 
   /**
@@ -297,7 +298,7 @@ export default class DOM {
     const children = this.currentNode.childNodes;
     for (const child of children) {
       child.detach();
-      parent.insertBefore(child, current as Child);
+      parent.insertBefore(unraw(child, parent), current as Child);
     }
     current.detach();
   }
@@ -318,7 +319,8 @@ export default class DOM {
   }
 
   /**
-   * Extract text content from this element.
+   * Extract text content from this element, recursive extraction excludes `<script>` and `<style>` elements in HTML
+   * documents.
    */
   text(options = {recursive: false}): string {
     const recursive = options.recursive;
@@ -340,7 +342,7 @@ export default class DOM {
 
       // Element
       else if (recursive === true && type === '#element') {
-        nodes.unshift(...node.childNodes);
+        if (this._xml === true || RAW.has(node.tagName) === false) nodes.unshift(...node.childNodes);
       }
     }
 
@@ -470,8 +472,16 @@ export default class DOM {
     else {
       const children = current.childNodes;
       current.childNodes = [];
-      children.reverse().forEach(node => innerNode.prependChild(node));
+      children.reverse().forEach(node => innerNode.prependChild(unraw(node, innerNode)));
       contentNode.childNodes.forEach(node => current.appendChild(node));
     }
   }
+}
+
+// Raw text is only allowed in "script" and "style" elements
+function unraw(node: Child, parent: Parent): Child {
+  if (node.nodeType !== '#text' || node.value instanceof SafeString === false) return node;
+  if (parent.nodeType === '#element' && RAW.has(parent.tagName) === true) return node;
+  node.value = node.value.toString();
+  return node;
 }

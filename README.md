@@ -36,7 +36,8 @@ console.log(dom.toString());
 
 There are currently two input formats supported, HTML and XML fragments. By default we use a very relaxed custom parser
 that will try to make sense of whatever tag soup you hand it. In HTML mode, all tags and attribute names are lowercased
-and selectors need to be lowercase as well.
+and selectors need to be lowercase as well. Note that the parser should not be used for validation or sanitization, its
+interpretation of broken markup can differ from that of a web browser.
 
 ```js
 // HTML
@@ -85,6 +86,8 @@ All CSS selectors that make sense for a standalone parser are supported.
 | `E`                           | an element of type E                                                                                                  |
 | `E:not(s1, s2, …)`            | an E element that does not match either compound selector s1 or compound selector s2                                  |
 | `E:is(s1, s2, …)`             | an E element that matches compound selector s1 and/or compound selector s2                                            |
+| `E:has(rs1, rs2, …)`          | an E element, if either of the relative selectors rs1 or rs2, when evaluated with E as the :scope element, match      |
+| `A\|E`                        | an E element that belongs to the namespace alias A (`*\|E` for any namespace, `\|E` for no namespace)                 |
 | `E.warning`                   | an E element belonging to the class warning                                                                           |
 | `E#myid`                      | an E element with ID equal to myid                                                                                    |
 | `E[foo]`                      | an E element with a foo attribute                                                                                     |
@@ -95,11 +98,13 @@ All CSS selectors that make sense for a standalone parser are supported.
 | `E[foo^="bar"]`               | an E element whose foo attribute value begins exactly with the string bar                                             |
 | `E[foo$="bar"]`               | an E element whose foo attribute value ends exactly with the string bar                                               |
 | `E[foo*="bar"]`               | an E element whose foo attribute value contains the substring bar                                                     |
+| `E[foo\|="en"]`               | an E element whose foo attribute value is a hyphen-separated list of values beginning with en                         |
 | `E:any-link`                  | an E element being the source anchor of a hyperlink                                                                   |
 | `E:link`                      | an E element being the source anchor of a hyperlink of which the target is not yet visited                            |
 | `E:visited`                   | an E element being the source anchor of a hyperlink of which the target is already visited                            |
 | `E:checked`                   | a user interface element E that is checked/selected (for instance a radio-button or checkbox)                         |
 | `E:root`                      | an E element, root of the document                                                                                    |
+| `E:scope`                     | an E element being a designated reference element                                                                     |
 | `E:empty`                     | an E element that has no children (neither elements nor text) except perhaps white space                              |
 | `E:nth-child(n [of S]?)`      | an E element, the n-th child of its parent matching S                                                                 |
 | `E:nth-last-child(n [of S]?)` | an E element, the n-th child of its parent matching S, counting from the last one                                     |
@@ -144,6 +149,12 @@ const div = dom.at('div > p');
 // Find all elements marching the CSS selector and return them as `DOM` objects
 const divs = dom.find('div > p');
 
+// Find all child elements with a relative CSS selector
+const children = dom.find('> p');
+
+// Find elements with namespace aliases
+const rects = dom.find('svg|rect', {svg: 'http://www.w3.org/2000/svg'});
+
 // Get root element as `DOM` object (document or fragment node)
 const root = dom.root();
 
@@ -179,7 +190,7 @@ Extract information and manipulate elements.
 // Check if element matches the given CSS selector
 const isDiv = dom.matches('div > p');
 
-// Extract text content from element
+// Extract text content from element (recursive extraction excludes `<script>` and `<style>` in HTML)
 const greeting = dom.text();
 const greeting = dom.text({recursive: true});
 

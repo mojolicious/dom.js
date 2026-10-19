@@ -1,4 +1,4 @@
-import DOM, {CDATANode, CommentNode, ElementNode, FragmentNode, PINode, TextNode} from '../lib/dom.js';
+import DOM, {CDATANode, CommentNode, DoctypeNode, ElementNode, FragmentNode, PINode, TextNode} from '../lib/dom.js';
 import {SafeString} from '@mojojs/util';
 import t from 'tap';
 
@@ -1021,14 +1021,14 @@ t.test('DOM', t => {
     );
 
     t.equal(dom.at('extension').attr['foo:id'], 'works');
-    t.match(dom.at('#works').text(), /\[awesome\]\]/);
-    t.match(dom.at('[id="works"]').text(), /\[awesome\]\]/);
+    t.match(dom.at('[foo\\:id]').text(), /\[awesome\]\]/);
+    t.match(dom.at('[foo\\:id="works"]').text(), /\[awesome\]\]/);
     t.equal(dom.find('description')[1].text(), '\n              <p>trololololo>\n            ');
     t.equal(dom.at('pubDate').text(), 'Mon, 12 Jul 2010 20:42:00');
-    t.match(dom.at('[id*="ork"]').text(), /\[awesome\]\]/);
-    t.match(dom.at('[id*="orks"]').text(), /\[awesome\]\]/);
-    t.match(dom.at('[id*="work"]').text(), /\[awesome\]\]/);
-    t.match(dom.at('[id*="or"]').text(), /\[awesome\]\]/);
+    t.match(dom.at('[foo\\:id*="ork"]').text(), /\[awesome\]\]/);
+    t.match(dom.at('[foo\\:id*="orks"]').text(), /\[awesome\]\]/);
+    t.match(dom.at('[foo\\:id*="work"]').text(), /\[awesome\]\]/);
+    t.match(dom.at('[foo\\:id*="or"]').text(), /\[awesome\]\]/);
     t.equal(dom.toString(), rss);
     t.end();
   });
@@ -1370,10 +1370,7 @@ t.test('DOM', t => {
     t.same(dom.children('ook')[0], null);
     t.same(dom.at('k:book'), null);
     t.same(dom.at('ook'), null);
-    t.equal(dom.at('[bk]').attr['xmlns:bk'], 'uri:book-ns');
-    t.same(dom.at('[bk]').attr['s:bk'], null);
-    t.same(dom.at('[bk]').attr['bk'], null);
-    t.same(dom.at('[bk]').attr['k'], null);
+    t.same(dom.at('[bk]'), null);
     t.same(dom.at('[k]'), null);
     t.equal(dom.at('number').ancestors('meta')[0].attr.xmlns, 'uri:meta-ns');
     t.same(dom.at('nons').matches('book > nons'), true);
@@ -1667,7 +1664,11 @@ t.test('DOM', t => {
   t.test('title', t => {
     const dom = new DOM('<title> <p>test&lt;</title>');
     t.equal(dom.at('title').text(), ' <p>test<');
-    t.equal(dom.toString(), '<title> <p>test<</title>');
+    t.equal(dom.toString(), '<title> &lt;p&gt;test&lt;</title>');
+
+    const dom2 = new DOM('<title>&lt;/title&gt;&lt;img src=x onerror=alert(1)&gt;</title>');
+    t.equal(dom2.at('title').text(), '</title><img src=x onerror=alert(1)>');
+    t.equal(dom2.toString(), '<title>&lt;/title&gt;&lt;img src=x onerror=alert(1)&gt;</title>');
 
     t.end();
   });
@@ -1675,7 +1676,11 @@ t.test('DOM', t => {
   t.test('textarea', t => {
     const dom = new DOM('<textarea id="a"> <p>test&lt;</textarea>');
     t.equal(dom.at('textarea').text(), ' <p>test<');
-    t.equal(dom.toString(), '<textarea id="a"> <p>test<</textarea>');
+    t.equal(dom.toString(), '<textarea id="a"> &lt;p&gt;test&lt;</textarea>');
+
+    const dom2 = new DOM('<textarea>&lt;/textarea&gt;&lt;script&gt;alert(1)&lt;/script&gt;</textarea>');
+    t.equal(dom2.at('textarea').text(), '</textarea><script>alert(1)</script>');
+    t.equal(dom2.toString(), '<textarea>&lt;/textarea&gt;&lt;script&gt;alert(1)&lt;/script&gt;</textarea>');
 
     t.end();
   });
@@ -2467,6 +2472,262 @@ t.test('DOM', t => {
       ['p']
     );
     t.equal(dom3.at('p').text(), 'ok');
+
+    t.end();
+  });
+
+  t.test('Scoped selectors', t => {
+    const dom = new DOM(`
+<p>Zero</p>
+<div>
+  <p>One</p>
+  <p>Two</p>
+  <p><a href="#">Link</a></p>
+</div>
+<div>
+  <p>Three</p>
+  <p>Four</p>
+  <i>Six</i>
+</div>
+<p>Five</p>
+`);
+    t.equal(dom.at('div p').at(':scope').text(), 'One');
+    t.equal(dom.at('div').at(':scope p').text(), 'One');
+    t.equal(dom.at('div').at(':scope > p').text(), 'One');
+    t.equal(dom.at('div').at('> p').text(), 'One');
+    t.equal(dom.at('div p').at('+ p').text(), 'Two');
+    t.equal(dom.at('div p').at('~ p').text(), 'Two');
+    t.equal(dom.at('div p').at('~ p a').text(), 'Link');
+    t.equal(dom.at('div').at(':scope a').text(), 'Link');
+    t.equal(dom.at('div').at(':scope > a'), null);
+    t.equal(dom.at('div').at(':scope > p > a').text(), 'Link');
+    t.equal(dom.find('div')[1].at(':scope p').text(), 'Three');
+    t.equal(dom.find('div')[1].at(':scope > p').text(), 'Three');
+    t.equal(dom.find('div')[1].at('> p').text(), 'Three');
+    t.equal(dom.at('div p').at(':scope + p').text(), 'Two');
+    t.equal(dom.at('div').at(':scope > p:nth-child(2), p a').text(), 'Two');
+    t.equal(dom.at('div').at('p, :scope > p:nth-child(2)').text(), 'One');
+    t.equal(dom.at('div').at('p:not(:scope > *)').text(), 'Zero');
+    t.equal(dom.at('div p:nth-child(2)').at('*:is(:scope)').text(), 'Two');
+    t.equal(dom.at('div').at('div p, ~ p').text(), 'Five');
+    t.equal(dom.at('> p').text(), 'Zero');
+    t.equal(dom.at(':scope'), null);
+    t.equal(dom.at(':scope p').text(), 'Zero');
+    t.equal(dom.at(':scope div p').text(), 'One');
+    t.equal(dom.at(':scope p a').text(), 'Link');
+    t.equal(dom.at('> p').at('p ~ :scope'), null);
+    t.equal(dom.at('> p:last-child').at('p ~ :scope').text(), 'Five');
+    t.equal(dom.at('p:has(+ i)').text(), 'Four');
+    t.equal(dom.at('p:has(:scope ~ i)').text(), 'Three');
+    t.equal(dom.at('div:has(i) p').text(), 'Three');
+    t.equal(dom.at('div:has(> i) p').text(), 'Three');
+    t.equal(dom.find('div:not(:has(i)) > p').pop().text({recursive: true}), 'Link');
+    t.equal(dom.find('div:has(:not(p)) > p').pop().text({recursive: true}), 'Four');
+    t.equal(dom.at('div p').matches(':scope'), false);
+    t.end();
+  });
+
+  t.test('Namespace selectors', t => {
+    const dom = new DOM(
+      `
+<tag xmlns:myns="coolns">
+  <this>foo</this>
+  <myns:this>bar</myns:this>
+</tag>
+`,
+      {xml: true}
+    );
+    const ns = {cool: 'coolns'};
+    t.same(
+      dom.find('cool|this', ns).map(el => el.text()),
+      ['bar']
+    );
+    t.same(
+      dom.find('cool|*', ns).map(el => el.text()),
+      ['bar']
+    );
+    t.same(
+      dom.find('|this', ns).map(el => el.text()),
+      ['foo']
+    );
+    t.same(
+      dom.find('*|this', ns).map(el => el.text()),
+      ['foo', 'bar']
+    );
+    t.equal(dom.at('foo|*'), null);
+
+    const dom2 = new DOM('<x:tag xmlns:x="ns" foo="bar" />', {xml: true});
+    t.equal(dom2.at('ns|tag', {ns: 'ns'}).attr.foo, 'bar');
+
+    const dom3 = new DOM('<foo xmlns=""><bar /></foo>', {xml: true});
+    t.not(dom3.at('|bar'), null);
+
+    t.end();
+  });
+
+  t.test('Nested namespace selectors', t => {
+    const dom = new DOM(
+      `
+<foo xmlns="ns:foo">
+  <tag val="1" />
+  <bar xmlns="ns:bar">
+    <tag val="2" />
+    <baz />
+    <yada hreflang="en-US">YADA</yada>
+  </bar>
+</foo>
+`,
+      {xml: true}
+    );
+    const ns = {foons: 'ns:foo', barns: 'ns:bar'};
+    t.not(dom.at('foons|foo', ns), null);
+    t.not(dom.at('foons|foo:not(barns|*)', ns), null);
+    t.not(dom.at('foo:not(|foo)', ns), null);
+    t.not(dom.at('foons|foo:root', ns), null);
+    t.not(dom.at('foo:is(:root, foons|*)', ns), null);
+    t.equal(dom.at('foons|foo:not(:root)', ns), null);
+    t.equal(dom.at('foons|tag', ns).attr.val, '1');
+    t.equal(dom.at('foons|tag:empty', ns).attr.val, '1');
+    t.not(dom.at('foo > foons|tag[val="1"]', ns), null);
+    t.not(dom.at('foons|foo foons|tag[val="1"]', ns), null);
+    t.not(dom.at('barns|bar', ns), null);
+    t.not(dom.at('barns|bar:not(foons|*)', ns), null);
+    t.not(dom.at('bar:not(|bar)', ns), null);
+    t.not(dom.at('bar:is(barns|*)', ns), null);
+    t.equal(dom.at('barns|bar:root', ns), null);
+    t.not(dom.at('bar:is(barns|*, :not(:root))', ns), null);
+    t.not(dom.at('foons|foo barns|bar', ns), null);
+    t.equal(dom.at('barns|tag', ns).attr.val, '2');
+    t.not(dom.at('barns|bar > barns|tag[val="2"]', ns), null);
+    t.not(dom.at('foons|foo barns|bar barns|baz', ns), null);
+    t.not(dom.at('foons|foo barns|bar barns|tag[val="2"] + barns|baz', ns), null);
+    t.not(dom.at('foons|foo barns|bar barns|tag[val="2"] ~ barns|baz', ns), null);
+    t.equal(dom.at('foons|bar', ns), null);
+    t.equal(dom.at('foons|baz', ns), null);
+    t.equal(dom.at('baz').matches('barns|*', ns), true);
+    t.equal(dom.at('barns|bar [hreflang|=en]', ns).text(), 'YADA');
+    t.equal(dom.at('barns|bar [hreflang|=en-US]', ns).text(), 'YADA');
+    t.equal(dom.at('barns|bar [hreflang|=en-US-yada]', ns), null);
+    t.equal(dom.at('barns|bar [hreflang|=e]', ns), null);
+    t.end();
+  });
+
+  t.test('Recursive text extraction excludes "script" and "style"', t => {
+    const dom = new DOM('<div>a<script>b</script><style>c</style><p>d</p></div>');
+    t.equal(dom.text({recursive: true}), 'ad');
+    t.equal(dom.at('script').text(), 'b');
+
+    const dom2 = new DOM('<div>a<script>b</script><style>c</style></div>', {xml: true});
+    t.equal(dom2.text({recursive: true}), 'abc');
+
+    t.end();
+  });
+
+  t.test('CDATA, processing instructions and DOCTYPE end at the first ">" in HTML', t => {
+    const dom = new DOM('<![CDATA[><img src=x onerror=alert(1)>]]>');
+    t.ok(dom.currentNode.childNodes[0] instanceof CDATANode);
+    t.equal(dom.currentNode.childNodes[0].value, '');
+    t.equal(dom.at('img').attr.onerror, 'alert(1)');
+    t.equal(dom.currentNode.childNodes[2].value, ']]>');
+    dom.find('img').forEach(el => el.remove());
+    t.equal(dom.toString(), '<![CDATA[]]>]]&gt;');
+
+    const dom2 = new DOM('<?><img src=x onerror=alert(1)>?>');
+    t.ok(dom2.currentNode.childNodes[0] instanceof PINode);
+    t.equal(dom2.at('img').attr.onerror, 'alert(1)');
+    dom2.find('img').forEach(el => el.remove());
+    t.equal(dom2.toString(), '<??>?&gt;');
+
+    const dom3 = new DOM('<!DOCTYPE html [><img src=x onerror=alert(1)>]>');
+    t.ok(dom3.currentNode.childNodes[0] instanceof DoctypeNode);
+    t.equal(dom3.at('img').attr.onerror, 'alert(1)');
+    dom3.find('img').forEach(el => el.remove());
+    t.equal(dom3.toString(), '<!DOCTYPE html [>]&gt;');
+
+    const dom4 = new DOM('<p><![CDATA[1 < 2]]><?php echo 1?></p>');
+    t.equal(dom4.toString(), '<p><![CDATA[1 < 2]]><?php echo 1?></p>');
+
+    const dom5 = new DOM('<svg><script><![CDATA[ if (a > b) {} ]]></script></svg>');
+    t.ok(dom5.at('script').currentNode.childNodes[0] instanceof CDATANode);
+    t.equal(dom5.toString(), '<svg><script><![CDATA[ if (a > b) {} ]]></script></svg>');
+
+    const dom6 = new DOM('<svg><foreignObject><![CDATA[><img src=x onerror=alert(1)>]]></foreignObject></svg>');
+    t.equal(dom6.at('foreignobject img').attr.onerror, 'alert(1)');
+
+    const dom7 = new DOM('<root><![CDATA[><img src=x onerror=alert(1)>]]></root>', {xml: true});
+    t.equal(dom7.at('img'), null);
+    t.equal(dom7.at('root').text(), '><img src=x onerror=alert(1)>');
+
+    t.end();
+  });
+
+  t.test('"style" and "script" in foreign content', t => {
+    const dom = new DOM('<svg><style><img src=x onerror=alert(1)></style></svg>');
+    t.equal(dom.at('svg > style > img').attr.onerror, 'alert(1)');
+    dom.find('img').forEach(el => el.remove());
+    t.equal(dom.toString(), '<svg><style></style></svg>');
+
+    const dom2 = new DOM('<math><script><img src=x onerror=alert(1)></script></math>');
+    t.equal(dom2.at('math > script > img').attr.onerror, 'alert(1)');
+
+    const dom3 = new DOM('<svg><title><img src=x onerror=alert(1)></title></svg>');
+    t.equal(dom3.at('svg > title > img').attr.onerror, 'alert(1)');
+
+    const dom4 = new DOM('<svg><foreignObject><style><b>test</b></style></foreignObject></svg>');
+    t.equal(dom4.at('b'), null);
+    t.equal(dom4.at('style').text(), '<b>test</b>');
+
+    const dom5 = new DOM('<math><mi><style><b>test</b></style></mi></math>');
+    t.equal(dom5.at('b'), null);
+
+    const dom6 = new DOM('<math><annotation-xml><style><b>test</b></style></annotation-xml></math>');
+    t.not(dom6.at('b'), null);
+
+    const dom7 = new DOM(
+      '<math><annotation-xml encoding="text/html"><style><b>test</b></style></annotation-xml></math>'
+    );
+    t.equal(dom7.at('b'), null);
+
+    t.end();
+  });
+
+  t.test('Raw text end tags', t => {
+    const dom = new DOM('<style></style/><img src=x onerror=alert(1)></style>');
+    t.equal(dom.at('style').text(), '');
+    t.equal(dom.at('img').attr.onerror, 'alert(1)');
+    dom.find('img').forEach(el => el.remove());
+    t.equal(dom.toString(), '<style></style>');
+
+    const dom2 = new DOM('<script>1</script/><img src=x onerror=alert(1)></script>');
+    t.equal(dom2.at('script').text(), '1');
+    t.equal(dom2.at('img').attr.onerror, 'alert(1)');
+
+    const dom3 = new DOM('<style>a</style foo="bar">b');
+    t.equal(dom3.at('style').text(), 'a');
+    t.equal(dom3.toString(), '<style>a</style>b');
+
+    const dom4 = new DOM('<title>a</title/>b');
+    t.equal(dom4.at('title').text(), 'a');
+    t.equal(dom4.toString(), '<title>a</title>b');
+
+    const dom5 = new DOM('<div><p>a</p/>b</div>');
+    t.equal(dom5.toString(), '<div><p>a</p>b</div>');
+
+    t.end();
+  });
+
+  t.test('Raw text moved out of "style" and "script"', t => {
+    const dom = new DOM('<p><style><img src=x onerror=alert(1)></style></p>');
+    dom.find(':not(p)').forEach(el => el.strip());
+    t.equal(dom.toString(), '<p>&lt;img src=x onerror=alert(1)&gt;</p>');
+
+    const dom2 = new DOM('<script><b>test</b></script>');
+    dom2.at('script').wrapContent('<div></div>');
+    t.equal(dom2.toString(), '<script><div>&lt;b&gt;test&lt;/b&gt;</div></script>');
+
+    const dom3 = new DOM('<p></p>');
+    dom3.at('p').appendContent(DOM.newTag('div', new SafeString('<b>test</b>')));
+    t.equal(dom3.toString(), '<p><div><b>test</b></div></p>');
 
     t.end();
   });

@@ -4,6 +4,7 @@ import {
   CLOSE,
   EMPTY,
   END,
+  INTEGRATION,
   NAME_START_CHAR,
   NAME_CHAR,
   NO_MORE_CONTENT,
@@ -41,10 +42,20 @@ const RUNAWAY_RE = new RegExp(`<`, 'y');
 
 const SCRIPT_NO_LT_RE = new RegExp(`[^<]*`, 'ys');
 const SCRIPT_NO_LT_OR_DASH_RE = new RegExp(`[^<\\-]*`, 'ys');
-const SCRIPT_CLOSE_RE = new RegExp(`</script(?:\\s+|\\s*>)`, 'ysi');
+const SCRIPT_CLOSE_RE = new RegExp(`</script(?=[\\s/>])[^>]*>?`, 'ysi');
+const SCRIPT_NESTED_CLOSE_RE = new RegExp(`</script(?=[\\s/>])`, 'ysi');
 const SCRIPT_COMMENT_START_RE = new RegExp(`<!--`, 'ys');
 const SCRIPT_COMMENT_END_RE = new RegExp(`-->`, 'ys');
 const SCRIPT_OPEN_RE = new RegExp(`<script(?=[\\s/>])`, 'ysi');
+
+// DOCTYPE, CDATA and processing instructions end at the first ">" in HTML
+function firstGreaterThan(sticky: {offset: number}, start: number, match: RegExpMatchArray): string {
+  const value = match[1];
+  const index = value.indexOf('>');
+  if (index < 0) return value;
+  sticky.offset = start + match[0].indexOf('>') + 1;
+  return value.slice(0, index);
+}
 
 function scriptContent(sticky: {offset: number; value: string}): {content: string; foundEnd: boolean} {
   const start = sticky.offset;
@@ -56,9 +67,13 @@ function scriptContent(sticky: {offset: number; value: string}): {content: strin
     const pos = sticky.offset;
     if (pos >= length) break;
 
-    // "</script>" (or end of nested script)
-    if (stickyMatch(sticky, SCRIPT_CLOSE_RE) !== null) {
-      if (state !== 2) return {content: sticky.value.slice(start, pos), foundEnd: true};
+    // "</script>"
+    if (state !== 2 && stickyMatch(sticky, SCRIPT_CLOSE_RE) !== null) {
+      return {content: sticky.value.slice(start, pos), foundEnd: true};
+    }
+
+    // "</script" (end of nested script)
+    if (state === 2 && stickyMatch(sticky, SCRIPT_NESTED_CLOSE_RE) !== null) {
       state = 1;
       continue;
     }
@@ -100,6 +115,8 @@ export class Parser {
     const sticky = {offset: 0, value: text};
     const textLength = text.length;
     while (textLength > sticky.offset) {
+      const before = sticky.offset;
+
       // Text
       const textMatch = stickyMatch(sticky, TEXT_RE);
       if (textMatch !== null) {
@@ -110,7 +127,8 @@ export class Parser {
       // DOCTYPE
       const doctypeMatch = stickyMatch(sticky, DOCTYPE_RE);
       if (doctypeMatch !== null) {
-        current.appendChild(new DoctypeNode(doctypeMatch[1], '', ''));
+        const value = xml === true ? doctypeMatch[1] : firstGreaterThan(sticky, before, doctypeMatch);
+        current.appendChild(new DoctypeNode(value, '', ''));
         continue;
       }
 
@@ -124,19 +142,21 @@ export class Parser {
       // CDATA
       const cdataMatch = stickyMatch(sticky, CDATA_RE);
       if (cdataMatch !== null) {
-        current.appendChild(new CDATANode(cdataMatch[1]));
+        const foreign = xml === true || this._foreign(current);
+        current.appendChild(
+          new CDATANode(foreign === true ? cdataMatch[1] : firstGreaterThan(sticky, before, cdataMatch))
+        );
         continue;
       }
 
       // Processing instruction
       const piMatch = stickyMatch(sticky, PI_RE);
       if (piMatch !== null) {
-        current.appendChild(new PINode(piMatch[1]));
+        current.appendChild(new PINode(xml === true ? piMatch[1] : firstGreaterThan(sticky, before, piMatch)));
         continue;
       }
 
       // Tag
-      const before = sticky.offset;
       const startMatch = stickyMatch(sticky, TAG_START_RE);
       if (startMatch !== null) {
         let tag = xml === true ? startMatch[2] : startMatch[2].toLowerCase();
@@ -167,8 +187,9 @@ export class Parser {
               ((xml === true || BLOCK.has(tag) === false) && close === true);
             if (isSelfClosing === true) current = this._end(current, xml, tag);
 
-            // Raw text elements
+            // Raw text elements (not in foreign content)
             if (xml === true || (RAW.has(tag) === false && RCDATA.has(tag) === false)) continue;
+            if (this._foreign(current.parentNode) === true) continue;
 
             // "script" (allows nested tags inside HTML comments)
             if (tag === 'script') {
@@ -178,10 +199,10 @@ export class Parser {
               continue;
             }
 
-            const rawMatch = stickyMatch(sticky, new RegExp(`(.*?)</${escapeRegExp(tag)}(?:\\s+|\\s*>)`, 'ysi'));
+            const rawMatch = stickyMatch(sticky, new RegExp(`(.*?)</${escapeRegExp(tag)}(?=[\\s/>])[^>]*>?`, 'ysi'));
             if (rawMatch === null) continue;
-            const text = RCDATA.has(tag) === true ? xmlUnescape(rawMatch[1]) : rawMatch[1];
-            current.appendChild(new TextNode(new SafeString(text)));
+            const text = RCDATA.has(tag) === true ? xmlUnescape(rawMatch[1]) : new SafeString(rawMatch[1]);
+            current.appendChild(new TextNode(text));
             current = this._end(current, xml, tag);
           }
 
@@ -217,6 +238,24 @@ export class Parser {
     }
 
     return doc;
+  }
+
+  _foreign(node: Parent | null): boolean {
+    // Search stack for SVG and MathML elements, but stop at HTML integration points
+    while (node !== null && node.nodeType === '#element') {
+      const tag = node.tagName;
+      if (SCOPE.has(tag) === true) return true;
+      if (INTEGRATION.has(tag) === true) return false;
+      if (
+        tag === 'annotation-xml' &&
+        /^(?:text\/html|application\/xhtml\+xml)$/i.test(node.attributes.encoding ?? '')
+      ) {
+        return false;
+      }
+      node = node.parentNode;
+    }
+
+    return false;
   }
 
   _end(current: Parent, xml: boolean, tag: string): Parent {
