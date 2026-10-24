@@ -1,5 +1,5 @@
-import type {ElementNode} from './nodes/element.js';
-import type {Parent} from './types.js';
+import type {ElementNode} from './nodes/element.ts';
+import type {Parent} from './types.ts';
 import {cssUnescape, escapeRegExp, stickyMatch} from '@mojojs/util';
 
 interface Attribute {
@@ -269,7 +269,7 @@ function compileSelector(selector: string, namespaces: Record<string, string>): 
     // Attribute
     const attrMatch = stickyMatch(sticky, ATTR_RE);
     if (attrMatch !== null) {
-      const insensitive = attrMatch[6] === undefined ? false : true;
+      const insensitive = attrMatch[6] !== undefined;
       last.push({
         type: 'attr',
         // shortcut: cssUnescape from @mojojs/util keeps backslashes, remove once it matches upstream _unescape

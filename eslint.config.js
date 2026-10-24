@@ -17,6 +17,9 @@ export default config(
     },
     rules: {
       'prettier/prettier': 'error',
+      'no-duplicate-imports': 'error',
+      'no-unneeded-ternary': 'error',
+      'prefer-object-spread': 'error',
       'import-x/order': [
         'error',
         {
@@ -34,7 +37,22 @@ export default config(
           prefer: 'type-imports'
         }
       ],
-      '@typescript-eslint/no-explicit-any': 'off'
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          ignoreRestSiblings: true,
+          args: 'none'
+        }
+      ],
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-use-before-define': 'off'
+    }
+  },
+  {
+    // Only resolvable once the package has been built and installed
+    files: ['test/support/package/**'],
+    rules: {
+      'import-x/no-unresolved': 'off'
     }
   }
 );

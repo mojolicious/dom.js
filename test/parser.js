@@ -1,5 +1,5 @@
 import {Parser} from './support/parse5.js';
-import DOM, {CommentNode, DoctypeNode, DocumentNode, ElementNode, FragmentNode, TextNode} from '../lib/dom.js';
+import DOM, {CommentNode, DoctypeNode, DocumentNode, ElementNode, FragmentNode, TextNode} from '../src/dom.ts';
 import t from 'tap';
 
 t.test('DOM', t => {

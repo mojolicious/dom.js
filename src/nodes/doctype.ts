@@ -1,4 +1,4 @@
-import {ChildNode} from './child.js';
+import {ChildNode} from './child.ts';
 
 /**
  * Docuement type node class.

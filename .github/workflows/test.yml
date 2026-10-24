@@ -1,5 +1,5 @@
 name: test
-on: [push, pull_request]
+on: [push, pull_request, workflow_dispatch]
 jobs:
   test:
     name: Node ${{ matrix.node-version }} and ${{ matrix.os }}
@@ -7,17 +7,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [20.x, 22.x, 24.x]
+        node-version: [22.x, 24.x, 26.x]
         os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v7
       - name: Use Node ${{ matrix.node-version }}
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ matrix.node-version }}
       - name: npm install
         run: npm i
-      - name: npm run build
-        run: npm run build
       - name: npm test
-        run: npm test
+        run: npm run test

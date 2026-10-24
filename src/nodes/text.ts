@@ -1,4 +1,4 @@
-import {ChildNode} from './child.js';
+import {ChildNode} from './child.ts';
 import {SafeString, xmlEscape} from '@mojojs/util';
 
 /**

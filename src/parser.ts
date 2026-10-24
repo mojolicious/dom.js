@@ -1,4 +1,4 @@
-import type {Parent} from './types.js';
+import type {Parent} from './types.ts';
 import {
   BLOCK,
   CLOSE,
@@ -12,14 +12,14 @@ import {
   RAW,
   RCDATA,
   SCOPE
-} from './constants.js';
-import {CDATANode} from './nodes/cdata.js';
-import {CommentNode} from './nodes/comment.js';
-import {DoctypeNode} from './nodes/doctype.js';
-import {ElementNode} from './nodes/element.js';
-import {FragmentNode} from './nodes/fragment.js';
-import {PINode} from './nodes/pi.js';
-import {TextNode} from './nodes/text.js';
+} from './constants.ts';
+import {CDATANode} from './nodes/cdata.ts';
+import {CommentNode} from './nodes/comment.ts';
+import {DoctypeNode} from './nodes/doctype.ts';
+import {ElementNode} from './nodes/element.ts';
+import {FragmentNode} from './nodes/fragment.ts';
+import {PINode} from './nodes/pi.ts';
+import {TextNode} from './nodes/text.ts';
 import {SafeString, escapeRegExp, stickyMatch, xmlUnescape} from '@mojojs/util';
 
 const NAME_RE = new RegExp(`[${NAME_START_CHAR}][${NAME_CHAR}]*`, 'u');

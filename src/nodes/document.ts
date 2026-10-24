@@ -1,5 +1,5 @@
-import {DoctypeNode} from './doctype.js';
-import {ParentNode} from './parent.js';
+import {DoctypeNode} from './doctype.ts';
+import {ParentNode} from './parent.ts';
 
 export class DocumentNode extends ParentNode {
   /**

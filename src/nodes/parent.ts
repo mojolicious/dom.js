@@ -1,6 +1,6 @@
-import type {Child, Parent} from '../types.js';
-import {ChildNode} from './child.js';
-import {TextNode} from './text.js';
+import type {Child, Parent} from '../types.ts';
+import {ChildNode} from './child.ts';
+import {TextNode} from './text.ts';
 
 /**
  * Base class for nodes with children.

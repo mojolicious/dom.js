@@ -1,4 +1,4 @@
-import {CommentNode, DocumentNode, ElementNode, FragmentNode, TextNode} from '../../lib/dom.js';
+import {CommentNode, DocumentNode, ElementNode, FragmentNode, TextNode} from '../../src/dom.ts';
 import {parse, parseFragment} from 'parse5';
 
 export class Parser {

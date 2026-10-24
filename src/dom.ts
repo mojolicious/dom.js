@@ -3,18 +3,18 @@
  * Copyright (C) 2021-2022 Sebastian Riedel
  * MIT Licensed
  */
-import type {Child, DOMParser, Parent} from './types.js';
-import {RAW} from './constants.js';
-import {Selector} from './css.js';
-import {CDATANode} from './nodes/cdata.js';
-import {CommentNode} from './nodes/comment.js';
-import {DoctypeNode} from './nodes/doctype.js';
-import {DocumentNode} from './nodes/document.js';
-import {ElementNode} from './nodes/element.js';
-import {FragmentNode} from './nodes/fragment.js';
-import {PINode} from './nodes/pi.js';
-import {TextNode} from './nodes/text.js';
-import {Parser} from './parser.js';
+import type {Child, DOMParser, Parent} from './types.ts';
+import {RAW} from './constants.ts';
+import {Selector} from './css.ts';
+import {CDATANode} from './nodes/cdata.ts';
+import {CommentNode} from './nodes/comment.ts';
+import {DoctypeNode} from './nodes/doctype.ts';
+import {DocumentNode} from './nodes/document.ts';
+import {ElementNode} from './nodes/element.ts';
+import {FragmentNode} from './nodes/fragment.ts';
+import {PINode} from './nodes/pi.ts';
+import {TextNode} from './nodes/text.ts';
+import {Parser} from './parser.ts';
 import {SafeString} from '@mojojs/util';
 
 export * from '@mojojs/util';

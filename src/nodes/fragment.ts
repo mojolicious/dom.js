@@ -1,4 +1,4 @@
-import {ParentNode} from './parent.js';
+import {ParentNode} from './parent.ts';
 
 /**
  * Document fragment node class.

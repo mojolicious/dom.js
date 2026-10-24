@@ -1,4 +1,4 @@
-import DOM, {CDATANode, CommentNode, DoctypeNode, ElementNode, FragmentNode, PINode, TextNode} from '../lib/dom.js';
+import DOM, {CDATANode, CommentNode, DoctypeNode, ElementNode, FragmentNode, PINode, TextNode} from '../src/dom.ts';
 import {SafeString} from '@mojojs/util';
 import t from 'tap';
 
